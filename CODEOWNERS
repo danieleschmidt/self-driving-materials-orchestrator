@@ -1,0 +1,34 @@
+# Global code ownership
+* @terragonlabs/materials-orchestrator-team
+
+# Core system components
+/src/materials_orchestrator/core.py @terragonlabs/core-team @daniel-schmidt  
+/src/materials_orchestrator/planners.py @terragonlabs/algorithms-team
+
+# Robot drivers and hardware integration
+/src/materials_orchestrator/robots/ @terragonlabs/robotics-team
+/docs/robot_integration.md @terragonlabs/robotics-team
+
+# Database and data management
+/src/materials_orchestrator/database/ @terragonlabs/data-team
+/src/materials_orchestrator/analysis/ @terragonlabs/data-team
+
+# Security and configuration
+/SECURITY.md @terragonlabs/security-team
+/.github/ @terragonlabs/devops-team
+/pyproject.toml @terragonlabs/core-team @terragonlabs/devops-team
+
+# Documentation
+/docs/ @terragonlabs/docs-team
+/README.md @terragonlabs/docs-team @daniel-schmidt
+/CONTRIBUTING.md @terragonlabs/docs-team
+
+# Testing infrastructure  
+/tests/ @terragonlabs/testing-team
+/.pre-commit-config.yaml @terragonlabs/devops-team
+/pytest.ini @terragonlabs/testing-team
+
+# Deployment and packaging
+/Dockerfile @terragonlabs/devops-team
+/docker-compose.yml @terragonlabs/devops-team
+/requirements.txt @terragonlabs/devops-team
