@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/terragonlabs/self-driving-materials-orchestrator/discussions
+    about: Ask questions, share ideas, and connect with the community
+  - name: 📚 Documentation
+    url: https://self-driving-materials.readthedocs.io
+    about: Read the comprehensive documentation and guides
+  - name: 🛡️ Security Issues
+    url: mailto:security@terragonlabs.com
+    about: Report security vulnerabilities privately via email

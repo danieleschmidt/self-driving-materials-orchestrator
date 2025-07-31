@@ -1,0 +1,16 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+
+  - name: MongoDB
+    type: mongodb-datasource
+    access: proxy
+    url: mongodb://mongodb:27017
+    database: materials_discovery
+    editable: true

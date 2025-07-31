@@ -1,0 +1,33 @@
+# Global code owners
+* @danieleschmidt
+
+# Core components
+/src/materials_orchestrator/core.py @danieleschmidt
+/src/materials_orchestrator/planners.py @danieleschmidt
+
+# Robot integration
+/src/materials_orchestrator/robots/ @danieleschmidt
+
+# Configuration and deployment
+/docker-compose.yml @danieleschmidt
+/Dockerfile @danieleschmidt
+/pyproject.toml @danieleschmidt
+
+# Documentation
+/docs/ @danieleschmidt
+/README.md @danieleschmidt
+/*.md @danieleschmidt
+
+# CI/CD and workflows
+/.github/ @danieleschmidt
+/scripts/ @danieleschmidt
+/Makefile @danieleschmidt
+
+# Security and compliance
+/SECURITY.md @danieleschmidt
+/COMPLIANCE.md @danieleschmidt
+/.bandit @danieleschmidt
+/.safety-policy.json @danieleschmidt
+
+# Monitoring and observability
+/monitoring/ @danieleschmidt

@@ -1,0 +1,71 @@
+{
+  "name": "Materials Orchestrator Dev",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "materials-orchestrator",
+  "workspaceFolder": "/app",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "charliermarsh.ruff",
+        "ms-python.mypy-type-checker",
+        "ms-vscode.vscode-json",
+        "redhat.vscode-yaml",
+        "ms-vscode.docker",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.formatting.provider": "black",
+        "python.linting.enabled": true,
+        "python.linting.mypyEnabled": true,
+        "python.testing.pytestEnabled": true,
+        "editor.formatOnSave": true
+      }
+    }
+  },
+
+  "postCreateCommand": "pip install -e '.[dev,robots,docs]' && pre-commit install",
+  "postStartCommand": "git config --global --add safe.directory /app",
+
+  "remoteUser": "materials",
+  "containerUser": "materials",
+
+  "forwardPorts": [8000, 8501, 27017, 9090, 3000],
+  "portsAttributes": {
+    "8000": {
+      "label": "API Server",
+      "onAutoForward": "notify"
+    },
+    "8501": {
+      "label": "Dashboard",
+      "onAutoForward": "openBrowser"
+    },
+    "27017": {
+      "label": "MongoDB"
+    },
+    "9090": {
+      "label": "Prometheus"
+    },
+    "3000": {
+      "label": "Grafana"
+    }
+  },
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/.git,target=/app/.git,type=bind,consistency=cached"
+  ]
+}

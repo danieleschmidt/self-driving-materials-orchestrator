@@ -1,0 +1,144 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-01-31T00:00:00Z",
+    "tools": [
+      {
+        "vendor": "terragonlabs",
+        "name": "self-driving-materials-orchestrator",
+        "version": "0.1.0"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "bom-ref": "self-driving-materials-orchestrator",
+      "name": "self-driving-materials-orchestrator",
+      "version": "0.1.0",
+      "description": "End-to-end agentic pipeline for autonomous materials-discovery experiments",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "numpy",
+      "name": "numpy",
+      "version": ">=1.21.0",
+      "description": "Fundamental package for array computing in Python",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library", 
+      "bom-ref": "scipy",
+      "name": "scipy",
+      "version": ">=1.7.0",
+      "description": "Scientific Library for Python",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pandas",
+      "name": "pandas", 
+      "version": ">=1.3.0",
+      "description": "Powerful data structures for data analysis, time series, and statistics",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "scikit-learn",
+      "name": "scikit-learn",
+      "version": ">=1.0.0", 
+      "description": "A set of python modules for machine learning and data mining",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pymongo",
+      "name": "pymongo",
+      "version": ">=4.0.0",
+      "description": "Python driver for MongoDB",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "streamlit",
+      "name": "streamlit", 
+      "version": ">=1.28.0",
+      "description": "The fastest way to build data apps in Python",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "fastapi",
+      "name": "fastapi",
+      "version": ">=0.100.0",
+      "description": "FastAPI framework, high performance, easy to learn, fast to code, ready for production",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "self-driving-materials-orchestrator",
+      "dependsOn": [
+        "numpy",
+        "scipy", 
+        "pandas",
+        "scikit-learn",
+        "pymongo",
+        "streamlit",
+        "fastapi"
+      ]
+    }
+  ]
+}

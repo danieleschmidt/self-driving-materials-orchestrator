@@ -1,0 +1,96 @@
+site_name: Self-Driving Materials Orchestrator
+site_description: End-to-end agentic pipeline for autonomous materials-discovery experiments
+site_author: Daniel Schmidt
+site_url: https://self-driving-materials.readthedocs.io
+
+repo_name: terragonlabs/self-driving-materials-orchestrator
+repo_url: https://github.com/terragonlabs/self-driving-materials-orchestrator
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+  - gen-files:
+      scripts:
+        - docs/gen_ref_pages.py
+
+nav:
+  - Home: index.md
+  - Quick Start:
+    - Installation: quickstart/installation.md
+    - First Campaign: quickstart/first-campaign.md
+    - Robot Setup: quickstart/robot-setup.md
+  - User Guide:
+    - Objectives: guide/objectives.md
+    - Optimization: guide/optimization.md
+    - Robots: guide/robots.md
+    - Data Management: guide/data.md
+    - Dashboard: guide/dashboard.md
+  - API Reference:
+    - Core: api/core.md
+    - Planners: api/planners.md
+    - Robots: api/robots.md
+  - Development:
+    - Contributing: CONTRIBUTING.md  
+    - Development Setup: DEVELOPMENT.md
+    - Architecture: architecture.md
+    - CI/CD: workflows/ci-cd-requirements.md
+  - Deployment:
+    - Docker: deployment/docker.md
+    - Production: deployment/production.md
+    - Monitoring: deployment/monitoring.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/terragonlabs/self-driving-materials-orchestrator
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/self-driving-materials-orchestrator
+  version:
+    provider: mike

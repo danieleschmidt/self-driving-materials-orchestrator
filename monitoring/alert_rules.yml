@@ -1,0 +1,62 @@
+groups:
+  - name: materials_orchestrator_alerts
+    rules:
+      # Application Health
+      - alert: MaterialsOrchestratorDown
+        expr: up{job="materials-orchestrator"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Materials Orchestrator is down"
+          description: "Materials Orchestrator has been down for more than 1 minute"
+
+      # Database Health
+      - alert: MongoDBDown
+        expr: up{job="mongodb"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB is down"
+          description: "MongoDB has been unreachable for more than 2 minutes"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 90% for more than 5 minutes"
+
+      # Robot Connection Issues
+      - alert: RobotConnectionFailed
+        expr: materials_orchestrator_robot_connection_status == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Robot connection failed"
+          description: "One or more robots are not connected"
+
+      # Experiment Failure Rate
+      - alert: HighExperimentFailureRate
+        expr: rate(materials_orchestrator_experiments_failed_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High experiment failure rate"
+          description: "Experiment failure rate is above 10% over the last 5 minutes"
+
+      # Database Storage
+      - alert: MongoDBStorageUsage
+        expr: mongodb_storage_size_bytes / mongodb_storage_available_bytes > 0.8
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB storage usage high"
+          description: "MongoDB storage usage is above 80%"

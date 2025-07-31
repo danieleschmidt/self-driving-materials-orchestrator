@@ -1,0 +1,16 @@
+{
+  "security": {
+    "ignore-cvss-severity-below": 7.0,
+    "ignore-vulnerabilities": [
+      "// Add CVE IDs to ignore specific vulnerabilities"
+    ],
+    "continue-on-vulnerability-error": false
+  },
+  "alert": {
+    "ignore-unpinned-requirements": false
+  },
+  "report": {
+    "full": true,
+    "output": "safety-report.json"
+  }
+}
