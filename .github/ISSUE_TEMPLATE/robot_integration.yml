@@ -1,0 +1,123 @@
+name: 🤖 Robot Integration
+description: Report issues or request support for robot hardware integration
+title: "[ROBOT] "
+labels: ["robot", "hardware", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for robot hardware integration issues, new robot support requests, or hardware-related problems.
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue Type
+      description: What type of robot issue is this?
+      options:
+        - Connection/Communication Issues
+        - New Robot Support Request
+        - Calibration Problems
+        - Safety System Issues
+        - Performance Issues
+        - Driver Bug
+        - Documentation Request
+    validations:
+      required: true
+
+  - type: input
+    id: robot-model
+    attributes:
+      label: Robot Model
+      description: What robot model are you using?
+      placeholder: "e.g., Opentrons OT-2, Chemspeed SWING, Custom ROS2 Robot"
+    validations:
+      required: true
+
+  - type: input
+    id: firmware-version
+    attributes:
+      label: Firmware/Software Version
+      description: Robot firmware or software version
+      placeholder: "e.g., OT-2 v6.3.0, ROS2 Humble"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Detailed description of the issue or request
+    validations:
+      required: true
+
+  - type: textarea
+    id: robot-config
+    attributes:
+      label: Robot Configuration
+      description: Provide your robot configuration
+      render: yaml
+      placeholder: |
+        # Example robot configuration
+        robot_type: "opentrons"
+        connection:
+          ip: "192.168.1.100"
+          port: 31950
+        deck_config: "configs/ot2_materials_deck.json"
+
+  - type: textarea
+    id: error-logs
+    attributes:
+      label: Error Logs
+      description: Robot-specific error logs or messages
+      render: shell
+
+  - type: checkboxes
+    id: hardware-status
+    attributes:
+      label: Hardware Status
+      description: Check all that apply
+      options:
+        - label: Robot powers on successfully
+        - label: Robot passes self-diagnostics
+        - label: Network connectivity is working
+        - label: All required attachments are installed
+        - label: Safety systems are functional
+        - label: Manual operation works correctly
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: Laboratory environment and setup
+      placeholder: |
+        - Lab location:
+        - Network setup:
+        - Other connected equipment:
+        - Safety protocols in place:
+
+  - type: checkboxes
+    id: safety-checklist
+    attributes:
+      label: Safety Checklist
+      description: Confirm safety measures are in place
+      options:
+        - label: Emergency stop procedures are documented and tested
+          required: true
+        - label: Personnel are trained on robot safety protocols
+          required: true
+        - label: Appropriate safety barriers and signage are in place
+          required: true
+        - label: Regular safety inspections are conducted
+          required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have read the robot integration documentation
+          required: true
+        - label: I have tested basic robot functionality outside of the orchestrator
+          required: true
+        - label: I have verified network connectivity and permissions
+          required: true

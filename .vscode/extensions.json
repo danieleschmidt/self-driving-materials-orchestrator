@@ -1,0 +1,20 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "charliermarsh.ruff",
+    "ms-python.mypy-type-checker",
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "ms-vscode.docker",
+    "ms-azuretools.vscode-docker",
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    "ms-python.pylint",
+    "ms-python.flake8",
+    "njpwerner.autodocstring",
+    "wholroyd.jinja",
+    "ms-vscode.makefile-tools",
+    "streetsidesoftware.code-spell-checker"
+  ]
+}

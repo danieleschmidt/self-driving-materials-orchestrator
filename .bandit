@@ -1,0 +1,19 @@
+[bandit]
+# Bandit configuration file
+
+# Tests to exclude (comma-separated list of test IDs)
+exclude: /tests/,/venv/,/build/,/dist/
+
+# Tests to skip (comma-separated list of test IDs)
+skips: B101,B601
+
+# Severity level of issues to report
+# LOW, MEDIUM, HIGH
+confidence: MEDIUM
+severity: MEDIUM
+
+# Report format
+format: json
+
+# Output file
+output: security-report.json
