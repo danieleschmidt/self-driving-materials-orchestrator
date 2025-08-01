@@ -1,0 +1,45 @@
+{
+  "repository_info": {
+    "name": "self-driving-materials-orchestrator",
+    "assessment_date": "2025-08-01T00:00:00Z",
+    "maturity_before": 65,
+    "maturity_current": 72,
+    "primary_language": "python",
+    "total_lines_of_code": 2847
+  },
+  "executionHistory": [
+    {
+      "timestamp": "2025-08-01T00:00:00Z",
+      "itemId": "init-001",
+      "title": "Initialize Terragon autonomous SDLC system",
+      "scores": {
+        "wsjf": 45.2,
+        "ice": 480,
+        "technicalDebt": 0,
+        "composite": 89.5
+      },
+      "estimatedEffort": 2.0,
+      "category": "infrastructure",
+      "status": "in_progress"
+    }
+  ],
+  "backlogMetrics": {
+    "totalItems": 8,
+    "averageAge": 0,
+    "debtRatio": 0.15,
+    "velocityTrend": "initializing"
+  },
+  "valueDelivered": {
+    "total_score": 89.5,
+    "security_improvements": 2,
+    "automation_added": 1,
+    "technical_debt_reduced": 0,
+    "performance_gains_percent": 0
+  },
+  "continuousMetrics": {
+    "last_discovery_run": "2025-08-01T00:00:00Z",
+    "next_scheduled_run": "2025-08-01T01:00:00Z",
+    "items_discovered_today": 8,
+    "items_completed_today": 0
+  }
+}

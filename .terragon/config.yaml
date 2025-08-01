@@ -1,0 +1,64 @@
+# Terragon Autonomous SDLC Configuration
+# Repository: self-driving-materials-orchestrator
+# Maturity Level: MATURING (70-75%)
+# Last Updated: 2025-08-01
+
+repository:
+  name: "self-driving-materials-orchestrator"
+  maturity_level: "maturing"
+  maturity_score: 72
+  primary_language: "python"
+  framework: "fastapi_streamlit"
+  
+scoring:
+  weights:
+    maturing:
+      wsjf: 0.6
+      ice: 0.1
+      technicalDebt: 0.2
+      security: 0.1
+  
+  thresholds:
+    minScore: 15
+    maxRisk: 0.7
+    securityBoost: 2.0
+    complianceBoost: 1.8
+
+discovery:
+  sources:
+    - gitHistory
+    - staticAnalysis
+    - issueTrackers
+    - vulnerabilityDatabases
+    - performanceMonitoring
+  
+  tools:
+    staticAnalysis:
+      - ruff
+      - mypy
+      - bandit
+    security:
+      - safety
+      - pip-audit
+      - semgrep
+    performance:
+      - pytest-benchmark
+      - memory-profiler
+
+execution:
+  maxConcurrentTasks: 1
+  testRequirements:
+    minCoverage: 85
+    performanceRegression: 10
+  rollbackTriggers:
+    - testFailure
+    - buildFailure
+    - securityViolation
+
+# Current high-value opportunities identified
+priority_areas:
+  - ci_cd_automation
+  - security_scanning_automation
+  - performance_testing
+  - dependency_management
+  - technical_debt_tracking
