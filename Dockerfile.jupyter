@@ -1,0 +1,68 @@
+# Jupyter Dockerfile for Materials Analysis
+FROM jupyter/scipy-notebook:latest
+
+# Switch to root for installation
+USER root
+
+# Install additional system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libffi-dev \
+    libssl-dev \
+    graphviz \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch back to jovyan user
+USER jovyan
+
+# Copy requirements and install Python packages
+COPY pyproject.toml /tmp/
+COPY README.md /tmp/
+COPY LICENSE /tmp/
+
+# Install the materials orchestrator package and additional analysis packages
+RUN pip install --upgrade pip && \
+    pip install /tmp/ && \
+    pip install \
+        ipywidgets \
+        plotly \
+        bokeh \
+        holoviews \
+        panel \
+        papermill \
+        scrapbook \
+        jupyter-dash \
+        ipympl \
+        voila \
+        jupyterlab-git \
+        jupyterlab-code-formatter \
+        black \
+        isort && \
+    pip cache purge
+
+# Enable Jupyter extensions
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build && \
+    jupyter labextension install jupyterlab-plotly --no-build && \
+    jupyter labextension install @bokeh/jupyter_bokeh --no-build && \
+    jupyter lab build --dev-build=False --minimize=True && \
+    jupyter lab clean && \
+    rm -rf ~/.cache/yarn
+
+# Copy analysis notebooks
+COPY notebooks/ /home/jovyan/work/notebooks/
+
+# Create directories for data and results
+RUN mkdir -p /home/jovyan/work/data /home/jovyan/work/results && \
+    fix-permissions /home/jovyan/work
+
+# Set up Jupyter configuration
+RUN echo "c.NotebookApp.token = 'materials-analysis'" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.allow_root = True" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.ip = '0.0.0.0'" >> ~/.jupyter/jupyter_notebook_config.py
+
+# Expose Jupyter port
+EXPOSE 8888
+
+# Start Jupyter Lab
+CMD ["start-notebook.sh", "--NotebookApp.token='materials-analysis'", "--NotebookApp.allow_root=True"]
