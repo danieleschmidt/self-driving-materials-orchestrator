@@ -1,0 +1,438 @@
+# Continuous Integration Workflow Template
+# This file should be copied to .github/workflows/ci.yml
+# 
+# This workflow runs comprehensive tests and quality checks on every PR
+
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  PYTHON_VERSION: "3.11"
+  MONGODB_VERSION: "5.0"
+  REDIS_VERSION: "7-alpine"
+
+jobs:
+  # Lint and code quality checks
+  lint:
+    name: Lint and Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        
+    - name: Run black formatter check
+      run: black --check --diff .
+      
+    - name: Run ruff linter
+      run: ruff check .
+      
+    - name: Run mypy type checker
+      run: mypy src/
+      
+    - name: Check import sorting
+      run: ruff check --select I .
+
+  # Security and vulnerability scanning
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        pip install safety bandit pip-audit
+        
+    - name: Run Bandit security scanner
+      run: bandit -r src/ -f json -o bandit-report.json
+      continue-on-error: true
+      
+    - name: Run Safety vulnerability scanner
+      run: safety check --json --output safety-report.json
+      continue-on-error: true
+      
+    - name: Run pip-audit
+      run: pip-audit --format=json --output=pip-audit-report.json
+      continue-on-error: true
+      
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+          pip-audit-report.json
+
+  # Unit tests
+  test-unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        
+    - name: Run unit tests
+      run: |
+        pytest tests/unit/ \
+          --cov=materials_orchestrator \
+          --cov-report=xml \
+          --cov-report=html \
+          --cov-report=term-missing \
+          --junitxml=pytest-unit.xml \
+          -v
+          
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: matrix.python-version == '3.11'
+      with:
+        file: ./coverage.xml
+        flags: unit
+        name: unit-tests
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: unit-test-results-${{ matrix.python-version }}
+        path: |
+          pytest-unit.xml
+          htmlcov/
+
+  # Integration tests with services
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:${{ env.MONGODB_VERSION }}
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: password
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongo --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
+      redis:
+        image: redis:${{ env.REDIS_VERSION }}
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev,robots]"
+        
+    - name: Wait for services
+      run: |
+        # Wait for MongoDB
+        until mongo --host localhost:27017 --eval "print('MongoDB is ready')"; do
+          echo "Waiting for MongoDB..."
+          sleep 2
+        done
+        
+        # Wait for Redis
+        until redis-cli -h localhost -p 6379 ping; do
+          echo "Waiting for Redis..."
+          sleep 2
+        done
+        
+    - name: Run integration tests
+      env:
+        MONGODB_URL: mongodb://admin:password@localhost:27017/materials_test?authSource=admin
+        REDIS_URL: redis://localhost:6379/1
+        TESTING: true
+      run: |
+        pytest tests/integration/ \
+          --cov=materials_orchestrator \
+          --cov-report=xml \
+          --junitxml=pytest-integration.xml \
+          -v
+          
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: integration
+        name: integration-tests
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: integration-test-results
+        path: pytest-integration.xml
+
+  # End-to-end tests (simulation mode)
+  test-e2e:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:${{ env.MONGODB_VERSION }}
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: password
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongo --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev,robots]"
+        
+    - name: Run E2E tests
+      env:
+        MONGODB_URL: mongodb://admin:password@localhost:27017/materials_e2e?authSource=admin
+        ROBOT_SIMULATION: true
+        TESTING: true
+      run: |
+        pytest tests/e2e/ \
+          --junitxml=pytest-e2e.xml \
+          -v \
+          -m "not slow"
+          
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: e2e-test-results
+        path: pytest-e2e.xml
+
+  # Documentation tests
+  test-docs:
+    name: Documentation Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[docs]"
+        
+    - name: Test documentation build
+      run: |
+        mkdocs build --strict
+        
+    - name: Check documentation links
+      run: |
+        # Install linkchecker
+        pip install linkchecker
+        
+        # Build docs
+        mkdocs build
+        
+        # Check internal links
+        linkchecker --check-extern site/
+
+  # Performance benchmarks (optional, on main branch only)
+  benchmark:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        pip install pytest-benchmark
+        
+    - name: Run benchmarks
+      run: |
+        pytest tests/performance/ \
+          --benchmark-json=benchmark.json \
+          --benchmark-only \
+          -v
+          
+    - name: Store benchmark results
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        tool: 'pytest'
+        output-file-path: benchmark.json
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true
+        comment-on-alert: true
+        alert-threshold: '200%'
+        fail-on-alert: true
+
+  # Docker build test
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: false
+        tags: materials-orchestrator:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Test Docker image
+      run: |
+        docker run --rm materials-orchestrator:test python -c "import materials_orchestrator; print('✅ Package import successful')"
+
+  # Dependency vulnerability check
+  dependency-check:
+    name: Dependency Vulnerability Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/python@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+        
+    - name: Upload result to GitHub Code Scanning
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: snyk.sarif
+
+# Job to aggregate all test results
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [lint, security, test-unit, test-integration, test-e2e, test-docs, docker-build]
+    if: always()
+    
+    steps:
+    - name: Check test results
+      run: |
+        echo "Lint: ${{ needs.lint.result }}"
+        echo "Security: ${{ needs.security.result }}"
+        echo "Unit Tests: ${{ needs.test-unit.result }}"
+        echo "Integration Tests: ${{ needs.test-integration.result }}"
+        echo "E2E Tests: ${{ needs.test-e2e.result }}"
+        echo "Documentation: ${{ needs.test-docs.result }}"
+        echo "Docker Build: ${{ needs.docker-build.result }}"
+        
+        # Fail if any critical tests failed
+        if [[ "${{ needs.lint.result }}" == "failure" ]] || \
+           [[ "${{ needs.test-unit.result }}" == "failure" ]] || \
+           [[ "${{ needs.test-integration.result }}" == "failure" ]] || \
+           [[ "${{ needs.docker-build.result }}" == "failure" ]]; then
+          echo "❌ Critical tests failed!"
+          exit 1
+        fi
+        
+        echo "✅ All critical tests passed!"

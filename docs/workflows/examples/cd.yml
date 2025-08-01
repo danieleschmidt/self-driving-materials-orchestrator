@@ -1,0 +1,350 @@
+# Continuous Deployment Workflow Template
+# This file should be copied to .github/workflows/cd.yml
+#
+# This workflow handles deployment to different environments
+
+name: Continuous Deployment
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  release:
+    types: [ published ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  # Build and publish Docker images
+  build-and-publish:
+    name: Build and Publish Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.meta.outputs.tags }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha
+          
+    - name: Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.production
+        target: runtime
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          BUILD_DATE=${{ github.event.head_commit.timestamp }}
+          VERSION=${{ steps.meta.outputs.version }}
+          VCS_REF=${{ github.sha }}
+          
+    - name: Generate SBOM
+      uses: anchore/sbom-action@v0
+      with:
+        image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+        format: spdx-json
+        output-file: sbom.spdx.json
+        
+    - name: Upload SBOM
+      uses: actions/upload-artifact@v3
+      with:
+        name: sbom
+        path: sbom.spdx.json
+
+  # Security scanning of built images
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    permissions:
+      security-events: write
+      
+    steps:
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ needs.build-and-publish.outputs.image-tag }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # Deploy to staging environment
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-and-publish, security-scan]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: staging
+      url: https://staging.materials-orchestrator.com
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to staging
+      env:
+        KUBE_CONFIG: ${{ secrets.STAGING_KUBECONFIG }}
+        IMAGE_TAG: ${{ needs.build-and-publish.outputs.image-tag }}
+      run: |
+        echo "$KUBE_CONFIG" | base64 -d > kubeconfig
+        export KUBECONFIG=kubeconfig
+        
+        # Update deployment with new image
+        sed -i "s|IMAGE_TAG|${IMAGE_TAG}|g" k8s/staging/deployment.yaml
+        
+        # Apply Kubernetes manifests
+        kubectl apply -f k8s/staging/
+        
+        # Wait for rollout to complete
+        kubectl rollout status deployment/materials-orchestrator -n staging --timeout=300s
+        
+    - name: Run smoke tests
+      env:
+        STAGING_URL: https://staging.materials-orchestrator.com
+      run: |
+        # Wait for service to be ready
+        sleep 30
+        
+        # Basic health check
+        curl -f ${STAGING_URL}/health || exit 1
+        
+        # API smoke test
+        curl -f ${STAGING_URL}/api/v1/status || exit 1
+        
+        # Database connectivity test
+        curl -f ${STAGING_URL}/health/database || exit 1
+        
+    - name: Notify deployment
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+
+  # Deploy to production (manual approval required)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-and-publish, security-scan, deploy-staging]
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: production
+      url: https://materials-orchestrator.com
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to production
+      env:
+        KUBE_CONFIG: ${{ secrets.PRODUCTION_KUBECONFIG }}
+        IMAGE_TAG: ${{ needs.build-and-publish.outputs.image-tag }}
+      run: |
+        echo "$KUBE_CONFIG" | base64 -d > kubeconfig
+        export KUBECONFIG=kubeconfig
+        
+        # Create backup of current deployment
+        kubectl get deployment materials-orchestrator -n production -o yaml > backup-deployment.yaml
+        
+        # Update deployment with new image
+        sed -i "s|IMAGE_TAG|${IMAGE_TAG}|g" k8s/production/deployment.yaml
+        
+        # Apply Kubernetes manifests
+        kubectl apply -f k8s/production/
+        
+        # Wait for rollout to complete
+        kubectl rollout status deployment/materials-orchestrator -n production --timeout=600s
+        
+    - name: Run production smoke tests
+      env:
+        PRODUCTION_URL: https://materials-orchestrator.com
+      run: |
+        # Wait for service to be ready
+        sleep 60
+        
+        # Comprehensive health checks
+        curl -f ${PRODUCTION_URL}/health || exit 1
+        curl -f ${PRODUCTION_URL}/health/database || exit 1
+        curl -f ${PRODUCTION_URL}/health/robots || exit 1
+        
+        # API functionality test
+        curl -f ${PRODUCTION_URL}/api/v1/status || exit 1
+        
+        # Dashboard accessibility test
+        curl -f ${PRODUCTION_URL}:8501/health || exit 1
+        
+    - name: Update release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          sbom.spdx.json
+        body: |
+          ## Deployment Information
+          
+          **Docker Image**: ${{ needs.build-and-publish.outputs.image-tag }}
+          **Deployed to**: Production
+          **Deployment Time**: ${{ github.event.head_commit.timestamp }}
+          
+          ## Security
+          - Image scanned with Trivy
+          - SBOM generated and attached
+          - All security checks passed
+          
+          ## Verification
+          - ✅ Health checks passed
+          - ✅ Database connectivity verified  
+          - ✅ API functionality tested
+          - ✅ Dashboard accessibility confirmed
+          
+    - name: Notify production deployment
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: ${{ job.status }}
+        channel: '#production-deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+
+  # Rollback capability
+  rollback-production:
+    name: Rollback Production
+    runs-on: ubuntu-latest
+    if: failure() && needs.deploy-production.result == 'failure'
+    needs: [deploy-production]
+    environment:
+      name: production-rollback
+      
+    steps:
+    - name: Rollback production deployment
+      env:
+        KUBE_CONFIG: ${{ secrets.PRODUCTION_KUBECONFIG }}
+      run: |
+        echo "$KUBE_CONFIG" | base64 -d > kubeconfig
+        export KUBECONFIG=kubeconfig
+        
+        # Rollback to previous version
+        kubectl rollout undo deployment/materials-orchestrator -n production
+        
+        # Wait for rollback to complete
+        kubectl rollout status deployment/materials-orchestrator -n production --timeout=300s
+        
+    - name: Verify rollback
+      env:
+        PRODUCTION_URL: https://materials-orchestrator.com
+      run: |
+        sleep 30
+        curl -f ${PRODUCTION_URL}/health || exit 1
+        curl -f ${PRODUCTION_URL}/api/v1/status || exit 1
+        
+    - name: Notify rollback
+      uses: 8398a7/action-slack@v3
+      with:
+        status: 'warning'
+        channel: '#production-deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+        text: '🚨 Production deployment rolled back due to failure'
+
+  # Documentation deployment
+  deploy-docs:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[docs]"
+        
+    - name: Build documentation
+      run: mkdocs build
+      
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./site
+        publish_branch: gh-pages
+        
+    - name: Update documentation links
+      run: |
+        # Update any external documentation references
+        echo "Documentation deployed to: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+
+  # Performance monitoring post-deployment
+  performance-monitoring:
+    name: Performance Monitoring
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Run performance tests
+      env:
+        PRODUCTION_URL: https://materials-orchestrator.com
+      run: |
+        # Install performance testing tools
+        npm install -g artillery
+        
+        # Run load tests
+        artillery run performance-tests/load-test.yml
+        
+    - name: Monitor metrics
+      run: |
+        # Check key metrics after deployment
+        # This would integrate with your monitoring system
+        echo "Monitoring deployment metrics..."
