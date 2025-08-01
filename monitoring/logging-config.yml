@@ -1,0 +1,373 @@
+# Centralized logging configuration for Materials Orchestrator
+
+# Log levels and formatting
+logging:
+  version: 1
+  disable_existing_loggers: false
+  
+  formatters:
+    detailed:
+      format: '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+      datefmt: '%Y-%m-%d %H:%M:%S'
+    
+    json:
+      format: '{"timestamp": "%(asctime)s", "logger": "%(name)s", "level": "%(levelname)s", "function": "%(funcName)s", "line": %(lineno)d, "message": "%(message)s", "module": "%(module)s"}'
+      datefmt: '%Y-%m-%dT%H:%M:%S.%fZ'
+    
+    simple:
+      format: '%(levelname)s - %(message)s'
+  
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: INFO
+      formatter: detailed
+      stream: ext://sys.stdout
+    
+    file:
+      class: logging.handlers.RotatingFileHandler
+      level: DEBUG
+      formatter: detailed
+      filename: /app/logs/materials_orchestrator.log
+      maxBytes: 104857600  # 100MB
+      backupCount: 10
+      encoding: utf8
+    
+    json_file:
+      class: logging.handlers.RotatingFileHandler
+      level: INFO
+      formatter: json
+      filename: /app/logs/materials_orchestrator.json
+      maxBytes: 104857600  # 100MB
+      backupCount: 10
+      encoding: utf8
+    
+    error_file:
+      class: logging.handlers.RotatingFileHandler
+      level: ERROR
+      formatter: detailed
+      filename: /app/logs/errors.log
+      maxBytes: 52428800  # 50MB
+      backupCount: 5
+      encoding: utf8
+    
+    syslog:
+      class: logging.handlers.SysLogHandler
+      level: WARNING
+      formatter: json
+      address: ['syslog-server', 514]
+      facility: local0
+  
+  loggers:
+    # Root logger
+    '':
+      level: INFO
+      handlers: [console, file, json_file, error_file]
+      propagate: false
+    
+    # Application loggers
+    materials_orchestrator:
+      level: DEBUG
+      handlers: [console, file, json_file]
+      propagate: false
+    
+    materials_orchestrator.core:
+      level: DEBUG
+      handlers: [file, json_file]
+      propagate: false
+    
+    materials_orchestrator.robots:
+      level: INFO
+      handlers: [file, json_file]
+      propagate: false
+    
+    materials_orchestrator.optimization:
+      level: INFO
+      handlers: [file, json_file]
+      propagate: false
+    
+    materials_orchestrator.database:
+      level: WARNING
+      handlers: [file, json_file, error_file]
+      propagate: false
+    
+    # Third-party loggers
+    uvicorn:
+      level: INFO
+      handlers: [console, file]
+      propagate: false
+    
+    fastapi:
+      level: INFO
+      handlers: [file, json_file]
+      propagate: false
+    
+    pymongo:
+      level: WARNING
+      handlers: [error_file]
+      propagate: false
+    
+    httpx:
+      level: WARNING
+      handlers: [error_file]
+      propagate: false
+    
+    # Security logger
+    security:
+      level: WARNING
+      handlers: [error_file, syslog]
+      propagate: false
+
+# Structured logging configuration
+structured_logging:
+  # Standard fields to include in all log messages
+  standard_fields:
+    - timestamp
+    - level
+    - logger
+    - message
+    - module
+    - function
+    - line
+    - thread_id
+    - process_id
+  
+  # Additional context fields
+  context_fields:
+    - request_id
+    - user_id
+    - session_id
+    - campaign_id
+    - experiment_id
+    - robot_id
+    - trace_id
+    - span_id
+  
+  # Sensitive fields to redact
+  sensitive_fields:
+    - password
+    - token
+    - api_key
+    - secret
+    - authorization
+    - cookie
+  
+  # Field mappings for external log systems
+  field_mappings:
+    elasticsearch:
+      timestamp: "@timestamp"
+      level: "log.level"
+      message: "message"
+      logger: "log.logger"
+    
+    splunk:
+      timestamp: "_time"
+      level: "log_level"
+      message: "msg"
+      logger: "source"
+
+# Log aggregation and forwarding
+aggregation:
+  # Fluentd configuration
+  fluentd:
+    enabled: false
+    host: fluentd
+    port: 24224
+    tag: materials.orchestrator
+  
+  # ELK Stack configuration
+  elasticsearch:
+    enabled: false
+    hosts:
+      - elasticsearch:9200
+    index_pattern: "materials-orchestrator-%Y.%m.%d"
+    doc_type: "log"
+  
+  # Loki configuration (Grafana Loki)
+  loki:
+    enabled: false
+    url: http://loki:3100/loki/api/v1/push
+    labels:
+      service: materials-orchestrator
+      environment: "${ENVIRONMENT:-production}"
+
+# Metrics from logs
+log_metrics:
+  # Error rate metrics
+  error_patterns:
+    - pattern: "ERROR"
+      metric: "log_errors_total"
+      labels:
+        level: "error"
+    
+    - pattern: "CRITICAL"
+      metric: "log_errors_total"
+      labels:
+        level: "critical"
+    
+    - pattern: "Robot.*failed"
+      metric: "robot_failures_total"
+      labels:
+        component: "robot"
+    
+    - pattern: "Database.*timeout"
+      metric: "database_timeouts_total"
+      labels:
+        component: "database"
+  
+  # Performance metrics from logs
+  performance_patterns:
+    - pattern: "Experiment completed in (\\d+\\.\\d+)s"
+      metric: "experiment_duration_seconds"
+      value_group: 1
+    
+    - pattern: "Campaign optimization took (\\d+\\.\\d+)s"
+      metric: "optimization_duration_seconds"
+      value_group: 1
+    
+    - pattern: "Database query took (\\d+)ms"
+      metric: "database_query_duration_ms"
+      value_group: 1
+
+# Audit logging
+audit_logging:
+  enabled: true
+  
+  # Events to audit
+  events:
+    - user_login
+    - user_logout
+    - campaign_created
+    - campaign_modified
+    - campaign_deleted
+    - experiment_started
+    - experiment_completed
+    - robot_command_sent
+    - safety_violation
+    - system_configuration_changed
+    - data_export
+    - backup_created
+    - backup_restored
+  
+  # Audit log format
+  format:
+    timestamp: "%(asctime)s"
+    event_type: "%(event_type)s"
+    user_id: "%(user_id)s"
+    resource_id: "%(resource_id)s"
+    action: "%(action)s"
+    result: "%(result)s"
+    ip_address: "%(ip_address)s"
+    user_agent: "%(user_agent)s"
+    session_id: "%(session_id)s"
+    additional_data: "%(additional_data)s"
+  
+  # Audit log storage
+  storage:
+    file_path: /app/logs/audit.log
+    rotation:
+      max_bytes: 104857600  # 100MB
+      backup_count: 20
+    retention_days: 2555  # 7 years for compliance
+    
+    # Optional: Send to external audit system
+    external:
+      enabled: false
+      endpoint: "https://audit-system.company.com/api/events"
+      authentication:
+        type: "bearer"
+        token: "${AUDIT_SYSTEM_TOKEN}"
+
+# Log analysis and alerting
+analysis:
+  # Real-time log analysis patterns
+  patterns:
+    security_alerts:
+      - pattern: "Failed login attempt"
+        severity: "medium"
+        cooldown: 300  # 5 minutes
+        threshold: 5   # 5 attempts
+        action: "alert"
+      
+      - pattern: "Unauthorized access attempt"
+        severity: "high"
+        cooldown: 60   # 1 minute
+        threshold: 1   # Immediate
+        action: "alert"
+    
+    system_alerts:
+      - pattern: "Out of memory"
+        severity: "critical"
+        cooldown: 60
+        threshold: 1
+        action: "alert_and_restart"
+      
+      - pattern: "Database connection lost"
+        severity: "critical"
+        cooldown: 30
+        threshold: 1
+        action: "alert"
+    
+    business_alerts:
+      - pattern: "Experiment failed"
+        severity: "medium"
+        cooldown: 600  # 10 minutes
+        threshold: 10  # 10 failures
+        action: "alert"
+      
+      - pattern: "Robot emergency stop"
+        severity: "high"
+        cooldown: 0
+        threshold: 1
+        action: "immediate_alert"
+
+# Performance and resource management
+performance:
+  # Log file management
+  cleanup:
+    enabled: true
+    schedule: "0 2 * * *"  # Daily at 2 AM
+    retention_days: 30
+    compress_after_days: 7
+  
+  # Async logging for performance
+  async_logging:
+    enabled: true
+    queue_size: 10000
+    timeout: 1.0
+  
+  # Sampling for high-volume logs
+  sampling:
+    debug_logs:
+      rate: 0.1  # Sample 10% of debug logs
+    info_logs:
+      rate: 1.0  # Keep all info logs
+    warning_logs:
+      rate: 1.0  # Keep all warning logs
+    error_logs:
+      rate: 1.0  # Keep all error logs
+
+# Integration with observability tools
+integrations:
+  # OpenTelemetry
+  opentelemetry:
+    enabled: false
+    endpoint: "http://jaeger:14268/api/traces"
+    service_name: "materials-orchestrator"
+    
+  # Prometheus logging metrics
+  prometheus:
+    enabled: true
+    metrics_port: 8001
+    
+  # Custom webhook for log events
+  webhooks:
+    - name: "slack_critical_errors"
+      url: "${SLACK_WEBHOOK_URL}"
+      events: ["critical", "error"]
+      format: "slack"
+      
+    - name: "pagerduty_alerts"
+      url: "${PAGERDUTY_WEBHOOK_URL}"
+      events: ["critical"]
+      format: "pagerduty"

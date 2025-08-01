@@ -1,0 +1,220 @@
+# Health check configuration for Materials Orchestrator
+# This file defines health check endpoints and their expected behaviors
+
+health_checks:
+  # Core application health
+  api_server:
+    endpoint: "http://materials-orchestrator:8000/health"
+    method: "GET"
+    timeout: 10
+    interval: 30
+    retries: 3
+    expected_status: 200
+    expected_response:
+      status: "healthy"
+    alerts:
+      critical: true
+      message: "API server is down"
+  
+  # Database connectivity
+  database:
+    endpoint: "http://materials-orchestrator:8000/health/database"
+    method: "GET"
+    timeout: 15
+    interval: 60
+    retries: 2
+    expected_status: 200
+    expected_response:
+      database: "connected"
+    alerts:
+      critical: true
+      message: "Database connection failed"
+  
+  # Robot connectivity
+  robots:
+    endpoint: "http://materials-orchestrator:8000/health/robots"
+    method: "GET"
+    timeout: 30
+    interval: 120
+    retries: 1
+    expected_status: 200
+    alerts:
+      critical: false
+      warning: true
+      message: "Robot connectivity issues"
+  
+  # Dashboard service
+  dashboard:
+    endpoint: "http://materials-orchestrator:8501/health"
+    method: "GET"
+    timeout: 10
+    interval: 60
+    retries: 2
+    expected_status: 200
+    alerts:
+      critical: false
+      warning: true
+      message: "Dashboard service unavailable"
+
+# External dependency health checks
+external_dependencies:
+  mongodb:
+    check_type: "tcp"
+    host: "mongodb"
+    port: 27017
+    timeout: 5
+    interval: 30
+    alerts:
+      critical: true
+      message: "MongoDB service unreachable"
+  
+  redis:
+    check_type: "tcp"
+    host: "redis"
+    port: 6379
+    timeout: 5
+    interval: 30
+    alerts:
+      critical: false
+      warning: true
+      message: "Redis cache unavailable"
+
+# Business logic health checks
+business_checks:
+  active_campaigns:
+    endpoint: "http://materials-orchestrator:8000/health/campaigns"
+    method: "GET"
+    timeout: 10
+    interval: 300  # 5 minutes
+    expected_response:
+      active_campaigns: ">= 0"
+    alerts:
+      warning: true
+      message: "No active campaigns running"
+  
+  experiment_queue:
+    endpoint: "http://materials-orchestrator:8000/health/queue"
+    method: "GET"
+    timeout: 10
+    interval: 120
+    expected_response:
+      queue_size: ">= 0"
+      processing: true
+    alerts:
+      warning: true
+      message: "Experiment queue not processing"
+  
+  optimization_health:
+    endpoint: "http://materials-orchestrator:8000/health/optimization"
+    method: "GET"
+    timeout: 15
+    interval: 300
+    expected_response:
+      models_loaded: true
+      last_prediction: "< 1h ago"
+    alerts:
+      warning: true
+      message: "Optimization models not functioning properly"
+
+# Performance health checks
+performance_checks:
+  response_time:
+    endpoint: "http://materials-orchestrator:8000/api/v1/status"
+    method: "GET"
+    timeout: 5
+    interval: 60
+    max_response_time: 2000  # 2 seconds
+    alerts:
+      warning: true
+      message: "API response time degraded"
+  
+  memory_usage:
+    check_type: "metrics"
+    metric: "process_resident_memory_bytes"
+    threshold: 4000000000  # 4GB
+    comparison: "<"
+    interval: 120
+    alerts:
+      critical: true
+      message: "High memory usage detected"
+  
+  cpu_usage:
+    check_type: "metrics"
+    metric: "rate(process_cpu_seconds_total[5m])"
+    threshold: 0.8  # 80%
+    comparison: "<"
+    interval: 60
+    alerts:
+      warning: true
+      message: "High CPU usage detected"
+
+# Security health checks
+security_checks:
+  ssl_certificates:
+    check_type: "ssl"
+    endpoint: "https://materials-orchestrator:8443"
+    days_before_expiry: 30
+    interval: 86400  # Daily
+    alerts:
+      warning: true
+      message: "SSL certificate expires soon"
+  
+  authentication:
+    endpoint: "http://materials-orchestrator:8000/auth/health"
+    method: "GET"
+    timeout: 10
+    interval: 300
+    expected_status: 200
+    alerts:
+      critical: true
+      message: "Authentication service failure"
+
+# Alert configuration
+alerting:
+  channels:
+    - type: "slack"
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channel: "#materials-alerts"
+      username: "Materials Monitor"
+    
+    - type: "email"
+      smtp_server: "${SMTP_SERVER}"
+      smtp_port: 587
+      username: "${SMTP_USERNAME}"
+      password: "${SMTP_PASSWORD}"
+      recipients:
+        - "admin@materials-lab.com"
+        - "oncall@materials-lab.com"
+    
+    - type: "pagerduty"
+      integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
+      severity_mapping:
+        critical: "critical"
+        warning: "warning"
+        info: "info"
+  
+  escalation:
+    - level: 1
+      wait_time: 300  # 5 minutes
+      channels: ["slack"]
+    
+    - level: 2
+      wait_time: 900  # 15 minutes
+      channels: ["email", "slack"]
+    
+    - level: 3
+      wait_time: 1800  # 30 minutes
+      channels: ["pagerduty", "email", "slack"]
+
+# Maintenance windows
+maintenance:
+  scheduled:
+    - name: "Weekly Maintenance"
+      cron: "0 2 * * 0"  # Sunday 2 AM
+      duration: 7200  # 2 hours
+      disable_alerts: true
+      
+    - name: "Monthly Security Updates"
+      cron: "0 1 1 * *"  # First day of month, 1 AM
+      duration: 14400  # 4 hours
+      disable_alerts: true

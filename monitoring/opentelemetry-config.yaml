@@ -1,0 +1,223 @@
+# OpenTelemetry Collector Configuration
+# This configuration sets up comprehensive observability for the Materials Orchestrator
+
+receivers:
+  # OTLP receiver for traces, metrics, and logs
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  # Prometheus receiver for scraping metrics
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'materials-orchestrator'
+          static_configs:
+            - targets: ['materials-orchestrator:8000']
+          scrape_interval: 30s
+          metrics_path: '/metrics'
+        
+        - job_name: 'mongodb'
+          static_configs:
+            - targets: ['mongodb-exporter:9216']
+          scrape_interval: 30s
+        
+        - job_name: 'redis'
+          static_configs:
+            - targets: ['redis-exporter:9121']
+          scrape_interval: 30s
+        
+        - job_name: 'node'
+          static_configs:
+            - targets: ['node-exporter:9100']
+          scrape_interval: 30s
+
+  # File log receiver
+  filelog:
+    include:
+      - /app/logs/*.log
+      - /app/logs/*.json
+    operators:
+      - type: json_parser
+        id: parser-json
+        if: 'body matches "^\\{"'
+      
+      - type: regex_parser
+        id: parser-text
+        if: 'body matches "^\\d{4}-\\d{2}-\\d{2}"'
+        regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+ - (?P<logger>\S+) - (?P<level>\S+) - (?P<function>\S+):(?P<line>\d+) - (?P<message>.*)'
+        timestamp:
+          parse_from: attributes.timestamp
+          layout: '%Y-%m-%d %H:%M:%S'
+
+  # System metrics receiver
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+      disk:
+        metrics:
+          system.disk.io:
+            enabled: true
+      network:
+        metrics:
+          system.network.io:
+            enabled: true
+      filesystem:
+        metrics:
+          system.filesystem.utilization:
+            enabled: true
+
+processors:
+  # Batch processor for performance
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  # Resource processor to add metadata
+  resource:
+    attributes:
+      - key: service.name
+        value: materials-orchestrator
+        action: upsert
+      - key: service.version
+        from_attribute: version
+        action: upsert
+      - key: deployment.environment
+        from_attribute: env
+        action: upsert
+      - key: k8s.cluster.name
+        value: materials-cluster
+        action: upsert
+
+  # Attributes processor for enrichment
+  attributes:
+    actions:
+      - key: environment
+        value: ${ENVIRONMENT}
+        action: upsert
+      - key: region
+        value: ${AWS_REGION}
+        action: upsert
+      - key: instance_id
+        value: ${INSTANCE_ID}
+        action: upsert
+
+  # Probabilistic sampler for traces
+  probabilistic_sampler:
+    sampling_percentage: 100  # Sample all traces initially
+
+  # Transform processor for log processing
+  transform:
+    log_statements:
+      - context: log
+        statements:
+          - set(severity_text, "TRACE") where severity_number >= 1 and severity_number <= 4
+          - set(severity_text, "DEBUG") where severity_number >= 5 and severity_number <= 8
+          - set(severity_text, "INFO") where severity_number >= 9 and severity_number <= 12
+          - set(severity_text, "WARN") where severity_number >= 13 and severity_number <= 16
+          - set(severity_text, "ERROR") where severity_number >= 17 and severity_number <= 20
+          - set(severity_text, "FATAL") where severity_number >= 21
+
+exporters:
+  # Jaeger exporter for traces
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+
+  # Prometheus exporter for metrics
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    const_labels:
+      service: materials-orchestrator
+
+  # Loki exporter for logs
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    labels:
+      attributes:
+        service.name: "service_name"
+        deployment.environment: "environment"
+        level: "level"
+      resource:
+        host.name: "hostname"
+
+  # OTLP exporter for external systems
+  otlp:
+    endpoint: ${OTLP_ENDPOINT}
+    headers:
+      api-key: ${OTLP_API_KEY}
+
+  # File exporter for debugging
+  file:
+    path: /tmp/otel-data.json
+
+  # Elasticsearch exporter for centralized logging
+  elasticsearch:
+    endpoints: 
+      - http://elasticsearch:9200
+    index: otel-logs
+    pipeline: otel-pipeline
+
+extensions:
+  # Health check extension
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+  # pprof extension for profiling
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # zpages extension for debugging
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+  
+  pipelines:
+    # Traces pipeline
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, attributes, probabilistic_sampler, batch]
+      exporters: [jaeger, otlp]
+
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp, prometheus, hostmetrics]
+      processors: [memory_limiter, resource, attributes, batch]
+      exporters: [prometheus, otlp]
+
+    # Logs pipeline
+    logs:
+      receivers: [otlp, filelog]
+      processors: [memory_limiter, resource, attributes, transform, batch]
+      exporters: [loki, elasticsearch, otlp]
+
+  # Telemetry configuration
+  telemetry:
+    logs:
+      level: info
+      development: false
+      sampling:
+        initial: 5
+        thereafter: 200
+    metrics:
+      level: detailed
+      address: 0.0.0.0:8888
