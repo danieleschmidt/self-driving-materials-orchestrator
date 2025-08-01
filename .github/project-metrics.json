@@ -1,0 +1,252 @@
+{
+  "project": {
+    "name": "self-driving-materials-orchestrator",
+    "description": "Autonomous materials discovery platform",
+    "version": "1.0.0",
+    "repository": "danieleschmidt/self-driving-materials-orchestrator",
+    "languages": ["Python", "YAML", "Docker", "Markdown"],
+    "license": "MIT",
+    "created_date": "2025-08-01",
+    "last_updated": "2025-08-01"
+  },
+  "metrics": {
+    "code_quality": {
+      "lines_of_code": {
+        "target": 15000,
+        "current": 8500,
+        "trend": "increasing",
+        "breakdown": {
+          "python": 7200,
+          "yaml": 800,
+          "markdown": 400,
+          "other": 100
+        }
+      },
+      "test_coverage": {
+        "target": 90,
+        "current": 85,
+        "unit_tests": 92,
+        "integration_tests": 78,
+        "e2e_tests": 65,
+        "trend": "increasing"
+      },
+      "code_complexity": {
+        "cyclomatic_complexity": {
+          "average": 3.2,
+          "max_allowed": 10,
+          "high_complexity_functions": 2
+        },
+        "maintainability_index": {
+          "current": 78,
+          "target": 80,
+          "trend": "stable"
+        }
+      },
+      "technical_debt": {
+        "debt_ratio": 2.1,
+        "target_ratio": 5.0,
+        "debt_hours": 45,
+        "trend": "decreasing"
+      }
+    },
+    "development_velocity": {
+      "commits_per_week": {
+        "current": 25,
+        "average_last_month": 28,
+        "trend": "stable"
+      },
+      "pull_requests": {
+        "opened_per_week": 8,
+        "merged_per_week": 7,
+        "average_merge_time_hours": 18,
+        "average_review_time_hours": 6
+      },
+      "issues": {
+        "opened_per_week": 5,
+        "closed_per_week": 6,
+        "average_resolution_time_days": 3.2,
+        "backlog_size": 23
+      }
+    },
+    "security": {
+      "vulnerabilities": {
+        "critical": 0,
+        "high": 0,
+        "medium": 2,
+        "low": 5,
+        "total": 7,
+        "trend": "decreasing"
+      },
+      "security_scans": {
+        "last_scan_date": "2025-08-01",
+        "scan_frequency_days": 1,
+        "tools_used": ["bandit", "safety", "semgrep", "trivy", "snyk"]
+      },
+      "dependency_updates": {
+        "outdated_dependencies": 8,
+        "security_updates_pending": 0,
+        "last_update_date": "2025-07-30"
+      }
+    },
+    "performance": {
+      "build_times": {
+        "ci_average_minutes": 12,
+        "cd_average_minutes": 8,
+        "target_ci_minutes": 10,
+        "target_cd_minutes": 5
+      },
+      "test_execution": {
+        "unit_tests_seconds": 45,
+        "integration_tests_seconds": 180,
+        "e2e_tests_seconds": 300,
+        "total_test_time_seconds": 525
+      },
+      "deployment": {
+        "staging_deployment_minutes": 5,
+        "production_deployment_minutes": 12,
+        "rollback_time_minutes": 3
+      }
+    },
+    "reliability": {
+      "uptime": {
+        "staging_percent": 99.5,
+        "production_percent": 99.9,
+        "target_percent": 99.9
+      },
+      "error_rates": {
+        "api_error_rate_percent": 0.1,
+        "dashboard_error_rate_percent": 0.05,
+        "experiment_failure_rate_percent": 12.0,
+        "target_api_error_rate": 0.1,
+        "target_experiment_failure_rate": 15.0
+      },
+      "incident_response": {
+        "mean_time_to_detection_minutes": 5,
+        "mean_time_to_resolution_minutes": 30,
+        "incidents_last_month": 2,
+        "p0_incidents_last_month": 0
+      }
+    },
+    "business_metrics": {
+      "materials_discovery": {
+        "campaigns_per_month": 15,
+        "experiments_per_day": 120,
+        "materials_discovered_per_month": 8,
+        "success_rate_percent": 65,
+        "target_success_rate_percent": 70
+      },
+      "user_engagement": {
+        "active_users_per_week": 12,
+        "dashboard_sessions_per_week": 85,
+        "api_requests_per_day": 2500,
+        "data_exports_per_week": 15
+      },
+      "resource_utilization": {
+        "robot_utilization_percent": 75,
+        "cpu_utilization_percent": 45,
+        "memory_utilization_percent": 60,
+        "storage_used_gb": 150,
+        "storage_capacity_gb": 500
+      }
+    },
+    "documentation": {
+      "coverage": {
+        "api_documentation_percent": 95,
+        "code_documentation_percent": 78,
+        "user_guides_count": 12,
+        "runbooks_count": 8
+      },
+      "quality": {
+        "broken_links": 0,
+        "last_review_date": "2025-07-25",
+        "outdated_sections": 2,
+        "community_contributions": 3
+      }
+    },
+    "community": {
+      "contributors": {
+        "total_contributors": 8,
+        "active_contributors_last_month": 5,
+        "new_contributors_last_month": 1,
+        "repeat_contributors": 7
+      },
+      "engagement": {
+        "github_stars": 45,
+        "github_forks": 12,
+        "github_watchers": 15,
+        "issues_from_community": 8,
+        "prs_from_community": 3
+      }
+    }
+  },
+  "goals": {
+    "q4_2025": {
+      "test_coverage_target": 95,
+      "api_error_rate_target": 0.05,
+      "deployment_frequency_target": "daily",
+      "materials_discovery_rate_target": 12,
+      "community_contributors_target": 15
+    },
+    "q1_2026": {
+      "uptime_target": 99.95,
+      "build_time_target": 8,
+      "response_time_target": 100,
+      "security_vulnerabilities_target": 0,
+      "documentation_coverage_target": 85
+    }
+  },
+  "alerts": {
+    "thresholds": {
+      "test_coverage_min": 80,
+      "build_time_max_minutes": 15,
+      "vulnerability_count_max": 5,
+      "uptime_min_percent": 99.0,
+      "error_rate_max_percent": 1.0
+    },
+    "notifications": {
+      "slack_channel": "#metrics",
+      "email_recipients": ["team@materials-lab.com"],
+      "dashboard_url": "https://materials-orchestrator.com/metrics"
+    }
+  },
+  "collection": {
+    "frequency": "daily",
+    "sources": {
+      "github_api": "Repository metrics, PRs, issues",
+      "ci_cd_systems": "Build times, deployment frequency",
+      "monitoring": "Uptime, error rates, performance",
+      "security_tools": "Vulnerability scans, dependency checks",
+      "application_logs": "Business metrics, user engagement"
+    },
+    "retention": {
+      "daily_metrics": "1_year",
+      "weekly_aggregates": "2_years",
+      "monthly_reports": "5_years"
+    }
+  },
+  "reporting": {
+    "dashboards": {
+      "executive_summary": "Weekly high-level metrics",
+      "development_team": "Daily development and quality metrics",
+      "operations_team": "Real-time performance and reliability",
+      "security_team": "Security posture and vulnerability tracking"
+    },
+    "automated_reports": {
+      "daily_summary": {
+        "recipients": ["team@materials-lab.com"],
+        "format": "email",
+        "time": "09:00 UTC"
+      },
+      "weekly_detailed": {
+        "recipients": ["management@materials-lab.com"],
+        "format": "pdf",
+        "time": "monday_10:00 UTC"
+      },
+      "monthly_executive": {
+        "recipients": ["exec@materials-lab.com"],
+        "format": "presentation",
+        "time": "first_monday_14:00 UTC"
+      }
+    }
+  }
+}
