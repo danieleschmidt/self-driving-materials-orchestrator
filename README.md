@@ -30,24 +30,57 @@
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+- Python 3.9+ 
+- Docker & Docker Compose
+- MongoDB (local or cloud)
+- Git
+
 ### Installation
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/self-driving-materials-orchestrator.git
+git clone https://github.com/danieleschmidt/self-driving-materials-orchestrator.git
 cd self-driving-materials-orchestrator
 
-# Install core dependencies
+# Set up development environment (automated)
+./scripts/setup-dev.sh
+
+# Alternative: Manual setup
 pip install -r requirements.txt
+cp .env.example .env
+# Edit .env with your configuration
 
-# Install robot drivers (optional)
-pip install -e ".[robots]"
+# Start services with Docker Compose
+docker-compose up -d
 
-# Start MongoDB
-docker run -d -p 27017:27017 --name materials-db mongo:5.0
+# Initialize database
+mongo --eval "load('scripts/init-mongo.js')"
 
 # Launch orchestrator
 python -m materials_orchestrator.launch
+```
+
+### Development Workflow
+
+```bash
+# Run comprehensive tests
+pytest tests/ --cov=src/ --cov-report=html
+
+# Check code quality
+ruff check src/ tests/
+black src/ tests/
+mypy src/
+
+# Build production container
+docker build -f Dockerfile.production -t materials-orchestrator:latest .
+
+# Run health checks
+./scripts/repo-health-check.py
+
+# Validate integration
+./scripts/validate-integration.py
 ```
 
 ### Basic Autonomous Campaign
@@ -461,11 +494,35 @@ class MyCustomRobot(RobotDriver):
 
 Full documentation: [https://self-driving-materials.readthedocs.io](https://self-driving-materials.readthedocs.io)
 
+### Core Documentation
+- [Architecture Overview](ARCHITECTURE.md) - System design and components
+- [Project Charter](PROJECT_CHARTER.md) - Objectives and success criteria  
+- [Development Roadmap](docs/ROADMAP.md) - Feature roadmap and milestones
+- [Architecture Decision Records](docs/adr/) - Key architectural decisions
+
+### Operational Guides
+- [Setup & Installation](docs/setup/) - Complete setup instructions
+- [Deployment Guide](docs/deployment/) - Production deployment  
+- [Monitoring & Observability](docs/monitoring/) - System monitoring
+- [Troubleshooting](docs/troubleshooting/) - Common issues and solutions
+
+### Developer Documentation
+- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute
+- [API Reference](docs/api/) - Complete API documentation
+- [Testing Guide](docs/testing/) - Testing framework and practices
+- [Security Policy](SECURITY.md) - Security guidelines and reporting
+
 ### Tutorials
 - [Setting Up Your First Campaign](docs/tutorials/01_first_campaign.md)
 - [Robot Integration Guide](docs/tutorials/02_robot_integration.md)
 - [Bayesian Optimization Strategies](docs/tutorials/03_optimization.md)
 - [Scaling to Multiple Labs](docs/tutorials/04_scaling.md)
+
+### SDLC & Quality Assurance
+- [Integration Checklist](.github/INTEGRATION_CHECKLIST.md) - Deployment validation
+- [Health Monitoring](scripts/repo-health-check.py) - Repository health checks
+- [Metrics Dashboard](.github/project-metrics.json) - Project metrics tracking
+- [Automated Workflows](docs/workflows/) - CI/CD pipeline documentation
 
 ## 🤝 Contributing
 
