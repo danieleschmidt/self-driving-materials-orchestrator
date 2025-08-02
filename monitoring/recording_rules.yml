@@ -1,0 +1,303 @@
+# Prometheus Recording Rules for Materials Orchestrator
+# Pre-computed metrics for better dashboard performance
+
+groups:
+  # ===============================================
+  # APPLICATION PERFORMANCE RECORDING RULES
+  # ===============================================
+  
+  - name: materials_orchestrator.performance
+    interval: 30s
+    rules:
+      # Request rate by endpoint
+      - record: materials:request_rate_5m
+        expr: rate(http_requests_total[5m])
+        labels:
+          aggregation: "5m_rate"
+
+      # Error rate by endpoint
+      - record: materials:error_rate_5m
+        expr: rate(http_requests_total{status=~"4..|5.."}[5m]) / rate(http_requests_total[5m])
+        labels:
+          aggregation: "5m_rate"
+
+      # 95th percentile response time
+      - record: materials:response_time_p95_5m
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+        labels:
+          aggregation: "5m_p95"
+
+      # 99th percentile response time
+      - record: materials:response_time_p99_5m
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
+        labels:
+          aggregation: "5m_p99"
+
+      # API availability
+      - record: materials:api_availability_5m
+        expr: rate(http_requests_total{status!~"5.."}[5m]) / rate(http_requests_total[5m])
+        labels:
+          aggregation: "5m_rate"
+
+  # ===============================================
+  # EXPERIMENT AND CAMPAIGN METRICS
+  # ===============================================
+  
+  - name: materials_orchestrator.experiments
+    interval: 60s
+    rules:
+      # Experiment success rate
+      - record: materials:experiment_success_rate_1h
+        expr: rate(experiments_total{status="success"}[1h]) / rate(experiments_total[1h])
+        labels:
+          aggregation: "1h_rate"
+
+      # Daily experiment count
+      - record: materials:experiments_per_day
+        expr: increase(experiments_total[24h])
+        labels:
+          aggregation: "24h_increase"
+
+      # Average experiment duration
+      - record: materials:avg_experiment_duration_1h
+        expr: rate(experiment_duration_seconds_sum[1h]) / rate(experiment_duration_seconds_count[1h])
+        labels:
+          aggregation: "1h_avg"
+
+      # Campaign progress rate
+      - record: materials:campaign_progress_rate_1h
+        expr: rate(campaign_progress[1h])
+        labels:
+          aggregation: "1h_rate"
+
+      # Materials discovery rate
+      - record: materials:discovery_rate_24h
+        expr: increase(materials_discovered_total[24h])
+        labels:
+          aggregation: "24h_increase"
+
+      # Target achievement rate
+      - record: materials:target_achievement_rate_1h
+        expr: rate(target_achievements_total[1h])
+        labels:
+          aggregation: "1h_rate"
+
+  # ===============================================
+  # RESOURCE UTILIZATION METRICS
+  # ===============================================
+  
+  - name: materials_orchestrator.resources
+    interval: 30s
+    rules:
+      # CPU utilization across all containers
+      - record: materials:cpu_utilization_avg
+        expr: avg(rate(container_cpu_usage_seconds_total{name=~"materials-.*"}[5m])) * 100
+        labels:
+          aggregation: "5m_avg"
+
+      # Memory utilization across all containers
+      - record: materials:memory_utilization_avg
+        expr: avg(container_memory_usage_bytes{name=~"materials-.*"} / container_spec_memory_limit_bytes{name=~"materials-.*"}) * 100
+        labels:
+          aggregation: "current_avg"
+
+      # Disk I/O rate
+      - record: materials:disk_io_rate_5m
+        expr: rate(container_fs_reads_bytes_total{name=~"materials-.*"}[5m]) + rate(container_fs_writes_bytes_total{name=~"materials-.*"}[5m])
+        labels:
+          aggregation: "5m_rate"
+
+      # Network I/O rate
+      - record: materials:network_io_rate_5m
+        expr: rate(container_network_receive_bytes_total{name=~"materials-.*"}[5m]) + rate(container_network_transmit_bytes_total{name=~"materials-.*"}[5m])
+        labels:
+          aggregation: "5m_rate"
+
+  # ===============================================
+  # DATABASE PERFORMANCE METRICS
+  # ===============================================
+  
+  - name: materials_orchestrator.database
+    interval: 30s
+    rules:
+      # MongoDB operation rate
+      - record: materials:mongodb_ops_rate_5m
+        expr: rate(mongodb_operations_total[5m])
+        labels:
+          aggregation: "5m_rate"
+
+      # MongoDB average query time
+      - record: materials:mongodb_avg_query_time_5m
+        expr: rate(mongodb_query_duration_seconds_sum[5m]) / rate(mongodb_query_duration_seconds_count[5m])
+        labels:
+          aggregation: "5m_avg"
+
+      # MongoDB connection utilization
+      - record: materials:mongodb_connection_utilization
+        expr: mongodb_connections_current / mongodb_connections_max * 100
+        labels:
+          aggregation: "current"
+
+      # Redis hit rate
+      - record: materials:redis_hit_rate_5m
+        expr: rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))
+        labels:
+          aggregation: "5m_rate"
+
+  # ===============================================
+  # ROBOT AND INSTRUMENT METRICS
+  # ===============================================
+  
+  - name: materials_orchestrator.hardware
+    interval: 60s
+    rules:
+      # Robot utilization rate
+      - record: materials:robot_utilization_avg
+        expr: avg(robot_utilization_percent)
+        labels:
+          aggregation: "current_avg"
+
+      # Average queue length
+      - record: materials:avg_queue_length
+        expr: avg(instrument_queue_length)
+        labels:
+          aggregation: "current_avg"
+
+      # Robot availability percentage
+      - record: materials:robot_availability
+        expr: count(robot_status == 1) / count(robot_status) * 100
+        labels:
+          aggregation: "current"
+
+      # Instrument uptime percentage
+      - record: materials:instrument_uptime
+        expr: count(instrument_status == 1) / count(instrument_status) * 100
+        labels:
+          aggregation: "current"
+
+  # ===============================================
+  # BUSINESS METRICS
+  # ===============================================
+  
+  - name: materials_orchestrator.business
+    interval: 300s  # 5 minute intervals for business metrics
+    rules:
+      # Cost savings rate (daily)
+      - record: materials:cost_savings_rate_24h
+        expr: increase(cost_savings_total[24h])
+        labels:
+          aggregation: "24h_increase"
+
+      # Efficiency improvement factor
+      - record: materials:efficiency_factor_avg
+        expr: avg(efficiency_ratio)
+        labels:
+          aggregation: "current_avg"
+
+      # ROI for active campaigns
+      - record: materials:avg_campaign_roi
+        expr: avg(campaign_roi)
+        labels:
+          aggregation: "current_avg"
+
+      # Research velocity (experiments per researcher per day)
+      - record: materials:research_velocity_24h
+        expr: increase(experiments_total[24h]) / scalar(active_researchers)
+        labels:
+          aggregation: "24h_velocity"
+
+  # ===============================================
+  # OPTIMIZATION PERFORMANCE METRICS
+  # ===============================================
+  
+  - name: materials_orchestrator.optimization
+    interval: 120s
+    rules:
+      # Average convergence time
+      - record: materials:avg_convergence_time_24h
+        expr: avg_over_time(optimization_convergence_time_seconds[24h])
+        labels:
+          aggregation: "24h_avg"
+
+      # Optimization improvement rate
+      - record: materials:optimization_improvement_rate_1h
+        expr: rate(optimization_improvement_events_total[1h])
+        labels:
+          aggregation: "1h_rate"
+
+      # Parameter space exploration efficiency
+      - record: materials:exploration_efficiency_1h
+        expr: rate(parameter_space_coverage[1h])
+        labels:
+          aggregation: "1h_rate"
+
+      # Prediction accuracy (rolling 24h)
+      - record: materials:prediction_accuracy_24h
+        expr: avg_over_time(prediction_accuracy[24h])
+        labels:
+          aggregation: "24h_avg"
+
+  # ===============================================
+  # SECURITY AND COMPLIANCE METRICS
+  # ===============================================
+  
+  - name: materials_orchestrator.security
+    interval: 60s
+    rules:
+      # Failed authentication rate
+      - record: materials:failed_auth_rate_5m
+        expr: rate(failed_logins_total[5m])
+        labels:
+          aggregation: "5m_rate"
+
+      # Security event rate
+      - record: materials:security_events_rate_1h
+        expr: rate(security_events_total[1h])
+        labels:
+          aggregation: "1h_rate"
+
+      # Data access compliance score
+      - record: materials:compliance_score
+        expr: (authorized_access_total / (authorized_access_total + unauthorized_access_total)) * 100
+        labels:
+          aggregation: "current"
+
+  # ===============================================
+  # ALERTING SUPPORT METRICS
+  # ===============================================
+  
+  - name: materials_orchestrator.alerting
+    interval: 30s
+    rules:
+      # High-level service health
+      - record: materials:service_health
+        expr: |
+          (
+            materials:api_availability_5m > 0.99 and
+            materials:error_rate_5m < 0.01 and
+            materials:response_time_p95_5m < 2
+          )
+        labels:
+          aggregation: "health_check"
+
+      # Resource pressure indicator
+      - record: materials:resource_pressure
+        expr: |
+          (
+            materials:cpu_utilization_avg > 80 or
+            materials:memory_utilization_avg > 80 or
+            materials:mongodb_connection_utilization > 80
+          )
+        labels:
+          aggregation: "pressure_check"
+
+      # Experiment pipeline health
+      - record: materials:pipeline_health
+        expr: |
+          (
+            materials:experiment_success_rate_1h > 0.95 and
+            materials:robot_availability > 90 and
+            materials:avg_queue_length < 50
+          )
+        labels:
+          aggregation: "pipeline_check"

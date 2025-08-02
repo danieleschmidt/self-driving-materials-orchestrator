@@ -1,0 +1,213 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "Self-Driving Materials Orchestrator",
+    "description": "Autonomous laboratory platform for materials discovery",
+    "repository": "https://github.com/terragonlabs/self-driving-materials-orchestrator",
+    "last_updated": "2025-08-02T00:00:00Z"
+  },
+  "metrics": {
+    "development": {
+      "code_quality": {
+        "coverage_target": 80,
+        "coverage_current": 0,
+        "technical_debt_ratio": 0,
+        "code_duplication": 0,
+        "cyclomatic_complexity": 0,
+        "maintainability_index": 0
+      },
+      "repository_health": {
+        "open_issues": 0,
+        "open_prs": 0,
+        "avg_issue_close_time_days": 0,
+        "avg_pr_merge_time_days": 0,
+        "contributor_count": 1,
+        "commits_last_30_days": 0
+      },
+      "testing": {
+        "unit_test_count": 0,
+        "integration_test_count": 0,
+        "e2e_test_count": 0,
+        "test_execution_time_seconds": 0,
+        "flaky_test_count": 0,
+        "test_success_rate": 0
+      },
+      "security": {
+        "vulnerability_count": 0,
+        "critical_vulnerabilities": 0,
+        "high_vulnerabilities": 0,
+        "security_scan_frequency_days": 1,
+        "dependency_vulnerabilities": 0,
+        "last_security_scan": "2025-08-02T00:00:00Z"
+      }
+    },
+    "application": {
+      "performance": {
+        "api_response_time_p95_ms": 0,
+        "api_error_rate": 0,
+        "throughput_rps": 0,
+        "uptime_percentage": 0,
+        "memory_usage_mb": 0,
+        "cpu_usage_percentage": 0
+      },
+      "business": {
+        "experiments_per_day": 0,
+        "experiment_success_rate": 0,
+        "materials_discovered": 0,
+        "target_achievements": 0,
+        "campaigns_active": 0,
+        "campaigns_completed": 0,
+        "cost_savings_usd": 0,
+        "time_acceleration_factor": 0
+      },
+      "optimization": {
+        "avg_convergence_time_hours": 0,
+        "optimization_success_rate": 0,
+        "parameter_space_coverage": 0,
+        "prediction_accuracy": 0,
+        "bayesian_improvement_rate": 0
+      },
+      "hardware": {
+        "robot_utilization_percentage": 0,
+        "instrument_uptime_percentage": 0,
+        "queue_length_avg": 0,
+        "robot_error_rate": 0,
+        "maintenance_frequency_days": 0
+      }
+    },
+    "deployment": {
+      "reliability": {
+        "deployment_frequency": 0,
+        "deployment_success_rate": 0,
+        "mttr_minutes": 0,
+        "change_failure_rate": 0,
+        "rollback_count": 0
+      },
+      "infrastructure": {
+        "container_start_time_seconds": 0,
+        "container_restart_count": 0,
+        "resource_utilization": 0,
+        "scaling_events": 0,
+        "backup_success_rate": 0
+      }
+    },
+    "user_experience": {
+      "satisfaction": {
+        "user_satisfaction_score": 0,
+        "feature_adoption_rate": 0,
+        "user_retention_rate": 0,
+        "support_ticket_count": 0,
+        "documentation_views": 0
+      },
+      "usability": {
+        "task_completion_rate": 0,
+        "time_to_first_experiment": 0,
+        "dashboard_load_time_ms": 0,
+        "user_onboarding_time_days": 0
+      }
+    }
+  },
+  "goals": {
+    "short_term": {
+      "coverage_increase": {
+        "target": 90,
+        "timeframe": "Q2 2025",
+        "priority": "high"
+      },
+      "experiment_throughput": {
+        "target": 100,
+        "unit": "experiments_per_day",
+        "timeframe": "Q1 2025",
+        "priority": "high"
+      },
+      "response_time": {
+        "target": 500,
+        "unit": "milliseconds",
+        "timeframe": "Q1 2025",
+        "priority": "medium"
+      }
+    },
+    "long_term": {
+      "automation_level": {
+        "target": 95,
+        "unit": "percentage",
+        "timeframe": "2026",
+        "priority": "high"
+      },
+      "discovery_acceleration": {
+        "target": 10,
+        "unit": "times_faster",
+        "timeframe": "2026",
+        "priority": "high"
+      },
+      "cost_reduction": {
+        "target": 90,
+        "unit": "percentage",
+        "timeframe": "2026",
+        "priority": "medium"
+      }
+    }
+  },
+  "tracking": {
+    "automated_collection": {
+      "enabled": true,
+      "frequency": "daily",
+      "sources": [
+        "github_api",
+        "prometheus_metrics",
+        "application_logs",
+        "deployment_events"
+      ]
+    },
+    "reporting": {
+      "dashboard_url": "https://materials-orchestrator.com/metrics",
+      "report_frequency": "weekly",
+      "stakeholders": [
+        "development_team",
+        "product_owner",
+        "engineering_manager"
+      ]
+    },
+    "alerts": {
+      "coverage_below_threshold": {
+        "threshold": 75,
+        "notification": "slack",
+        "severity": "warning"
+      },
+      "critical_vulnerabilities": {
+        "threshold": 1,
+        "notification": "email",
+        "severity": "critical"
+      },
+      "deployment_failure": {
+        "threshold": 1,
+        "notification": "pagerduty",
+        "severity": "critical"
+      }
+    }
+  },
+  "benchmarks": {
+    "industry_standards": {
+      "code_coverage": 80,
+      "deployment_frequency": "daily",
+      "mttr": 60,
+      "change_failure_rate": 0.05
+    },
+    "internal_targets": {
+      "experiment_success_rate": 95,
+      "discovery_rate": "10x traditional",
+      "cost_efficiency": "90% reduction",
+      "uptime": 99.9
+    }
+  },
+  "history": [
+    {
+      "date": "2025-08-02",
+      "version": "1.0.0",
+      "changes": ["Initial metrics framework established"],
+      "coverage": 0,
+      "experiments_per_day": 0,
+      "deployment_frequency": 0
+    }
+  ]
+}

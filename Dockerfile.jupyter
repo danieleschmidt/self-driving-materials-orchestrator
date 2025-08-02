@@ -1,0 +1,73 @@
+# Jupyter Notebook Dockerfile for Materials Analysis
+FROM jupyter/scipy-notebook:latest
+
+# Switch to root to install system packages
+USER root
+
+# Install additional system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libffi-dev \
+    libssl-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch back to jovyan user
+USER jovyan
+
+# Set environment variables
+ENV PYTHONPATH=/home/jovyan/work/src
+
+# Copy requirements
+COPY pyproject.toml /tmp/
+
+# Install materials orchestrator in development mode
+RUN pip install --upgrade pip && \
+    pip install -e /tmp/[dev,docs] && \
+    pip install --no-cache-dir \
+        plotly \
+        dash \
+        seaborn \
+        scikit-learn \
+        pymongo \
+        ipywidgets \
+        jupyter-dash \
+        voila \
+        && pip cache purge
+
+# Install Jupyter extensions
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager plotlywidget
+
+# Create work directories
+RUN mkdir -p /home/jovyan/work/notebooks \
+             /home/jovyan/work/data \
+             /home/jovyan/work/exports \
+             /home/jovyan/work/analysis
+
+# Copy sample notebooks
+COPY --chown=jovyan:users notebooks/ /home/jovyan/work/notebooks/
+
+# Set working directory
+WORKDIR /home/jovyan/work
+
+# Configure Jupyter
+RUN echo "c.NotebookApp.token = 'materials-analysis'" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.open_browser = False" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.ip = '0.0.0.0'" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.port = 8888" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.allow_root = True" >> ~/.jupyter/jupyter_notebook_config.py
+
+# Create startup script for materials orchestrator
+RUN echo '#!/bin/bash\necho "Setting up Materials Orchestrator environment..."\nexport PYTHONPATH=/home/jovyan/work/src:$PYTHONPATH\necho "Environment ready! Access notebooks at http://localhost:8888"' > /usr/local/bin/setup-materials && \
+    chmod +x /usr/local/bin/setup-materials
+
+# Expose Jupyter port
+EXPOSE 8888
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8888 || exit 1
+
+# Start Jupyter Lab
+CMD ["start-notebook.sh", "--LabApp.token='materials-analysis'"]

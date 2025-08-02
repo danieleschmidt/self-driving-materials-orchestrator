@@ -1,0 +1,112 @@
+# Production Dockerfile for Self-Driving Materials Orchestrator
+# Multi-stage build for optimized production image
+
+# ===============================================
+# STAGE 1: Build Dependencies
+# ===============================================
+FROM python:3.11-slim as builder
+
+# Set build arguments
+ARG BUILD_DATE
+ARG VERSION
+ARG VCS_REF
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libffi-dev \
+    libssl-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Upgrade pip and install wheel
+RUN pip install --upgrade pip wheel setuptools
+
+# Copy requirements
+COPY pyproject.toml README.md LICENSE ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -e . && \
+    pip install --no-cache-dir gunicorn uvicorn[standard] && \
+    pip cache purge
+
+# ===============================================
+# STAGE 2: Runtime Image
+# ===============================================
+FROM python:3.11-slim as runtime
+
+# Set labels for metadata
+LABEL org.opencontainers.image.title="Self-Driving Materials Orchestrator"
+LABEL org.opencontainers.image.description="Autonomous laboratory platform for materials discovery"
+LABEL org.opencontainers.image.version=${VERSION}
+LABEL org.opencontainers.image.created=${BUILD_DATE}
+LABEL org.opencontainers.image.revision=${VCS_REF}
+LABEL org.opencontainers.image.vendor="Terragon Labs"
+LABEL org.opencontainers.image.licenses="MIT"
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/src \
+    PATH="/opt/venv/bin:$PATH" \
+    ENVIRONMENT=production \
+    LOG_LEVEL=INFO
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create non-root user with specific UID/GID for security
+RUN groupadd -g 1001 materials && \
+    useradd -r -u 1001 -g materials -s /bin/false materials
+
+# Copy virtual environment from builder stage
+COPY --from=builder /opt/venv /opt/venv
+
+# Set work directory
+WORKDIR /app
+
+# Copy source code with correct ownership
+COPY --chown=materials:materials src/ ./src/
+COPY --chown=materials:materials pyproject.toml ./
+
+# Create necessary directories with correct permissions
+RUN mkdir -p /app/data /app/logs /app/configs && \
+    chown -R materials:materials /app && \
+    chmod 755 /app/data /app/logs /app/configs
+
+# Create health check script
+RUN echo '#!/bin/bash\ncurl -f http://localhost:8000/health || exit 1' > /usr/local/bin/healthcheck && \
+    chmod +x /usr/local/bin/healthcheck
+
+# Switch to non-root user
+USER materials
+
+# Expose ports
+EXPOSE 8000 8501 9090
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD /usr/local/bin/healthcheck
+
+# Use gunicorn for production WSGI server
+CMD ["gunicorn", \
+     "--bind", "0.0.0.0:8000", \
+     "--workers", "4", \
+     "--worker-class", "uvicorn.workers.UvicornWorker", \
+     "--timeout", "300", \
+     "--keep-alive", "5", \
+     "--max-requests", "1000", \
+     "--max-requests-jitter", "100", \
+     "--preload", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-", \
+     "materials_orchestrator.api:app"]

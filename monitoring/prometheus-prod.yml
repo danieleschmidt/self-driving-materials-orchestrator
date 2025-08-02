@@ -1,0 +1,230 @@
+# Production Prometheus Configuration
+# Enhanced configuration for production monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'materials-orchestrator-prod'
+    environment: 'production'
+
+rule_files:
+  - "alert_rules.yml"
+  - "recording_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+      timeout: 10s
+      api_version: v2
+
+scrape_configs:
+  # ===============================================
+  # APPLICATION METRICS
+  # ===============================================
+  
+  # Materials Orchestrator main application
+  - job_name: 'materials-orchestrator'
+    static_configs:
+      - targets: ['materials-orchestrator:9090']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    honor_labels: true
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'materials-orchestrator'
+
+  # Materials Orchestrator API endpoints
+  - job_name: 'materials-api'
+    static_configs:
+      - targets: ['materials-orchestrator:8000']
+    metrics_path: '/api/v1/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Streamlit Dashboard metrics
+  - job_name: 'materials-dashboard'
+    static_configs:
+      - targets: ['materials-orchestrator:8501']
+    metrics_path: '/_stcore/metrics'
+    scrape_interval: 60s
+    scrape_timeout: 15s
+
+  # ===============================================
+  # INFRASTRUCTURE METRICS
+  # ===============================================
+
+  # Node Exporter for system metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '([^:]+):\d+'
+        target_label: instance
+        replacement: '${1}'
+
+  # cAdvisor for container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+    relabel_configs:
+      - source_labels: [__name__]
+        regex: 'container_.*'
+        target_label: __name__
+        replacement: '${1}'
+
+  # ===============================================
+  # DATABASE METRICS
+  # ===============================================
+
+  # MongoDB Exporter
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # PostgreSQL Exporter (for Grafana)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+
+  # ===============================================
+  # NETWORKING AND REVERSE PROXY
+  # ===============================================
+
+  # Nginx Exporter
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 30s
+
+  # ===============================================
+  # HARDWARE AND ROBOT METRICS
+  # ===============================================
+
+  # Robot Controller Metrics
+  - job_name: 'robot-controllers'
+    static_configs:
+      - targets: ['materials-orchestrator:8001']
+    metrics_path: '/robot-metrics'
+    scrape_interval: 60s
+    scrape_timeout: 30s
+    honor_labels: true
+
+  # Instrument Metrics
+  - job_name: 'instruments'
+    static_configs:
+      - targets: ['materials-orchestrator:8002']
+    metrics_path: '/instrument-metrics'
+    scrape_interval: 60s
+    scrape_timeout: 30s
+
+  # Environmental Monitoring (temperature, humidity, etc.)
+  - job_name: 'environmental'
+    static_configs:
+      - targets: ['environmental-sensors:8080']
+    scrape_interval: 120s
+    scrape_timeout: 30s
+
+  # ===============================================
+  # SECURITY MONITORING
+  # ===============================================
+
+  # Security Event Exporter
+  - job_name: 'security-events'
+    static_configs:
+      - targets: ['security-exporter:9200']
+    scrape_interval: 60s
+    metrics_path: '/security-metrics'
+
+  # ===============================================
+  # EXTERNAL MONITORING
+  # ===============================================
+
+  # Blackbox Exporter for endpoint monitoring
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - https://materials-orchestrator.local/health
+        - https://materials-orchestrator.local/api/v1/status
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # ===============================================
+  # PROMETHEUS FEDERATION
+  # ===============================================
+
+  # Federate from other Prometheus instances
+  - job_name: 'federate'
+    scrape_interval: 15s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job=~"materials-.*"}'
+        - '{__name__=~"up|job:.*"}'
+    static_configs:
+      - targets:
+        - prometheus-lab1:9090
+        - prometheus-lab2:9090
+
+  # ===============================================
+  # CUSTOM BUSINESS METRICS
+  # ===============================================
+
+  # Custom metrics from external systems
+  - job_name: 'custom-exporters'
+    static_configs:
+      - targets: ['custom-exporter:8080']
+    scrape_interval: 60s
+    metrics_path: '/custom-metrics'
+
+# Remote write configuration for long-term storage
+remote_write:
+  - url: "https://prometheus-remote-storage/api/v1/write"
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 200
+      capacity: 10000
+    basic_auth:
+      username: "prometheus"
+      password: "secure_password"
+
+# Remote read configuration
+remote_read:
+  - url: "https://prometheus-remote-storage/api/v1/read"
+    basic_auth:
+      username: "prometheus"
+      password: "secure_password"
+
+# Storage configuration
+storage:
+  tsdb:
+    retention.time: 30d
+    retention.size: 100GB
+    wal-compression: true
