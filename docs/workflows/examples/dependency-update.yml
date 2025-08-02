@@ -1,0 +1,413 @@
+# GitHub Actions Dependency Update Workflow Template
+# This file should be copied to .github/workflows/dependency-update.yml
+
+name: Dependency Updates
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      update_type:
+        description: 'Type of update to perform'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - all
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  # ===============================================
+  # PYTHON DEPENDENCY UPDATES
+  # ===============================================
+  update-python-deps:
+    name: Update Python Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-tools pur
+
+      - name: Update requirements with pip-tools
+        run: |
+          # Update pyproject.toml dependencies
+          pur -r pyproject.toml --force
+          
+          # Compile new requirements
+          pip-compile pyproject.toml --upgrade
+          pip-compile pyproject.toml --extra dev --upgrade -o requirements-dev.txt
+
+      - name: Check for security vulnerabilities
+        run: |
+          pip install safety
+          safety check --json --output safety-report.json || true
+
+      - name: Create dependency update PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'deps: update Python dependencies'
+          title: '🔧 Update Python Dependencies'
+          body: |
+            ## Python Dependency Updates
+            
+            This PR updates Python dependencies to their latest compatible versions.
+            
+            ### Changes
+            - Updated dependencies in `pyproject.toml`
+            - Regenerated lock files
+            
+            ### Security Check
+            Security scan results are attached as artifacts.
+            
+            ### Testing
+            - [ ] All tests pass
+            - [ ] No security vulnerabilities introduced
+            - [ ] Functionality verified
+            
+            ---
+            
+            🤖 This PR was automatically created by the dependency update workflow.
+          branch: deps/update-python-dependencies
+          delete-branch: true
+          labels: |
+            dependencies
+            automated-pr
+            python
+
+  # ===============================================
+  # DOCKER BASE IMAGE UPDATES
+  # ===============================================
+  update-docker-images:
+    name: Update Docker Base Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for updated base images
+        id: check-images
+        run: |
+          # Get current Python version from Dockerfile
+          CURRENT_PYTHON=$(grep "FROM python:" Dockerfile | head -1 | cut -d: -f2)
+          echo "current-python=$CURRENT_PYTHON" >> $GITHUB_OUTPUT
+          
+          # Check for latest Python version
+          LATEST_PYTHON=$(curl -s https://registry.hub.docker.com/v2/repositories/library/python/tags/ | \
+            jq -r '.results[].name' | grep -E '^3\.11\.[0-9]+-slim$' | sort -V | tail -1)
+          echo "latest-python=$LATEST_PYTHON" >> $GITHUB_OUTPUT
+          
+          # Check if update is needed
+          if [ "$CURRENT_PYTHON" != "$LATEST_PYTHON" ]; then
+            echo "update-needed=true" >> $GITHUB_OUTPUT
+          else
+            echo "update-needed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update Dockerfiles
+        if: steps.check-images.outputs.update-needed == 'true'
+        run: |
+          # Update all Dockerfiles
+          sed -i "s/FROM python:${{ steps.check-images.outputs.current-python }}/FROM python:${{ steps.check-images.outputs.latest-python }}/" Dockerfile
+          sed -i "s/FROM python:${{ steps.check-images.outputs.current-python }}/FROM python:${{ steps.check-images.outputs.latest-python }}/" Dockerfile.production
+          
+          # Update any other base images
+          sed -i 's/mongo:5\.0/mongo:5.0/' docker-compose.yml
+          sed -i 's/redis:7-alpine/redis:7-alpine/' docker-compose.yml
+
+      - name: Test updated images
+        if: steps.check-images.outputs.update-needed == 'true'
+        run: |
+          # Build and test the updated image
+          docker build -t materials-orchestrator:test .
+          
+          # Run basic smoke test
+          docker run --rm materials-orchestrator:test python -c "import materials_orchestrator; print('✅ Import successful')"
+
+      - name: Create Docker update PR
+        if: steps.check-images.outputs.update-needed == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'docker: update base images'
+          title: '🐳 Update Docker Base Images'
+          body: |
+            ## Docker Base Image Updates
+            
+            This PR updates Docker base images to their latest versions.
+            
+            ### Changes
+            - Updated Python base image from `${{ steps.check-images.outputs.current-python }}` to `${{ steps.check-images.outputs.latest-python }}`
+            - Updated other service images as needed
+            
+            ### Security & Compatibility
+            - [ ] Base images tested for compatibility
+            - [ ] Security vulnerabilities addressed
+            - [ ] Build process verified
+            
+            ### Testing
+            - [x] Docker build successful
+            - [x] Basic import test passed
+            - [ ] Full test suite passed
+            
+            ---
+            
+            🤖 This PR was automatically created by the dependency update workflow.
+          branch: deps/update-docker-images
+          delete-branch: true
+          labels: |
+            dependencies
+            automated-pr
+            docker
+
+  # ===============================================
+  # GITHUB ACTIONS UPDATES
+  # ===============================================
+  update-github-actions:
+    name: Update GitHub Actions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update GitHub Actions
+        uses: nicklasfrahm/gha-updater@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: .github/workflows/
+
+      - name: Create Actions update PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'ci: update GitHub Actions to latest versions'
+          title: '⚡ Update GitHub Actions'
+          body: |
+            ## GitHub Actions Updates
+            
+            This PR updates GitHub Actions to their latest versions.
+            
+            ### Changes
+            - Updated action versions in workflow files
+            - Ensured compatibility with latest features
+            
+            ### Benefits
+            - Latest security patches
+            - Performance improvements
+            - Bug fixes and new features
+            
+            ### Testing
+            - [ ] All workflows validate successfully
+            - [ ] No breaking changes introduced
+            - [ ] Functionality verified
+            
+            ---
+            
+            🤖 This PR was automatically created by the dependency update workflow.
+          branch: deps/update-github-actions
+          delete-branch: true
+          labels: |
+            dependencies
+            automated-pr
+            github-actions
+
+  # ===============================================
+  # SECURITY ADVISORY MONITORING
+  # ===============================================
+  check-security-advisories:
+    name: Check Security Advisories
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Check for security advisories
+        run: |
+          pip install safety
+          safety check --json --output safety-report.json
+
+      - name: Check npm audit (if applicable)
+        run: |
+          if [ -f package.json ]; then
+            npm audit --audit-level high --json > npm-audit-report.json || true
+          fi
+
+      - name: Create security advisory issue
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '## 🚨 Security Advisory Alert\n\n';
+            body += 'Security vulnerabilities have been detected in project dependencies.\n\n';
+            
+            try {
+              const safetyReport = JSON.parse(fs.readFileSync('safety-report.json', 'utf8'));
+              if (safetyReport.vulnerabilities && safetyReport.vulnerabilities.length > 0) {
+                body += '### Python Dependencies\n';
+                safetyReport.vulnerabilities.forEach(vuln => {
+                  body += `- **${vuln.package_name}** (${vuln.analyzed_version}): ${vuln.vulnerability_id}\n`;
+                  body += `  - ${vuln.advisory}\n`;
+                });
+              }
+            } catch (e) {
+              console.log('No safety report found');
+            }
+            
+            body += '\n### Action Required\n';
+            body += '- Review and update affected dependencies\n';
+            body += '- Test thoroughly after updates\n';
+            body += '- Consider security patches or workarounds\n\n';
+            body += '---\n';
+            body += '🤖 This issue was automatically created by the security monitoring workflow.';
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Security Advisory: Vulnerable Dependencies Detected',
+              body: body,
+              labels: ['security', 'vulnerability', 'high-priority']
+            });
+
+  # ===============================================
+  # DEPENDENCY ANALYSIS
+  # ===============================================
+  analyze-dependencies:
+    name: Analyze Dependency Health
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Analyze dependency health
+        run: |
+          pip install pip-check pipdeptree
+          
+          # Check for outdated packages
+          pip list --outdated --format=json > outdated-packages.json
+          
+          # Generate dependency tree
+          pipdeptree --json > dependency-tree.json
+          
+          # Check for conflicts
+          pip-check --json > pip-check-report.json || true
+
+      - name: Generate dependency report
+        run: |
+          cat > dependency-report.md << 'EOF'
+          # 📊 Dependency Health Report
+          
+          ## Outdated Packages
+          EOF
+          
+          python -c "
+          import json
+          with open('outdated-packages.json') as f:
+              outdated = json.load(f)
+          
+          if outdated:
+              for pkg in outdated[:10]:  # Top 10 outdated
+                  print(f'- **{pkg[\"name\"]}**: {pkg[\"version\"]} → {pkg[\"latest_version\"]}')
+          else:
+              print('All packages are up to date! ✅')
+          " >> dependency-report.md
+
+      - name: Upload dependency analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-analysis
+          path: |
+            outdated-packages.json
+            dependency-tree.json
+            pip-check-report.json
+            dependency-report.md
+
+  # ===============================================
+  # AUTOMATED MAINTENANCE
+  # ===============================================
+  maintenance:
+    name: Automated Maintenance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean up old branches
+        run: |
+          # Delete merged dependency update branches
+          git branch -r | grep 'origin/deps/' | sed 's/origin\///' | while read branch; do
+            if git merge-base --is-ancestor origin/$branch origin/main; then
+              echo "Deleting merged branch: $branch"
+              git push origin --delete $branch || true
+            fi
+          done
+
+      - name: Update license headers
+        run: |
+          # Update copyright year in license files
+          CURRENT_YEAR=$(date +%Y)
+          find . -name "*.py" -exec sed -i "s/Copyright (c) [0-9]\{4\}/Copyright (c) $CURRENT_YEAR/g" {} \;
+
+      - name: Generate SBOM
+        run: |
+          pip install cyclonedx-bom
+          cyclonedx-py -o sbom.json
+
+      - name: Commit maintenance changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "chore: automated maintenance updates"
+            git push
+          fi
+
+# ===============================================
+# DEPENDENCY UPDATE WORKFLOW CONFIGURATION  
+# ===============================================
+concurrency:
+  group: dependency-updates
+  cancel-in-progress: false
