@@ -1,0 +1,230 @@
+# Self-Driving Materials Orchestrator Docker Ignore
+
+# ===============================================
+# VERSION CONTROL
+# ===============================================
+.git
+.gitignore
+.gitattributes
+
+# ===============================================
+# PYTHON
+# ===============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ===============================================
+# VIRTUAL ENVIRONMENTS
+# ===============================================
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env/
+
+# ===============================================
+# TESTING AND COVERAGE
+# ===============================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.coverage.*
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# ===============================================
+# TYPE CHECKING AND LINTING
+# ===============================================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# ===============================================
+# JUPYTER NOTEBOOKS
+# ===============================================
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+*.ipynb
+
+# ===============================================
+# DOCUMENTATION
+# ===============================================
+docs/_build/
+site/
+.readthedocs.yml
+
+# ===============================================
+# IDE AND EDITORS
+# ===============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.spyderproject
+.spyproject
+.ropeproject
+
+# ===============================================
+# LOGS AND TEMPORARY FILES
+# ===============================================
+logs/
+*.log
+tmp/
+temp/
+.tmp/
+
+# ===============================================
+# DATABASE AND DATA
+# ===============================================
+data/
+backups/
+*.sqlite3
+*.db
+
+# ===============================================
+# CONFIGURATION FILES
+# ===============================================
+.env
+.env.local
+.env.production
+.env.staging
+config.local.json
+secrets.json
+
+# ===============================================
+# DOCKER
+# ===============================================
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+.docker/
+
+# ===============================================
+# CI/CD
+# ===============================================
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+Jenkinsfile
+
+# ===============================================
+# NODE.JS (for docs or frontend)
+# ===============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ===============================================
+# MONITORING AND METRICS
+# ===============================================
+prometheus_data/
+grafana_data/
+monitoring/data/
+
+# ===============================================
+# SECURITY
+# ===============================================
+*.pem
+*.key
+*.crt
+ssl/
+certificates/
+
+# ===============================================
+# BACKUP FILES
+# ===============================================
+*.bak
+*.backup
+*.orig
+
+# ===============================================
+# COMPRESSED FILES
+# ===============================================
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ===============================================
+# HARDWARE SPECIFIC
+# ===============================================
+hardware_configs/
+robot_calibrations/
+instrument_data/
+
+# ===============================================
+# DEVELOPMENT TOOLS
+# ===============================================
+.pre-commit-config.yaml
+.pre-commit-hooks.yaml
+Makefile
+tox.ini
+
+# ===============================================
+# BENCHMARKS AND PERFORMANCE
+# ===============================================
+benchmarks/
+performance_data/
+*.benchmark
+
+# ===============================================
+# SAMPLE AND EXAMPLE DATA
+# ===============================================
+examples/data/
+sample_data/
+test_data/
+
+# ===============================================
+# EXCLUDE SPECIFIC DIRECTORIES
+# ===============================================
+# Keep structure but exclude content
+data/*
+!data/.gitkeep
+logs/*
+!logs/.gitkeep
+configs/local/
+configs/production/
+
+# ===============================================
+# ALLOW ESSENTIAL FILES
+# ===============================================
+# Force include certain files that might be ignored
+!.gitkeep
+!requirements*.txt
+!pyproject.toml
+!setup.py
+!setup.cfg
+!MANIFEST.in
