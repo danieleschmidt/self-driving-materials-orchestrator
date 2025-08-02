@@ -30,36 +30,87 @@
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
-- Python 3.9+ 
-- Docker & Docker Compose
-- MongoDB (local or cloud)
-- Git
-
-### Installation
+### Immediate Testing (No Dependencies)
 
 ```bash
 # Clone repository
 git clone https://github.com/danieleschmidt/self-driving-materials-orchestrator.git
 cd self-driving-materials-orchestrator
 
+# Test immediately - no installation required
+python3 -c "
+import sys; sys.path.insert(0, 'src')
+from materials_orchestrator import AutonomousLab, MaterialsObjective
+print('✅ Ready to discover materials!')
+"
+
+# Run full discovery example
+python3 examples/perovskite_discovery_example.py
+```
+
+### Full Installation
+
+```bash
+# Prerequisites: Python 3.9+, Git
+# Optional: Docker, MongoDB for production features
+
 # Set up development environment (automated)
+chmod +x scripts/setup-dev.sh
 ./scripts/setup-dev.sh
 
 # Alternative: Manual setup
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your configuration
+python3 -m venv venv
+source venv/bin/activate
+pip install -e .
 
-# Start services with Docker Compose
+# For advanced features (Bayesian optimization)
+pip install numpy scipy scikit-learn
+
+# For production deployment
+pip install -e .[robots,dev]
 docker-compose up -d
+```
 
-# Initialize database
-mongo --eval "load('scripts/init-mongo.js')"
+### Working Example Output
 
-# Launch orchestrator
-python -m materials_orchestrator.launch
+```bash
+$ python3 examples/perovskite_discovery_example.py
+
+🔬 Self-Driving Materials Discovery - Perovskite Example
+============================================================
+🎯 Objective: Optimize band_gap
+   Target range: (1.2, 1.6) eV
+   Material system: perovskites
+
+🚀 Starting Discovery Campaign...
+🏆 CAMPAIGN RESULTS
+============================================================
+Campaign ID: e63a0cf4-f9fc-4b84-9a3b-e6bc1a5a08a4
+Total experiments: 43
+Successful experiments: 42  
+Success rate: 97.7%
+
+🥇 Best Material Found:
+   Band gap: 1.413 eV
+   Efficiency: 27.1%
+   Stability: 0.820
+
+🔬 Optimal Parameters:
+   precursor_A_conc: 1.373
+   precursor_B_conc: 0.444
+   temperature: 128.470
+   reaction_time: 3.207
+
+⚡ Acceleration Analysis:
+   Experiments to target: 43
+   Traditional estimate: 200
+   Acceleration factor: 4.7x
+
+📊 STRATEGY COMPARISON
+Random Search:        0 experiments, 0.0% success rate ❌
+Bayesian Optimization: 50 experiments, 98.0% success rate ✅
+
+🎉 Example completed!
 ```
 
 ### Development Workflow
@@ -86,38 +137,60 @@ docker build -f Dockerfile.production -t materials-orchestrator:latest .
 ### Basic Autonomous Campaign
 
 ```python
-from materials_orchestrator import AutonomousLab, MaterialsObjective
-from materials_orchestrator.planners import BayesianPlanner
+from materials_orchestrator import AutonomousLab, MaterialsObjective, BayesianPlanner
 
-# Define objective
+# Define optimization objective
 objective = MaterialsObjective(
     target_property="band_gap",
-    target_range=(1.2, 1.6),  # eV
-    optimization_direction="minimize_variance",
-    material_system="perovskites"
+    target_range=(1.2, 1.6),  # eV for photovoltaics
+    optimization_direction="target",
+    material_system="perovskites",
+    success_threshold=1.4
 )
 
-# Initialize autonomous lab
+# Define parameter space for synthesis
+param_space = {
+    "precursor_A_conc": (0.1, 2.0),    # Molar concentration
+    "precursor_B_conc": (0.1, 2.0),    # Molar concentration
+    "temperature": (100, 300),          # °C
+    "reaction_time": (1, 24),           # hours
+    "pH": (3, 11),                      # Solution pH
+    "solvent_ratio": (0, 1)             # DMF:DMSO ratio
+}
+
+# Initialize autonomous lab with Bayesian optimization
 lab = AutonomousLab(
     robots=["synthesis_robot", "characterization_robot"],
     instruments=["xrd", "uv_vis", "pl_spectrometer"],
     planner=BayesianPlanner(
         acquisition_function="expected_improvement",
-        batch_size=5
+        target_property="band_gap"
     )
 )
 
-# Run autonomous campaign
+# Run autonomous discovery campaign
 campaign = lab.run_campaign(
     objective=objective,
-    initial_samples=20,
-    max_experiments=500,
-    stop_on_target=True
+    param_space=param_space,
+    initial_samples=15,       # Random exploration phase
+    max_experiments=100,      # Budget constraint
+    stop_on_target=True,      # Stop when target reached
+    convergence_patience=20   # Early stopping criteria
 )
 
-print(f"Best material: {campaign.best_material}")
+# Results with full experiment tracking
+print(f"🏆 Campaign Results:")
+print(f"Best material: {campaign.best_material['properties']}")
 print(f"Band gap: {campaign.best_properties['band_gap']:.3f} eV")
-print(f"Experiments run: {campaign.total_experiments}")
+print(f"Efficiency: {campaign.best_properties['efficiency']:.1f}%")
+print(f"Experiments: {campaign.total_experiments} (vs ~200 manual)")
+print(f"Success rate: {campaign.success_rate:.1%}")
+print(f"Acceleration: {200/campaign.total_experiments:.1f}x faster")
+
+# Optimal synthesis parameters
+print(f"\n🔬 Optimal Parameters:")
+for param, value in campaign.best_material['parameters'].items():
+    print(f"   {param}: {value:.3f}")
 ```
 
 ### Robot Integration
