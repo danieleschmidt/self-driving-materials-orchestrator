@@ -13,11 +13,29 @@
 
 ## ✨ Key Features
 
-- **Bayesian Experiment Planner**: Intelligent selection of next experiments based on uncertainty
-- **Robotic Control API**: Unified interface for lab automation (Opentrons, Chemspeed, custom)
-- **Real-Time Analysis**: On-the-fly data processing and decision making
-- **MongoDB Result Vault**: Comprehensive experiment tracking and provenance
-- **Streamlit Dashboard**: Live monitoring of discoveries and material properties
+### 🧠 Intelligent Discovery
+- **ML-Accelerated Optimization**: Property prediction and intelligent experiment planning
+- **Multi-Strategy Planning**: Bayesian, uncertainty sampling, diversity exploration
+- **Adaptive Caching**: Learning from access patterns for optimal performance
+- **Auto-Scaling**: Dynamic resource allocation based on workload
+
+### 🔬 Laboratory Integration  
+- **Universal Robot Support**: Opentrons, Chemspeed, ROS2, and custom platforms
+- **Safety Systems**: Comprehensive validation, error handling, and emergency stops
+- **Real-Time Monitoring**: Live experiment tracking and health diagnostics
+- **Concurrent Execution**: Parallel experiment processing with load balancing
+
+### 🛡️ Production Ready
+- **Enterprise Security**: Authentication, authorization, and audit logging
+- **Comprehensive Monitoring**: Prometheus metrics, Grafana dashboards, alerting
+- **Data Validation**: Quality assurance with statistical outlier detection
+- **Fault Tolerance**: Circuit breakers, retry logic, graceful degradation
+
+### 📊 Analytics & Insights
+- **Real-Time Dashboard**: Live experiment monitoring and control interface
+- **Performance Analytics**: Acceleration metrics and strategy comparison
+- **Data Management**: MongoDB with full experiment provenance
+- **Export & Reporting**: Comprehensive campaign reports and data export
 
 ## 🎯 Applications
 
@@ -128,10 +146,33 @@ mypy src/
 docker build -f Dockerfile.production -t materials-orchestrator:latest .
 
 # Run health checks
-./scripts/repo-health-check.py
+python3 scripts/automation/repo-health-check.py
 
 # Validate integration
-./scripts/validate-integration.py
+python3 scripts/validate-integration.py
+
+# Test CLI commands
+materials-orchestrator --help
+materials-orchestrator run-campaign --help
+materials-orchestrator dashboard
+```
+
+### Production Deployment
+
+```bash
+# Quick production deployment
+./scripts/deploy.sh
+
+# Manual deployment
+cp .env.production .env
+# Edit .env with your configuration
+docker-compose -f docker-compose.production.yml up -d
+
+# Access services
+# Main API: http://localhost:8000
+# Dashboard: http://localhost:8501  
+# Monitoring: http://localhost:9090 (Prometheus)
+# Analytics: http://localhost:3000 (Grafana)
 ```
 
 ### Basic Autonomous Campaign

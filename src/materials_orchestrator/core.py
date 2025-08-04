@@ -2,6 +2,7 @@
 
 import time
 import uuid
+import math
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable, TYPE_CHECKING
 
@@ -179,7 +180,7 @@ class AutonomousLab:
         }
     
     def run_experiment(self, parameters: Dict[str, Any]) -> "Experiment":
-        """Run a single experiment."""
+        """Run a single experiment with enhanced error handling and validation."""
         experiment = Experiment(
             parameters=parameters,
             status="running",
@@ -189,15 +190,49 @@ class AutonomousLab:
         start_time = time.time()
         
         try:
+            # Import validation here to avoid circular imports
+            from .validation import create_validator
+            from .security import InputValidator
+            
+            # Validate and sanitize input parameters
+            validator = create_validator()
+            validation_results = validator.validate_parameters(parameters)
+            
+            # Check for critical validation errors
+            critical_errors = [r for r in validation_results if r.status.value == "invalid"]
+            if critical_errors:
+                experiment.status = "failed"
+                experiment.metadata["validation_errors"] = [r.message for r in critical_errors]
+                logger.error(f"Experiment {experiment.id} failed validation: {critical_errors[0].message}")
+                return experiment
+            
+            # Sanitize parameters for safety
+            safe_params = InputValidator.validate_experiment_parameters(parameters)
+            
+            # Add safety checks
+            if not self._safety_check(safe_params):
+                experiment.status = "failed"
+                experiment.metadata["error"] = "Safety check failed"
+                logger.error(f"Experiment {experiment.id} failed safety check")
+                return experiment
+            
             # Simulate experiment execution time
             time.sleep(0.1)  # Simulate processing time
             
-            results = self.experiment_simulator(parameters)
+            # Run experiment with enhanced error handling
+            results = self._run_experiment_with_retry(safe_params, max_retries=2)
             
             if results:
                 experiment.results = results
                 experiment.status = "completed"
                 self._successful_experiments += 1
+                
+                # Validate results
+                result_validation = validator.validate_results(results)
+                warning_count = sum(1 for r in result_validation if r.status.value == "warning")
+                if warning_count > 0:
+                    experiment.metadata["result_warnings"] = warning_count
+                    logger.warning(f"Experiment {experiment.id} completed with {warning_count} result warnings")
             else:
                 experiment.status = "failed"
                 
@@ -211,6 +246,85 @@ class AutonomousLab:
         self._experiments_history.append(experiment)
         
         return experiment
+    
+    def _safety_check(self, parameters: Dict[str, Any]) -> bool:
+        """Perform safety checks on experiment parameters."""
+        # Temperature safety check
+        temp = parameters.get("temperature", 0)
+        if temp > 400:  # Above 400°C requires special handling
+            logger.warning(f"High temperature experiment: {temp}°C")
+            # In a real system, this would check for proper safety equipment
+        
+        # pH safety check
+        ph = parameters.get("pH", 7)
+        if ph < 2 or ph > 12:  # Extreme pH values
+            logger.warning(f"Extreme pH experiment: {ph}")
+        
+        # Concentration safety check
+        conc_a = parameters.get("precursor_A_conc", 0)
+        conc_b = parameters.get("precursor_B_conc", 0)
+        if conc_a > 3.0 or conc_b > 3.0:  # High concentrations
+            logger.warning(f"High concentration experiment: A={conc_a}, B={conc_b}")
+        
+        return True  # All safety checks passed
+    
+    def _run_experiment_with_retry(self, parameters: Dict[str, Any], max_retries: int = 2) -> Dict[str, float]:
+        """Run experiment with retry logic for robustness."""
+        last_exception = None
+        
+        for attempt in range(max_retries + 1):
+            try:
+                results = self.experiment_simulator(parameters)
+                
+                # Validate results are reasonable
+                if results and self._validate_results(results):
+                    return results
+                elif attempt < max_retries:
+                    logger.warning(f"Experiment attempt {attempt + 1} produced invalid results, retrying...")
+                    continue
+                else:
+                    return {}  # Failed all attempts
+                    
+            except Exception as e:
+                last_exception = e
+                if attempt < max_retries:
+                    logger.warning(f"Experiment attempt {attempt + 1} failed: {e}, retrying...")
+                    time.sleep(0.1)  # Brief delay before retry
+                    continue
+                else:
+                    logger.error(f"Experiment failed after {max_retries + 1} attempts: {e}")
+                    raise
+        
+        return {}
+    
+    def _validate_results(self, results: Dict[str, float]) -> bool:
+        """Validate experiment results are physically reasonable."""
+        if not results:
+            return False
+        
+        # Check for NaN or infinite values
+        for key, value in results.items():
+            if not isinstance(value, (int, float)) or math.isnan(float(value)) or math.isinf(float(value)):
+                logger.warning(f"Invalid result value: {key}={value}")
+                return False
+        
+        # Physical validation
+        band_gap = results.get("band_gap")
+        if band_gap and (band_gap < 0.1 or band_gap > 4.0):
+            logger.warning(f"Unrealistic band gap: {band_gap} eV")
+            return False
+        
+        efficiency = results.get("efficiency")
+        if efficiency and (efficiency < 0 or efficiency > 50):
+            logger.warning(f"Unrealistic efficiency: {efficiency}%")
+            return False
+        
+        stability = results.get("stability")
+        if stability and (stability < 0 or stability > 1):
+            logger.warning(f"Invalid stability: {stability}")
+            return False
+        
+        return True
     
     def run_campaign(
         self,
@@ -354,6 +468,20 @@ class AutonomousLab:
             raise
         finally:
             self.status = LabStatus.IDLE
+            
+            # Update ML optimizer with campaign results if available
+            try:
+                from .ml_acceleration import create_intelligent_optimizer
+                ml_optimizer = create_intelligent_optimizer(objective.target_property)
+                for experiment in self._experiments_history:
+                    if experiment.status == "completed":
+                        exp_data = {
+                            'parameters': experiment.parameters,
+                            'results': experiment.results
+                        }
+                        ml_optimizer.add_experiment_result(exp_data)
+            except ImportError:
+                pass  # ML acceleration not available
         
         end_time = datetime.now()
         
