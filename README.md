@@ -612,7 +612,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ```bibtex
 @article{self_driving_materials_orchestrator,
   title={Self-Driving Materials Discovery: An Autonomous Laboratory Platform},
-  author={Your Name},
+  author={Daniel Schmidt},
   journal={Nature Materials},
   year={2025},
   doi={10.1038/s41563-025-xxxxx}
