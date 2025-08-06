@@ -1,0 +1,370 @@
+# Production Kubernetes deployment for Materials Orchestrator
+# Multi-region ready with auto-scaling and high availability
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: materials-orchestrator
+  labels:
+    name: materials-orchestrator
+    environment: production
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: materials-orchestrator-api
+  namespace: materials-orchestrator
+  labels:
+    app: materials-orchestrator
+    component: api
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: materials-orchestrator
+      component: api
+  template:
+    metadata:
+      labels:
+        app: materials-orchestrator
+        component: api
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "9090"
+    spec:
+      serviceAccountName: materials-orchestrator
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: materials-orchestrator
+        image: materials-orchestrator:v1.0.0
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        - name: dashboard
+          containerPort: 8501
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        env:
+        - name: MATERIALS_ORCHESTRATOR_ENV
+          value: "production"
+        - name: MATERIALS_ORCHESTRATOR_CONFIG
+          value: "/app/config/production.yaml"
+        - name: MONGODB_URL
+          valueFrom:
+            secretKeyRef:
+              name: materials-orchestrator-secrets
+              key: mongodb-url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: materials-orchestrator-secrets
+              key: redis-url
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: data
+          mountPath: /app/data
+        - name: cache
+          mountPath: /app/cache
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: config
+        configMap:
+          name: materials-orchestrator-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: materials-orchestrator-data
+      - name: cache
+        emptyDir:
+          sizeLimit: "1Gi"
+      - name: logs
+        emptyDir:
+          sizeLimit: "500Mi"
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      tolerations:
+      - key: "materials-orchestrator"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: materials-orchestrator-api
+  namespace: materials-orchestrator
+  labels:
+    app: materials-orchestrator
+    component: api
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
+    protocol: TCP
+  - name: dashboard
+    port: 8501
+    targetPort: dashboard
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+    protocol: TCP
+  selector:
+    app: materials-orchestrator
+    component: api
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: materials-orchestrator-hpa
+  namespace: materials-orchestrator
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: materials-orchestrator-api
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: materials-orchestrator-data
+  namespace: materials-orchestrator
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: fast-ssd
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: materials-orchestrator
+  namespace: materials-orchestrator
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: materials-orchestrator
+  name: materials-orchestrator-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: materials-orchestrator-binding
+  namespace: materials-orchestrator
+subjects:
+- kind: ServiceAccount
+  name: materials-orchestrator
+  namespace: materials-orchestrator
+roleRef:
+  kind: Role
+  name: materials-orchestrator-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: materials-orchestrator-config
+  namespace: materials-orchestrator
+data:
+  production.yaml: |
+    environment: production
+    debug: false
+    
+    # Database configuration
+    database:
+      type: mongodb
+      connection_timeout: 10
+      max_pool_size: 50
+      retry_writes: true
+    
+    # Cache configuration
+    cache:
+      type: redis
+      ttl_seconds: 3600
+      max_memory_mb: 1000
+    
+    # Security configuration
+    security:
+      enable_audit_logging: true
+      rate_limit_requests_per_minute: 1000
+      max_experiments_per_campaign: 100000
+      validate_chemical_formulas: true
+    
+    # Performance configuration
+    performance:
+      max_workers: 16
+      enable_concurrent_processing: true
+      enable_caching: true
+      use_processes: false
+    
+    # Monitoring configuration
+    monitoring:
+      enable_metrics: true
+      metrics_port: 9090
+      enable_health_checks: true
+      health_check_interval: 30
+    
+    # Logging configuration
+    logging:
+      level: INFO
+      format: json
+      enable_structured_logging: true
+    
+    # Internationalization
+    i18n:
+      default_locale: en
+      supported_locales: [en, es, fr, de, ja, zh]
+      enable_auto_detection: true
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: materials-orchestrator-ingress
+  namespace: materials-orchestrator
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "1000"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  tls:
+  - hosts:
+    - materials.example.com
+    - dashboard.materials.example.com
+    secretName: materials-orchestrator-tls
+  rules:
+  - host: materials.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: materials-orchestrator-api
+            port:
+              number: 8000
+  - host: dashboard.materials.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: materials-orchestrator-api
+            port:
+              number: 8501
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: materials-orchestrator-pdb
+  namespace: materials-orchestrator
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: materials-orchestrator
+      component: api
