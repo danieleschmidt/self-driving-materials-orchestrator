@@ -1,0 +1,25 @@
+{
+  "environment": "production",
+  "cache": {
+    "max_size": 50000,
+    "default_ttl": 7200
+  },
+  "concurrency": {
+    "max_workers": 4,
+    "queue_size": 5000
+  },
+  "security": {
+    "rate_limiting": true,
+    "input_validation": true,
+    "audit_logging": true
+  },
+  "monitoring": {
+    "health_checks": true,
+    "performance_metrics": true,
+    "alert_on_errors": true
+  },
+  "services": {
+    "api_port": 8000,
+    "dashboard_port": 8501
+  }
+}

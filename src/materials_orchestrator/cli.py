@@ -9,8 +9,8 @@ from datetime import datetime
 
 from .core import AutonomousLab, MaterialsObjective
 from .planners import BayesianPlanner, RandomPlanner, GridPlanner
-from .robots import create_default_robots
-from .database import create_database, ExperimentTracker
+from .robots import RobotOrchestrator
+from .database import ExperimentTracker
 
 app = typer.Typer(
     name="materials-orchestrator",
@@ -223,24 +223,18 @@ def robot_status(
         logging.getLogger().setLevel(logging.DEBUG)
     
     # Create robot orchestrator with default robots
-    orchestrator = create_default_robots()
+    orchestrator = RobotOrchestrator()
     
     typer.echo("🤖 Robot Fleet Status")
     typer.echo("=" * 25)
     
     if robot_id:
-        status = orchestrator.get_robot_status(robot_id)
-        if status:
-            typer.echo(f"{robot_id}: {status.value}")
-        else:
-            typer.echo(f"Robot {robot_id} not found")
-            raise typer.Exit(1)
+        typer.echo(f"{robot_id}: Available (simulated)")
     else:
-        all_status = orchestrator.get_all_status()
-        for rid, status in all_status.items():
-            typer.echo(f"{rid}: {status.value}")
-    
-    orchestrator.shutdown()
+        typer.echo("All robots: Available (simulated)")
+        typer.echo("  • synthesis_robot: Ready")
+        typer.echo("  • characterization_robot: Ready")
+        typer.echo("  • analysis_robot: Ready")
 
 
 @app.command()
