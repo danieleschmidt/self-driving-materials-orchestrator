@@ -1,0 +1,26 @@
+{
+  "deployment": {
+    "timestamp": "2025-08-08T19:59:43.047744",
+    "environment": "production",
+    "python_version": "3.12",
+    "repository": "/root/repo"
+  },
+  "services": {
+    "api": {
+      "port": 8000,
+      "script": "start_api_simple.sh",
+      "url": "http://localhost:8000"
+    },
+    "dashboard": {
+      "port": 8501,
+      "script": "start_dashboard_simple.sh",
+      "url": "http://localhost:8501"
+    }
+  },
+  "management": {
+    "start_all": "./start_production.sh",
+    "stop_all": "pkill -f 'Materials Orchestrator'",
+    "view_logs": "tail -f /tmp/materials-*.log",
+    "health_check": "curl http://localhost:8000/health"
+  }
+}

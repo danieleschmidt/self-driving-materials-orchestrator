@@ -9,13 +9,13 @@ __email__ = "daniel@terragonlabs.com"
 
 from .core import AutonomousLab, MaterialsObjective, Experiment, CampaignResult
 from .planners import BayesianPlanner, RandomPlanner, GridPlanner
-from .robots import RobotOrchestrator, SimulatedRobot, create_default_robots
-from .database import ExperimentTracker, create_database
-from .monitoring import HealthMonitor, create_health_monitor
-from .security import SecurityManager, create_security_manager
-from .validation import ExperimentValidator, create_validator
-from .optimization import AdaptiveCache, ConcurrentExecutor, get_global_cache, get_global_executor
-from .ml_acceleration import IntelligentOptimizer, PropertyPredictor, create_intelligent_optimizer
+from .robots import RobotOrchestrator, SimulatedDriver as SimulatedRobot
+from .database import ExperimentTracker
+from .monitoring import HealthMonitor
+from .security import SecurityManager
+from .validation import ExperimentValidator
+from .optimization import AdaptiveCache, ConcurrentExecutor
+from .ml_acceleration import IntelligentOptimizer, PropertyPredictor
 
 # Optional dashboard import (requires streamlit)
 try:
@@ -35,25 +35,58 @@ __all__ = [
     "GridPlanner",
     "RobotOrchestrator",
     "SimulatedRobot", 
-    "create_default_robots",
     "ExperimentTracker",
-    "create_database",
-    "HealthMonitor",
-    "create_health_monitor",
+    "HealthMonitor", 
     "SecurityManager",
-    "create_security_manager",
     "ExperimentValidator",
-    "create_validator",
     "AdaptiveCache",
     "ConcurrentExecutor",
-    "get_global_cache",
-    "get_global_executor",
     "IntelligentOptimizer",
     "PropertyPredictor",
-    "create_intelligent_optimizer",
     "DASHBOARD_AVAILABLE",
+    "create_database",
+    "create_health_monitor", 
+    "create_security_manager",
+    "create_validator",
+    "create_intelligent_optimizer",
+    "get_global_cache",
+    "get_global_executor",
+    "create_default_robots",
 ]
 
 # Add LabDashboard to __all__ if available
 if DASHBOARD_AVAILABLE:
     __all__.append("LabDashboard")
+
+# Factory functions for convenience
+def create_database(url: str = "mongodb://localhost:27017/") -> ExperimentTracker:
+    """Create experiment database tracker."""
+    return ExperimentTracker(connection_string=url)
+
+def create_health_monitor() -> HealthMonitor:
+    """Create health monitor instance."""
+    return HealthMonitor()
+
+def create_security_manager() -> SecurityManager:
+    """Create security manager instance.""" 
+    return SecurityManager()
+
+def create_validator() -> ExperimentValidator:
+    """Create experiment validator instance."""
+    return ExperimentValidator()
+
+def create_intelligent_optimizer(target_property: str) -> IntelligentOptimizer:
+    """Create intelligent optimizer instance."""
+    return IntelligentOptimizer(target_property=target_property)
+
+def get_global_cache() -> AdaptiveCache:
+    """Get global adaptive cache instance."""
+    return AdaptiveCache()
+
+def get_global_executor() -> ConcurrentExecutor:
+    """Get global concurrent executor instance."""
+    return ConcurrentExecutor()
+
+def create_default_robots() -> list:
+    """Create default robot configuration."""
+    return [SimulatedRobot()]

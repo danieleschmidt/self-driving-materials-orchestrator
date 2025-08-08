@@ -81,6 +81,7 @@ class AutonomousLab:
         planner: Optional[Any] = None,
         database_url: str = "mongodb://localhost:27017/",
         experiment_simulator: Optional[Callable] = None,
+        enable_monitoring: bool = True,
     ):
         """Initialize autonomous laboratory.
         
@@ -90,6 +91,7 @@ class AutonomousLab:
             planner: Experiment planning algorithm
             database_url: MongoDB connection string
             experiment_simulator: Function to simulate experiments
+            enable_monitoring: Enable health monitoring
         """
         self.robots = robots or []
         self.instruments = instruments or []
@@ -101,6 +103,98 @@ class AutonomousLab:
         self._successful_experiments = 0
         self._best_material: Optional[Dict[str, Any]] = None
         self._experiments_history: List[Experiment] = []
+        
+        # Initialize enhanced monitoring and security
+        if enable_monitoring:
+            self._setup_monitoring()
+        
+        # Initialize performance optimization
+        self._setup_performance_optimization()
+        
+        logger.info(f"Autonomous lab initialized with {len(self.robots)} robots and {len(self.instruments)} instruments")
+    
+    def _setup_monitoring(self):
+        """Setup health monitoring and security systems."""
+        try:
+            from .health_monitoring import get_global_health_monitor
+            
+            self.health_monitor = get_global_health_monitor()
+            
+            # Register custom health checks for this lab
+            self.health_monitor.register_health_check(
+                f"lab_{id(self)}_experiments",
+                self._check_lab_health,
+                self.health_monitor.ComponentType.CORE  # Access enum through instance
+            )
+            
+            # Start monitoring if not already running
+            if not self.health_monitor.monitoring_active:
+                self.health_monitor.start_monitoring()
+                
+            logger.info("Health monitoring enabled for laboratory")
+            
+        except ImportError as e:
+            logger.warning(f"Health monitoring not available: {e}")
+    
+    def _check_lab_health(self):
+        """Custom health check for this laboratory instance."""
+        from .health_monitoring import ComponentHealth, HealthStatus, HealthMetric, ComponentType
+        
+        metrics = []
+        
+        # Check experiment success rate
+        success_rate = self.success_rate
+        if success_rate < 0.5:
+            status = HealthStatus.CRITICAL
+        elif success_rate < 0.8:
+            status = HealthStatus.WARNING  
+        else:
+            status = HealthStatus.HEALTHY
+        
+        metrics.append(HealthMetric(
+            name="experiment_success_rate",
+            value=success_rate,
+            unit="fraction",
+            status=status
+        ))
+        
+        # Check recent experiment count
+        metrics.append(HealthMetric(
+            name="total_experiments",
+            value=self.total_experiments,
+            unit="count",
+            status=HealthStatus.HEALTHY
+        ))
+        
+        # Overall lab status
+        overall_status = HealthStatus.HEALTHY
+        if self.status == LabStatus.ERROR:
+            overall_status = HealthStatus.CRITICAL
+        elif self.status == LabStatus.PAUSED:
+            overall_status = HealthStatus.WARNING
+        
+        return ComponentHealth(
+            name=f"lab_{id(self)}",
+            component_type=ComponentType.CORE,
+            status=overall_status,
+            metrics=metrics
+        )
+    
+    def _setup_performance_optimization(self):
+        """Setup performance optimization systems."""
+        try:
+            from .performance_optimizer import get_global_performance_optimizer
+            
+            self.performance_optimizer = get_global_performance_optimizer()
+            
+            # Start performance monitoring
+            self.performance_optimizer.start_performance_monitoring()
+            
+            logger.info("Performance optimization enabled for laboratory")
+            
+        except ImportError as e:
+            logger.warning(f"Performance optimization not available: {e}")
+            self.performance_optimizer = None
         
     @property
     def total_experiments(self) -> int:
@@ -192,7 +286,22 @@ class AutonomousLab:
         try:
             # Import validation here to avoid circular imports
             from .validation import create_validator
-            from .security import InputValidator
+            from .security_enhanced import get_global_security_manager
+            from .error_recovery import get_global_resilient_executor
+            
+            # Enhanced security validation
+            security_manager = get_global_security_manager()
+            is_valid, error_msg = security_manager.validate_request(
+                {"parameters": parameters}, 
+                f"lab_{id(self)}", 
+                "run_experiment"
+            )
+            
+            if not is_valid:
+                experiment.status = "failed"
+                experiment.metadata["security_error"] = error_msg
+                logger.error(f"Experiment {experiment.id} failed security validation: {error_msg}")
+                return experiment
             
             # Validate and sanitize input parameters
             validator = create_validator()
@@ -207,7 +316,7 @@ class AutonomousLab:
                 return experiment
             
             # Sanitize parameters for safety
-            safe_params = InputValidator.validate_experiment_parameters(parameters)
+            safe_params = security_manager.input_validator.sanitize_parameters(parameters)
             
             # Add safety checks
             if not self._safety_check(safe_params):
@@ -219,8 +328,18 @@ class AutonomousLab:
             # Simulate experiment execution time
             time.sleep(0.1)  # Simulate processing time
             
-            # Run experiment with enhanced error handling
-            results = self._run_experiment_with_retry(safe_params, max_retries=2)
+            # Run experiment with enhanced error handling using resilient executor
+            resilient_executor = get_global_resilient_executor()
+            results, success = resilient_executor.execute_with_recovery(
+                self.experiment_simulator,
+                safe_params,
+                operation_name="experiment_simulation",
+                context={"experiment_id": experiment.id, "parameters": safe_params}
+            )
+            
+            # Fallback to retry mechanism if resilient executor fails
+            if not success:
+                results = self._run_experiment_with_retry(safe_params, max_retries=2)
             
             if results:
                 experiment.results = results
@@ -334,6 +453,7 @@ class AutonomousLab:
         max_experiments: int = 500,
         stop_on_target: bool = True,
         convergence_patience: int = 50,
+        concurrent_experiments: int = 1,
     ) -> "CampaignResult":
         """Run autonomous discovery campaign.
         
@@ -344,6 +464,7 @@ class AutonomousLab:
             max_experiments: Maximum experiments to run
             stop_on_target: Stop when target is reached
             convergence_patience: Stop if no improvement for N experiments
+            concurrent_experiments: Number of experiments to run concurrently
             
         Returns:
             Campaign results summary
@@ -372,10 +493,21 @@ class AutonomousLab:
                 initial_samples, param_space, []
             )
             
-            for params in initial_params:
-                experiment = self.run_experiment(params)
-                
-                if experiment.status == "completed":
+            # Run initial experiments with concurrency
+            if concurrent_experiments > 1 and hasattr(self, 'performance_optimizer') and self.performance_optimizer:
+                # Concurrent execution using performance optimizer
+                experiment_tasks = [(self.run_experiment, (params,), {}) for params in initial_params]
+                experiments = self.performance_optimizer.concurrent_execute(
+                    experiment_tasks, 
+                    max_concurrent=min(concurrent_experiments, len(initial_params))
+                )
+            else:
+                # Sequential execution
+                experiments = [self.run_experiment(params) for params in initial_params]
+            
+            # Process experiment results
+            for experiment in experiments:
+                if experiment and experiment.status == "completed":
                     property_value = experiment.results.get(objective.target_property)
                     if property_value is not None:
                         fitness = objective.calculate_fitness(property_value)
@@ -420,12 +552,30 @@ class AutonomousLab:
                         current_results
                     )
                     
-                    # Run suggested experiments
-                    for params in suggestions:
-                        if self._experiments_run >= max_experiments:
-                            break
-                            
-                        experiment = self.run_experiment(params)
+                    # Run suggested experiments with concurrency
+                    if concurrent_experiments > 1 and hasattr(self, 'performance_optimizer') and self.performance_optimizer:
+                        # Concurrent execution
+                        batch_size = min(concurrent_experiments, len(suggestions), max_experiments - self._experiments_run)
+                        batch_suggestions = suggestions[:batch_size]
+                        experiment_tasks = [(self.run_experiment, (params,), {}) for params in batch_suggestions]
+                        batch_experiments = self.performance_optimizer.concurrent_execute(
+                            experiment_tasks,
+                            max_concurrent=batch_size
+                        )
+                        experiments_to_process = batch_experiments
+                    else:
+                        # Sequential execution
+                        experiments_to_process = []
+                        for params in suggestions:
+                            if self._experiments_run >= max_experiments:
+                                break
+                            experiment = self.run_experiment(params)
+                            experiments_to_process.append(experiment)
+                    
+                    # Process batch of experiments
+                    for experiment in experiments_to_process:
+                        if not experiment:
+                            continue
                         
                         if experiment.status == "completed":
                             property_value = experiment.results.get(objective.target_property)

@@ -56,29 +56,41 @@ class ExperimentValidator:
                     "type": "float",
                     "range": (0.01, 5.0),
                     "units": "M",
-                    "required": True
+                    "required": False  # Made optional for flexible parameter spaces
                 },
                 "precursor_B_conc": {
                     "type": "float",
                     "range": (0.01, 5.0),
-                    "units": "M",
-                    "required": True
+                    "units": "M", 
+                    "required": False
                 },
                 "temperature": {
                     "type": "float",
-                    "range": (20, 500),
+                    "range": (20, 1000),  # Expanded range for flexibility
                     "units": "°C",
-                    "required": True
+                    "required": False
                 },
                 "reaction_time": {
                     "type": "float",
-                    "range": (0.1, 48),
+                    "range": (0.1, 168),  # Expanded to 1 week
                     "units": "hours",
-                    "required": True
+                    "required": False
+                },
+                "time": {  # Alternative naming
+                    "type": "float",
+                    "range": (0.1, 168),
+                    "units": "hours",
+                    "required": False
+                },
+                "concentration": {  # Alternative naming
+                    "type": "float",
+                    "range": (0.01, 10.0),
+                    "units": "M",
+                    "required": False
                 },
                 "pH": {
                     "type": "float",
-                    "range": (1, 14),
+                    "range": (0, 15),  # Expanded range
                     "units": "pH",
                     "required": False
                 },
