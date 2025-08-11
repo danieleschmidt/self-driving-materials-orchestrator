@@ -10,11 +10,13 @@ __email__ = "daniel@terragonlabs.com"
 from .core import AutonomousLab, MaterialsObjective, Experiment, CampaignResult
 from .planners import BayesianPlanner, RandomPlanner, GridPlanner
 from .robots import RobotOrchestrator, SimulatedDriver as SimulatedRobot
-from .database import ExperimentTracker
+from .database import ExperimentTracker, ExperimentDatabase
 from .monitoring import HealthMonitor
 from .security import SecurityManager
 from .validation import ExperimentValidator
 from .optimization import AdaptiveCache, ConcurrentExecutor
+from .scaling_optimizer import PerformanceOptimizer, get_global_optimizer
+from .caching_system import ExperimentResultCache, get_global_experiment_cache
 from .ml_acceleration import IntelligentOptimizer, PropertyPredictor
 
 # Optional dashboard import (requires streamlit)
@@ -36,6 +38,7 @@ __all__ = [
     "RobotOrchestrator",
     "SimulatedRobot", 
     "ExperimentTracker",
+    "ExperimentDatabase",
     "HealthMonitor", 
     "SecurityManager",
     "ExperimentValidator",
@@ -43,6 +46,10 @@ __all__ = [
     "ConcurrentExecutor",
     "IntelligentOptimizer",
     "PropertyPredictor",
+    "PerformanceOptimizer",
+    "ExperimentResultCache",
+    "get_global_optimizer",
+    "get_global_experiment_cache",
     "DASHBOARD_AVAILABLE",
     "create_database",
     "create_health_monitor", 

@@ -121,10 +121,11 @@ class AutonomousLab:
             self.health_monitor = get_global_health_monitor()
             
             # Register custom health checks for this lab
+            from .health_monitoring import ComponentType
             self.health_monitor.register_health_check(
                 f"lab_{id(self)}_experiments",
                 self._check_lab_health,
-                self.health_monitor.ComponentType.CORE  # Access enum through instance
+                ComponentType.CORE
             )
             
             # Start monitoring if not already running
@@ -653,6 +654,23 @@ class AutonomousLab:
                    f"{self.success_rate:.1%} success rate")
         
         return campaign_result
+
+
+    def _validate_experiment_parameters(self, parameters: Dict[str, float]) -> bool:
+        """Validate experiment parameters."""
+        from .error_handling import ValidationError
+        
+        for key, value in parameters.items():
+            if not isinstance(value, (int, float)):
+                raise ValidationError(f"Parameter {key} must be numeric, got {type(value)}")
+            
+            if key == "temperature" and value < 0:
+                raise ValidationError(f"Temperature cannot be negative: {value}")
+            
+            if key == "concentration" and (value < 0 or value > 10):
+                raise ValidationError(f"Concentration must be between 0 and 10: {value}")
+        
+        return True
 
 
 @dataclass
