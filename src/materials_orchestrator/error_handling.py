@@ -12,6 +12,22 @@ import json
 logger = logging.getLogger(__name__)
 
 
+# Custom exception classes
+class MaterialsBaseError(Exception):
+    """Base exception for materials orchestrator."""
+    pass
+
+
+class ExperimentError(MaterialsBaseError):
+    """Exception for experiment-related errors."""
+    pass
+
+
+class ValidationError(MaterialsBaseError):
+    """Exception for validation-related errors."""
+    pass
+
+
 class ErrorSeverity(Enum):
     """Error severity levels."""
     LOW = "low"

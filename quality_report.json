@@ -1,0 +1,101 @@
+{
+  "timestamp": "2025-08-11 13:02:12.894538",
+  "overall_score": 69.23283538098784,
+  "passed": false,
+  "results": [
+    {
+      "name": "Test Coverage & Success",
+      "passed": false,
+      "score": 0.0,
+      "details": {
+        "coverage_percent": 0.0,
+        "test_success_rate": 0,
+        "total_tests": 0,
+        "failed_tests": 0,
+        "coverage_threshold": 85.0,
+        "success_rate_threshold": 95.0
+      },
+      "duration": 5.12277889251709,
+      "error": ""
+    },
+    {
+      "name": "Security Analysis",
+      "passed": true,
+      "score": 100.0,
+      "details": {
+        "issues_found": 0,
+        "issues": [],
+        "files_scanned": 34,
+        "threshold": 90.0
+      },
+      "duration": 0.016640424728393555,
+      "error": ""
+    },
+    {
+      "name": "Performance Benchmarks",
+      "passed": true,
+      "score": 100.0,
+      "details": {
+        "import_time_seconds": 1.7804553508758545,
+        "functionality_time_seconds": 3.962878465652466,
+        "performance_score": 100.0,
+        "threshold": 80.0,
+        "test_successful": true
+      },
+      "duration": 5.743344783782959,
+      "error": ""
+    },
+    {
+      "name": "Code Quality Analysis",
+      "passed": false,
+      "score": 66.33423306031273,
+      "details": {
+        "total_files": 34,
+        "total_lines": 15275,
+        "total_functions": 572,
+        "total_classes": 139,
+        "avg_file_size": 449.2647058823529,
+        "complexity_score": 75.07352941176471,
+        "docstring_score": 57.59493670886076,
+        "threshold": 85.0
+      },
+      "duration": 0.010874032974243164,
+      "error": ""
+    },
+    {
+      "name": "Documentation Analysis",
+      "passed": true,
+      "score": 92.82700421940928,
+      "details": {
+        "doc_files_count": 33,
+        "docstring_coverage": 85.65400843881856,
+        "documented_items": 609,
+        "total_items": 711,
+        "threshold": 70.0
+      },
+      "duration": 0.008968353271484375,
+      "error": ""
+    },
+    {
+      "name": "Integration Tests",
+      "passed": true,
+      "score": 100.0,
+      "details": {
+        "total_tests": 3,
+        "failed_tests": 0,
+        "success_rate": 100.0,
+        "return_code": 0
+      },
+      "duration": 3.2423593997955322,
+      "error": ""
+    }
+  ],
+  "summary": {
+    "total_gates": 6,
+    "passed_gates": 4,
+    "failed_gates": 2,
+    "success_rate": 66.66666666666666,
+    "total_duration": 14.146038293838501,
+    "avg_gate_duration": 2.3576730489730835
+  }
+}

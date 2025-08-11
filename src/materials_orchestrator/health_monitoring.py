@@ -5,7 +5,7 @@ import time
 import threading
 import json
 import psutil  # Will use fallback if not available
-from typing import Dict, List, Any, Optional, Callable
+from typing import Dict, List, Any, Optional, Callable, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum

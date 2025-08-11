@@ -67,8 +67,14 @@ class TestAutonomousLab:
             target_range=(1.2, 1.6)
         )
         
+        param_space = {
+            "temperature": (100, 300),
+            "concentration": (0.1, 2.0)
+        }
+        
         result = lab.run_campaign(
             objective=objective,
+            param_space=param_space,
             max_experiments=10
         )
         

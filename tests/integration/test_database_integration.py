@@ -32,8 +32,13 @@ class TestDatabaseIntegration:
             material_system="perovskites"
         )
         
+        param_space = {
+            "temperature": (100, 300),
+            "concentration": (0.1, 2.0)
+        }
+        
         lab = AutonomousLab()
-        campaign = lab.run_campaign(objective, initial_samples=5, max_experiments=10)
+        campaign = lab.run_campaign(objective, param_space, initial_samples=5, max_experiments=10)
         
         # Verify campaign results structure
         assert hasattr(campaign, 'best_material')
