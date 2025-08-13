@@ -455,6 +455,7 @@ class AutonomousLab:
         stop_on_target: bool = True,
         convergence_patience: int = 50,
         concurrent_experiments: int = 1,
+        enable_autonomous_reasoning: bool = True,
     ) -> "CampaignResult":
         """Run autonomous discovery campaign.
         
@@ -466,6 +467,7 @@ class AutonomousLab:
             stop_on_target: Stop when target is reached
             convergence_patience: Stop if no improvement for N experiments
             concurrent_experiments: Number of experiments to run concurrently
+            enable_autonomous_reasoning: Enable autonomous decision making
             
         Returns:
             Campaign results summary
@@ -483,6 +485,16 @@ class AutonomousLab:
         self._experiments_run = 0
         self._successful_experiments = 0
         self._experiments_history = []
+        
+        # Initialize autonomous reasoning if enabled
+        autonomous_reasoner = None
+        if enable_autonomous_reasoning:
+            try:
+                from .autonomous_reasoning import get_global_reasoner, ReasoningContext
+                autonomous_reasoner = get_global_reasoner()
+                logger.info("Autonomous reasoning enabled for campaign")
+            except ImportError:
+                logger.warning("Autonomous reasoning not available")
         
         try:
             # Phase 1: Initial random sampling
@@ -606,6 +618,32 @@ class AutonomousLab:
                                     "current_value": property_value,
                                 })
                     
+                    # Autonomous reasoning checkpoint
+                    if autonomous_reasoner and self._experiments_run % 10 == 0:
+                        reasoning_context = ReasoningContext(
+                            current_state={
+                                'experiments_run': self._experiments_run,
+                                'success_rate': self.success_rate,
+                                'best_fitness': best_fitness,
+                                'no_improvement_count': no_improvement_count
+                            },
+                            experiment_history=self._experiments_history,
+                            objective=objective
+                        )
+                        
+                        decision = autonomous_reasoner.make_decision(reasoning_context)
+                        if decision:
+                            logger.info(f"Autonomous decision: {decision.description}")
+                            
+                            # Execute autonomous decisions
+                            if decision.decision_type.value == "early_stopping":
+                                logger.info("Autonomous early stopping decision made")
+                                break
+                            elif decision.decision_type.value == "parameter_adjustment":
+                                # Could adjust convergence patience or other parameters
+                                if 'convergence_patience' in decision.parameters:
+                                    convergence_patience = decision.parameters['convergence_patience']
+                    
                     # Check convergence
                     if no_improvement_count >= convergence_patience:
                         logger.info(f"Converged after {convergence_patience} experiments without improvement")
@@ -649,6 +687,31 @@ class AutonomousLab:
             start_time=start_time,
             end_time=end_time,
         )
+        
+        # Generate advanced analytics if available
+        try:
+            from .advanced_analytics import get_global_analyzer
+            analyzer = get_global_analyzer()
+            analytics = analyzer.analyze_campaign(campaign_result)
+            insights = analyzer.generate_insights_report(analytics)
+            
+            # Log key insights
+            if insights['performance_summary']['overall_rating']:
+                logger.info(f"Campaign rating: {insights['performance_summary']['overall_rating']}")
+            
+            # Store analytics in campaign result metadata
+            if hasattr(campaign_result, 'metadata'):
+                campaign_result.metadata.update({
+                    'analytics': analytics,
+                    'insights': insights
+                })
+            else:
+                # Add metadata field if not exists
+                campaign_result.analytics = analytics
+                campaign_result.insights = insights
+                
+        except ImportError:
+            logger.warning("Advanced analytics not available")
         
         logger.info(f"Campaign completed: {self._experiments_run} experiments, "
                    f"{self.success_rate:.1%} success rate")
