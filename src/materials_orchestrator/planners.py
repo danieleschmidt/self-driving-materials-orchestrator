@@ -6,16 +6,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-try:
-    import numpy as np
-    NUMPY_AVAILABLE = True
-except ImportError:
-    logger.warning("numpy not available, using fallback implementations")
-    NUMPY_AVAILABLE = False
+from .utils import np, NUMPY_AVAILABLE
 
+from .utils import GaussianProcessRegressor, Matern, RBF, SKLEARN_AVAILABLE
 try:
-    from sklearn.gaussian_process import GaussianProcessRegressor
-    from sklearn.gaussian_process.kernels import Matern, RBF, ConstantKernel
+    from sklearn.gaussian_process.kernels import ConstantKernel
     from scipy.optimize import minimize
     from scipy.stats import norm
     SKLEARN_AVAILABLE = True

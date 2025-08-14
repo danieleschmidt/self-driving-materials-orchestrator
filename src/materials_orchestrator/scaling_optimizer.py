@@ -9,7 +9,7 @@ import time
 import logging
 from dataclasses import dataclass, field
 from queue import Queue, PriorityQueue
-import numpy as np
+from .utils import np, NUMPY_AVAILABLE
 from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)

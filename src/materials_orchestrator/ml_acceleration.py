@@ -8,12 +8,7 @@ import json
 import time
 from pathlib import Path
 
-try:
-    import numpy as np
-    NUMPY_AVAILABLE = True
-except ImportError:
-    np = None
-    NUMPY_AVAILABLE = False
+from .utils import np, NUMPY_AVAILABLE
 
 try:
     from sklearn.ensemble import RandomForestRegressor
