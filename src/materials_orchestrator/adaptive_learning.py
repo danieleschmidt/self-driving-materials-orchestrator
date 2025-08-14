@@ -1,7 +1,7 @@
 """Adaptive learning system for continuous improvement of materials discovery."""
 
 import logging
-import numpy as np
+from .utils import np, NUMPY_AVAILABLE
 from typing import Dict, List, Any, Optional, Tuple, Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta

@@ -1,5 +1,5 @@
 {
-  "campaign_id": "9ec02321-a64a-4091-a2a3-6f4fef582d66",
+  "campaign_id": "a92f4ec0-dc3f-4385-bb48-f7e65e83ccda",
   "objective": {
     "target_property": "band_gap",
     "target_range": [
@@ -13,26 +13,26 @@
     "successful_experiments": 39,
     "success_rate": 0.975,
     "best_properties": {
-      "band_gap": 1.475,
-      "efficiency": 23.77,
-      "stability": 0.807
+      "band_gap": 1.407,
+      "efficiency": 25.05,
+      "stability": 0.957
     },
     "acceleration_factor": 5.0
   },
   "best_material": {
     "parameters": {
-      "precursor_A_conc": 1.4836147153977333,
-      "precursor_B_conc": 0.15816567715457427,
-      "temperature": 134.17606256327736,
-      "reaction_time": 20.113885389060407,
-      "pH": 8.551439416274185,
-      "solvent_ratio": 0.8372894148752327
+      "precursor_A_conc": 0.27599025978481984,
+      "precursor_B_conc": 0.372073585231811,
+      "temperature": 213.8218238778085,
+      "reaction_time": 1.6723040203591824,
+      "pH": 9.098765509937252,
+      "solvent_ratio": 0.464931518052918
     },
     "properties": {
-      "band_gap": 1.475,
-      "efficiency": 23.77,
-      "stability": 0.807
+      "band_gap": 1.407,
+      "efficiency": 25.05,
+      "stability": 0.957
     },
-    "experiment_id": "dcd12479-988d-4771-9152-8e6b30386b5b"
+    "experiment_id": "da20cb3f-7b08-4e43-aedc-ee20d4670b4a"
   }
 }

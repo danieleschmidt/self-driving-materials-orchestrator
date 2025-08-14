@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import logging
 import json
-import numpy as np
+from .utils import np, NUMPY_AVAILABLE
 
 logger = logging.getLogger(__name__)
 
