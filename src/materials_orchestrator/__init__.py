@@ -18,6 +18,14 @@ from .optimization import AdaptiveCache, ConcurrentExecutor
 from .scaling_optimizer import PerformanceOptimizer, get_global_optimizer
 from .caching_system import ExperimentResultCache, get_global_experiment_cache
 from .ml_acceleration import IntelligentOptimizer, PropertyPredictor
+from .pipeline_guard import SelfHealingPipelineGuard, get_pipeline_guard, PipelineStatus, FailureType
+from .intelligent_failover import IntelligentFailoverManager, get_failover_manager, ComponentType, FailoverStrategy
+from .robust_error_handling import RobustErrorHandler, get_global_error_handler, ErrorSeverity, ErrorCategory, with_error_handling
+from .advanced_monitoring import AdvancedMonitoringSystem, get_monitoring_system, MetricType, AlertSeverity
+from .quantum_enhanced_pipeline_guard import DistributedQuantumPipelineGuard, get_quantum_pipeline_guard, QuantumConfiguration, PipelineOptimizationProblem
+from .distributed_self_healing import GlobalCoordinationLayer, get_global_coordination_layer, GlobalRegion, NodeStatus
+from .global_compliance import GlobalComplianceManager, get_compliance_manager, InternationalizationManager, get_i18n_manager, ComplianceRegulation, t
+from .multi_region_deployment import MultiRegionDeploymentManager, get_deployment_manager, DeploymentRegion, RegionStatus
 
 # Optional dashboard import (requires streamlit)
 try:
@@ -50,6 +58,41 @@ __all__ = [
     "ExperimentResultCache",
     "get_global_optimizer",
     "get_global_experiment_cache",
+    "SelfHealingPipelineGuard",
+    "get_pipeline_guard",
+    "PipelineStatus",
+    "FailureType",
+    "IntelligentFailoverManager",
+    "get_failover_manager",
+    "ComponentType",
+    "FailoverStrategy",
+    "RobustErrorHandler",
+    "get_global_error_handler",
+    "ErrorSeverity",
+    "ErrorCategory",
+    "with_error_handling",
+    "AdvancedMonitoringSystem",
+    "get_monitoring_system",
+    "MetricType",
+    "AlertSeverity",
+    "DistributedQuantumPipelineGuard",
+    "get_quantum_pipeline_guard",
+    "QuantumConfiguration",
+    "PipelineOptimizationProblem",
+    "GlobalCoordinationLayer",
+    "get_global_coordination_layer",
+    "GlobalRegion",
+    "NodeStatus",
+    "GlobalComplianceManager",
+    "get_compliance_manager",
+    "InternationalizationManager",
+    "get_i18n_manager",
+    "ComplianceRegulation",
+    "t",
+    "MultiRegionDeploymentManager",
+    "get_deployment_manager",
+    "DeploymentRegion",
+    "RegionStatus",
     "DASHBOARD_AVAILABLE",
     "create_database",
     "create_health_monitor", 
