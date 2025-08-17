@@ -170,7 +170,10 @@ class AutoScaler:
         if (average_load < self.scale_down_threshold and 
             queue_length == 0 and 
             current_workers > self.min_workers):
-            scale_down_reasons.append(f"load ({average_load:.2f}) < threshold ({self.scale_down_threshold})")\n        
+            scale_down_reasons.append(
+                f"load ({average_load:.2f}) < threshold ({self.scale_down_threshold})"
+            )
+        
         if (average_response_time < 5.0 and 
             queue_length == 0 and 
             current_workers > self.min_workers):
