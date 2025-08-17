@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-08-14 12:26:57.864845",
-  "overall_score": 68.86761363636364,
+  "timestamp": "2025-08-17 00:05:51.026076",
+  "overall_score": 68.28783749616917,
   "passed": false,
   "results": [
     {
@@ -15,7 +15,7 @@
         "coverage_threshold": 85.0,
         "success_rate_threshold": 95.0
       },
-      "duration": 0.031691789627075195,
+      "duration": 8.697930574417114,
       "error": ""
     },
     {
@@ -25,10 +25,10 @@
       "details": {
         "issues_found": 0,
         "issues": [],
-        "files_scanned": 44,
+        "files_scanned": 52,
         "threshold": 90.0
       },
-      "duration": 0.013923168182373047,
+      "duration": 0.3090035915374756,
       "error": ""
     },
     {
@@ -36,66 +36,66 @@
       "passed": true,
       "score": 100.0,
       "details": {
-        "import_time_seconds": 0.20371508598327637,
-        "functionality_time_seconds": 2.235820770263672,
+        "import_time_seconds": 2.696345567703247,
+        "functionality_time_seconds": 4.810511350631714,
         "performance_score": 100.0,
         "threshold": 80.0,
         "test_successful": true
       },
-      "duration": 2.4395461082458496,
+      "duration": 7.506868839263916,
       "error": ""
     },
     {
       "name": "Code Quality Analysis",
       "passed": false,
-      "score": 63.38409090909091,
+      "score": 59.92688476861784,
       "details": {
-        "total_files": 44,
-        "total_lines": 21926,
-        "total_functions": 808,
-        "total_classes": 192,
-        "avg_file_size": 498.3181818181818,
-        "complexity_score": 70.16818181818182,
-        "docstring_score": 56.599999999999994,
+        "total_files": 52,
+        "total_lines": 30986,
+        "total_functions": 994,
+        "total_classes": 261,
+        "avg_file_size": 595.8846153846154,
+        "complexity_score": 60.41153846153846,
+        "docstring_score": 59.442231075697215,
         "threshold": 85.0
       },
-      "duration": 0.015024185180664062,
+      "duration": 0.019463777542114258,
       "error": ""
     },
     {
       "name": "Documentation Analysis",
       "passed": true,
-      "score": 93.6,
+      "score": 92.98804780876495,
       "details": {
-        "doc_files_count": 35,
-        "docstring_coverage": 87.2,
-        "documented_items": 872,
-        "total_items": 1000,
+        "doc_files_count": 38,
+        "docstring_coverage": 85.97609561752988,
+        "documented_items": 1079,
+        "total_items": 1255,
         "threshold": 70.0
       },
-      "duration": 0.012071609497070312,
+      "duration": 0.015373468399047852,
       "error": ""
     },
     {
       "name": "Integration Tests",
-      "passed": false,
-      "score": 100,
+      "passed": true,
+      "score": 100.0,
       "details": {
-        "total_tests": 0,
+        "total_tests": 3,
         "failed_tests": 0,
-        "success_rate": 100,
-        "return_code": 1
+        "success_rate": 100.0,
+        "return_code": 0
       },
-      "duration": 0.031884193420410156,
+      "duration": 4.295299768447876,
       "error": ""
     }
   ],
   "summary": {
     "total_gates": 6,
-    "passed_gates": 3,
-    "failed_gates": 3,
-    "success_rate": 50.0,
-    "total_duration": 2.545152187347412,
-    "avg_gate_duration": 0.42419203122456867
+    "passed_gates": 4,
+    "failed_gates": 2,
+    "success_rate": 66.66666666666666,
+    "total_duration": 20.844997882843018,
+    "avg_gate_duration": 3.4741663138071694
   }
 }

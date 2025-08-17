@@ -6,7 +6,7 @@ from .utils import load_campaign_data, format_duration
 
 __all__ = [
     "create_dashboard_app",
-    "CampaignMonitor", 
+    "CampaignMonitor",
     "RobotStatus",
     "ExperimentViewer",
     "load_campaign_data",

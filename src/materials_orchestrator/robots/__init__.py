@@ -7,11 +7,11 @@ from .protocols import SynthesisProtocol, CharacterizationProtocol
 
 __all__ = [
     "RobotOrchestrator",
-    "RobotDriver", 
+    "RobotDriver",
     "RobotStatus",
     "ActionResult",
     "SimulatedDriver",
-    "OpentronsDriver", 
+    "OpentronsDriver",
     "ChemspeedDriver",
     "SynthesisProtocol",
     "CharacterizationProtocol",

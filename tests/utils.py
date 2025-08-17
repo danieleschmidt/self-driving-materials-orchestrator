@@ -12,7 +12,7 @@ import pytest
 
 class MockRobot:
     """Mock robot for testing without hardware."""
-    
+
     def __init__(self, robot_id: str = "test_robot", capabilities: list = None):
         self.robot_id = robot_id
         self.capabilities = capabilities or ["pipetting", "dispensing"]
@@ -20,32 +20,29 @@ class MockRobot:
         self.connected = True
         self.protocols_executed = []
         self.current_protocol = None
-        
+
     def connect(self) -> bool:
         """Mock connection."""
         self.connected = True
         return True
-        
+
     def disconnect(self) -> bool:
-        """Mock disconnection.""" 
+        """Mock disconnection."""
         self.connected = False
         return True
-        
+
     def execute_protocol(self, protocol: Dict[str, Any]) -> Dict[str, Any]:
         """Mock protocol execution."""
         self.current_protocol = protocol
         self.protocols_executed.append(protocol)
-        
+
         # Simulate execution time
         import time
+
         time.sleep(0.1)  # Very short for testing
-        
-        return {
-            "status": "completed",
-            "duration": 0.1,
-            "results": {"success": True}
-        }
-        
+
+        return {"status": "completed", "duration": 0.1, "results": {"success": True}}
+
     def get_status(self) -> Dict[str, Any]:
         """Get mock robot status."""
         return {
@@ -53,29 +50,31 @@ class MockRobot:
             "status": self.status,
             "connected": self.connected,
             "current_protocol": self.current_protocol,
-            "capabilities": self.capabilities
+            "capabilities": self.capabilities,
         }
 
 
 class MockInstrument:
     """Mock analytical instrument for testing."""
-    
-    def __init__(self, instrument_id: str = "test_instrument", measurements: list = None):
+
+    def __init__(
+        self, instrument_id: str = "test_instrument", measurements: list = None
+    ):
         self.instrument_id = instrument_id
         self.measurements = measurements or ["band_gap", "efficiency"]
         self.status = "available"
         self.connected = True
         self.measurement_history = []
-        
+
     def connect(self) -> bool:
         """Mock connection."""
         self.connected = True
         return True
-        
+
     def measure(self, sample_id: str, measurement_type: str) -> Dict[str, Any]:
         """Mock measurement."""
         import random
-        
+
         # Generate realistic mock data based on measurement type
         if measurement_type == "band_gap":
             value = random.uniform(1.0, 2.0)
@@ -85,46 +84,48 @@ class MockInstrument:
             value = random.uniform(0, 1)
         else:
             value = random.uniform(0, 100)
-            
+
         result = {
             "sample_id": sample_id,
             "measurement_type": measurement_type,
             "value": round(value, 3),
             "timestamp": "2025-01-01T12:00:00Z",
-            "instrument_id": self.instrument_id
+            "instrument_id": self.instrument_id,
         }
-        
+
         self.measurement_history.append(result)
         return result
 
 
 class MockDatabase:
     """Mock database for testing."""
-    
+
     def __init__(self):
         self.experiments = []
         self.campaigns = []
         self.models = []
         self.connected = False
-        
+
     def connect(self) -> bool:
         """Mock database connection."""
         self.connected = True
         return True
-        
+
     def store_experiment(self, experiment: Dict[str, Any]) -> str:
         """Store mock experiment."""
         experiment_id = f"exp_{len(self.experiments):04d}"
         experiment["experiment_id"] = experiment_id
         self.experiments.append(experiment)
         return experiment_id
-        
+
     def get_experiments(self, campaign_id: str = None) -> list:
         """Get mock experiments."""
         if campaign_id:
-            return [exp for exp in self.experiments if exp.get("campaign_id") == campaign_id]
+            return [
+                exp for exp in self.experiments if exp.get("campaign_id") == campaign_id
+            ]
         return self.experiments
-        
+
     def store_campaign(self, campaign: Dict[str, Any]) -> str:
         """Store mock campaign."""
         campaign_id = f"campaign_{len(self.campaigns):04d}"
@@ -147,16 +148,17 @@ def temporary_directory() -> Generator[Path, None, None]:
 def mock_environment_variables(env_vars: Dict[str, str]) -> Generator[None, None, None]:
     """Temporarily set environment variables for testing."""
     import os
+
     original_env = {}
-    
+
     # Store original values
     for key in env_vars:
         original_env[key] = os.environ.get(key)
-        
+
     # Set test values
     for key, value in env_vars.items():
         os.environ[key] = value
-        
+
     try:
         yield
     finally:
@@ -171,28 +173,25 @@ def mock_environment_variables(env_vars: Dict[str, str]) -> Generator[None, None
 def create_test_config() -> Dict[str, Any]:
     """Create a test configuration."""
     return {
-        "database": {
-            "url": "mongodb://localhost:27017/",
-            "database": "materials_test"
-        },
+        "database": {"url": "mongodb://localhost:27017/", "database": "materials_test"},
         "robots": [
             {
                 "id": "test_robot_1",
                 "type": "liquid_handler",
-                "connection": {"type": "mock"}
+                "connection": {"type": "mock"},
             }
         ],
         "instruments": [
             {
-                "id": "test_instrument_1", 
+                "id": "test_instrument_1",
                 "type": "spectroscopy",
-                "connection": {"type": "mock"}
+                "connection": {"type": "mock"},
             }
         ],
         "optimization": {
             "algorithm": "bayesian",
-            "acquisition_function": "expected_improvement"
-        }
+            "acquisition_function": "expected_improvement",
+        },
     }
 
 
@@ -201,7 +200,7 @@ def assert_experiment_valid(experiment: Dict[str, Any]) -> None:
     required_fields = ["experiment_id", "parameters", "results", "metadata"]
     for field in required_fields:
         assert field in experiment, f"Missing required field: {field}"
-        
+
     assert isinstance(experiment["parameters"], dict), "Parameters must be a dictionary"
     assert isinstance(experiment["metadata"], dict), "Metadata must be a dictionary"
 
@@ -211,14 +210,16 @@ def assert_campaign_valid(campaign: Dict[str, Any]) -> None:
     required_fields = ["campaign_id", "objective", "parameter_space", "status"]
     for field in required_fields:
         assert field in campaign, f"Missing required field: {field}"
-        
+
     assert isinstance(campaign["objective"], dict), "Objective must be a dictionary"
-    assert isinstance(campaign["parameter_space"], dict), "Parameter space must be a dictionary"
+    assert isinstance(
+        campaign["parameter_space"], dict
+    ), "Parameter space must be a dictionary"
 
 
 class AsyncTestCase:
     """Base class for async testing."""
-    
+
     @staticmethod
     def run_async(coro):
         """Run an async coroutine in tests."""
@@ -233,15 +234,18 @@ def skip_if_no_hardware():
     """Skip test if hardware is not available."""
     return pytest.mark.skipif(
         True,  # Always skip hardware tests in CI
-        reason="Hardware not available in test environment"
+        reason="Hardware not available in test environment",
     )
 
 
 def skip_if_no_mongodb():
     """Skip test if MongoDB is not available."""
     import pymongo
+
     try:
-        client = pymongo.MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=1000)
+        client = pymongo.MongoClient(
+            "mongodb://localhost:27017/", serverSelectionTimeoutMS=1000
+        )
         client.server_info()
         return pytest.mark.skipif(False, reason="")
     except:
@@ -256,7 +260,7 @@ def parametrize_optimization_algorithms():
             ("random", {"seed": 42}),
             ("grid", {"resolution": 10}),
             ("bayesian", {"acquisition_function": "expected_improvement"}),
-        ]
+        ],
     )
 
 
@@ -267,7 +271,7 @@ def mock_robot():
     return MockRobot()
 
 
-@pytest.fixture  
+@pytest.fixture
 def mock_instrument():
     """Provide a mock instrument for testing."""
     return MockInstrument()
