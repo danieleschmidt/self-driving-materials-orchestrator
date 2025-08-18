@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-17 00:07:11",
+  "timestamp": "2025-08-18 12:08:03",
   "overall_status": "acceptable",
   "phases": {
     "foundation": {
@@ -101,7 +101,7 @@
         "\u2705 Bandit security scanner configuration",
         "\u2705 Safety scanner policy",
         "\u274c Missing Security scanning script: scripts/security-scan.sh",
-        "\u26a0\ufe0f Potential secrets found in 225 files",
+        "\u26a0\ufe0f Potential secrets found in 220 files",
         "  - scripts/automation/dependency-updater.py",
         "  - scripts/automation/metrics-collector.py",
         "  - src/materials_orchestrator/security.py"

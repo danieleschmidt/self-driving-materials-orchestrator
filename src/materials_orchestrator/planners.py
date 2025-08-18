@@ -1,19 +1,24 @@
 """Experiment planning algorithms for autonomous discovery."""
 
-from typing import Dict, List, Any, Optional
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
-from .utils import np, NUMPY_AVAILABLE
-
-from .utils import GaussianProcessRegressor, Matern, RBF, SKLEARN_AVAILABLE
+from .utils import (
+    NUMPY_AVAILABLE,
+    RBF,
+    SKLEARN_AVAILABLE,
+    GaussianProcessRegressor,
+    Matern,
+    np,
+)
 
 try:
-    from sklearn.gaussian_process.kernels import ConstantKernel
     from scipy.optimize import minimize
     from scipy.stats import norm
+    from sklearn.gaussian_process.kernels import ConstantKernel
 
     SKLEARN_AVAILABLE = True
 except ImportError:

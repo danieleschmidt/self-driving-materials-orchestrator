@@ -1,18 +1,14 @@
 """Distributed computing capabilities for large-scale materials discovery."""
 
-import logging
-import asyncio
 import concurrent.futures
+import logging
 import multiprocessing as mp
-from typing import Dict, List, Any, Optional, Callable, Tuple
+import queue
+import threading
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
-import json
-import time
-import threading
-import queue
-import pickle
-from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

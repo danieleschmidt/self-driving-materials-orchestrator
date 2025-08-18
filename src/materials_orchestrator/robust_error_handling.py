@@ -6,19 +6,17 @@ for materials discovery pipelines with advanced logging and alerting.
 
 import asyncio
 import logging
+import threading
 import time
 import traceback
-import sys
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Union, Type
-from dataclasses import dataclass, field
-from enum import Enum
-import json
 import uuid
-from contextlib import asynccontextmanager, contextmanager
-from functools import wraps
-import threading
 from collections import defaultdict, deque
+from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from functools import wraps
+from typing import Any, Callable, Dict, List, Optional, Type
 
 logger = logging.getLogger(__name__)
 

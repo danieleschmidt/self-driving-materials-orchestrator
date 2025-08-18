@@ -1,25 +1,24 @@
 """Enhanced CLI with comprehensive commands for materials discovery."""
 
-import typer
 import json
 import logging
-from pathlib import Path
-from typing import Optional, List, Dict, Any
-from datetime import datetime
 import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List
+
+import typer
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from materials_orchestrator import (
     AutonomousLab,
-    MaterialsObjective,
     BayesianPlanner,
+    MaterialsObjective,
     RandomPlanner,
     create_database,
-    create_health_monitor,
 )
-from materials_orchestrator.ml_enhanced import EnhancedMLOptimizer
 
 app = typer.Typer(help="🔬 Self-Driving Materials Orchestrator CLI")
 
@@ -67,7 +66,7 @@ def run_campaign(
     else:
         setup_logging("INFO")
 
-    typer.echo(f"🔬 Starting materials discovery campaign")
+    typer.echo("🔬 Starting materials discovery campaign")
     typer.echo(f"   Target: {target_property} in [{target_min}, {target_max}]")
     typer.echo(f"   System: {material_system}")
     typer.echo(f"   Planner: {planner}")
@@ -83,7 +82,7 @@ def run_campaign(
 
     # Load parameter space
     if param_space_file:
-        with open(param_space_file, "r") as f:
+        with open(param_space_file) as f:
             param_space = json.load(f)
     else:
         # Default parameter space for common materials
@@ -137,11 +136,11 @@ def run_campaign(
     )
 
     if campaign.best_material:
-        typer.echo(f"\n🥇 Best Material:")
+        typer.echo("\n🥇 Best Material:")
         for prop, value in campaign.best_properties.items():
             typer.echo(f"   {prop}: {value}")
 
-        typer.echo(f"\n🔬 Optimal Parameters:")
+        typer.echo("\n🔬 Optimal Parameters:")
         for param, value in campaign.best_material["parameters"].items():
             typer.echo(f"   {param}: {value:.3f}")
 
@@ -188,7 +187,7 @@ def analyze_results(
 
     # Load results
     try:
-        with open(results_file, "r") as f:
+        with open(results_file) as f:
             data = json.load(f)
     except Exception as e:
         typer.echo(f"❌ Error loading results: {e}")
@@ -240,7 +239,7 @@ def analyze_results(
             _show_convergence_plot(convergence)
 
     # Performance metrics
-    typer.echo(f"\n⚡ Performance Metrics:")
+    typer.echo("\n⚡ Performance Metrics:")
     traditional_estimate = 200  # Typical for grid search
     acceleration = traditional_estimate / max(data["results"]["total_experiments"], 1)
     typer.echo(f"   Acceleration factor: {acceleration:.1f}x")
@@ -319,9 +318,10 @@ def dashboard(
     typer.echo(f"🖥️ Starting dashboard on http://{host}:{port}")
 
     try:
-        import streamlit
         import subprocess
         import sys
+
+        import streamlit
 
         dashboard_path = Path(__file__).parent / "dashboard" / "app.py"
         cmd = [

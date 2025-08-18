@@ -1,6 +1,7 @@
 """Pytest configuration and shared fixtures."""
 
 import pytest
+
 from materials_orchestrator.core import AutonomousLab, MaterialsObjective
 from materials_orchestrator.planners import BayesianPlanner
 

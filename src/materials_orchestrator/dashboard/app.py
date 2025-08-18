@@ -1,22 +1,15 @@
 """Main Streamlit dashboard application."""
 
-import streamlit as st
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+from datetime import datetime
+from typing import Any, Dict, List
+
 import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-import json
-import asyncio
-from typing import Dict, List, Optional, Any
+import plotly.express as px
+import streamlit as st
 
 from ..database import ExperimentDatabase
-from .utils import load_campaign_data, format_duration, create_property_evolution_plot
 from .components import (
     render_campaign_overview,
-    render_robot_status,
-    render_experiment_feed,
 )
 
 

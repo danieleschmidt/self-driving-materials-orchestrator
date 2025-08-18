@@ -1,11 +1,11 @@
 """Circuit breaker pattern for fault tolerance."""
 
-import time
 import logging
-from typing import Callable, Any, Optional
-from enum import Enum
+import time
 from dataclasses import dataclass
+from enum import Enum
 from threading import Lock
+from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ class CircuitBreaker:
                     result = func(*args, **kwargs)
                     self._on_success()
                     return result
-                except self.config.expected_exception as e:
+                except self.config.expected_exception:
                     self._on_failure()
                     raise
 
@@ -67,7 +67,7 @@ class CircuitBreaker:
                 result = func(*args, **kwargs)
                 self._on_success()
                 return result
-            except self.config.expected_exception as e:
+            except self.config.expected_exception:
                 self._on_failure()
                 raise
 

@@ -1,17 +1,16 @@
 """Core classes for autonomous materials discovery."""
 
+import math
 import time
 import uuid
-import math
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 if TYPE_CHECKING:
-    from typing import Self
+    pass
+import logging
 from dataclasses import dataclass, field
 from enum import Enum
-import json
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -147,9 +146,9 @@ class AutonomousLab:
         """Custom health check for this laboratory instance."""
         from .health_monitoring import (
             ComponentHealth,
-            HealthStatus,
-            HealthMetric,
             ComponentType,
+            HealthMetric,
+            HealthStatus,
         )
 
         metrics = []
@@ -249,8 +248,8 @@ class AutonomousLab:
 
         Simulates perovskite band gap based on composition and processing.
         """
-        import random
         import math
+        import random
 
         # Simulate band gap based on parameters
         # This is a simplified model for demonstration
@@ -306,9 +305,9 @@ class AutonomousLab:
 
         try:
             # Import validation here to avoid circular imports
-            from .validation import create_validator
-            from .security_enhanced import get_global_security_manager
             from .error_recovery import get_global_resilient_executor
+            from .security_enhanced import get_global_security_manager
+            from .validation import create_validator
 
             # Enhanced security validation
             security_manager = get_global_security_manager()
@@ -534,7 +533,7 @@ class AutonomousLab:
         autonomous_reasoner = None
         if enable_autonomous_reasoning:
             try:
-                from .autonomous_reasoning import get_global_reasoner, ReasoningContext
+                from .autonomous_reasoning import ReasoningContext, get_global_reasoner
 
                 autonomous_reasoner = get_global_reasoner()
                 logger.info("Autonomous reasoning enabled for campaign")

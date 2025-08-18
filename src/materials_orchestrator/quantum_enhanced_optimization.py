@@ -2,16 +2,15 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Any, Optional, Callable, Union, Tuple
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
-import json
 import math
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
-from .utils import np, NUMPY_AVAILABLE, safe_numerical_operation
-from .core import MaterialsObjective, Experiment
+from .core import MaterialsObjective
+from .utils import np, safe_numerical_operation
 
 # from .performance_optimizer import get_global_optimizer  # Optional
 

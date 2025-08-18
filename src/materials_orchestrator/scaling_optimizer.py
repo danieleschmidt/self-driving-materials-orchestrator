@@ -1,16 +1,17 @@
 """Advanced scaling and optimization for high-performance materials discovery."""
 
 import asyncio
+import logging
 import multiprocessing as mp
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
-from typing import Dict, List, Any, Optional, Callable, Union
 import threading
 import time
-import logging
-from dataclasses import dataclass, field
-from queue import Queue, PriorityQueue
-from .utils import np, NUMPY_AVAILABLE
-from datetime import datetime, timedelta
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from dataclasses import dataclass
+from datetime import datetime
+from queue import PriorityQueue
+from typing import Any, Callable, Dict, List, Optional
+
+from .utils import np
 
 logger = logging.getLogger(__name__)
 

@@ -1,15 +1,15 @@
 """Adaptive learning system for continuous improvement of materials discovery."""
 
 import logging
-from .utils import np, NUMPY_AVAILABLE
-from typing import Dict, List, Any, Optional, Tuple, Callable
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
-import json
 import pickle
-from pathlib import Path
 import threading
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+from .utils import np
 
 logger = logging.getLogger(__name__)
 

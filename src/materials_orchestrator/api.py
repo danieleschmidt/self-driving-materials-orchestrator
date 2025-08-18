@@ -1,14 +1,12 @@
 """Production API for Materials Orchestrator."""
 
 import logging
-import json
-from typing import Dict, Any, List, Optional
 from datetime import datetime
-from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # FastAPI imports with fallbacks
 try:
-    from fastapi import FastAPI, HTTPException, BackgroundTasks
+    from fastapi import BackgroundTasks, FastAPI, HTTPException
     from fastapi.middleware.cors import CORSMiddleware
     from pydantic import BaseModel, Field
 
@@ -45,12 +43,13 @@ except ImportError:
 
     FASTAPI_AVAILABLE = False
 
-from .core import AutonomousLab, MaterialsObjective, Experiment
-from .planners import BayesianPlanner, RandomPlanner
-from .security_enhanced import get_global_security_manager
+from .core import AutonomousLab, MaterialsObjective
+from .health_endpoints import setup_health_endpoints
 from .health_monitoring import get_global_health_monitor
 from .performance_optimizer import get_global_performance_optimizer
+from .planners import BayesianPlanner, RandomPlanner
 from .quality_gates import get_global_quality_runner
+from .security_enhanced import get_global_security_manager
 
 logger = logging.getLogger(__name__)
 
@@ -123,6 +122,9 @@ def create_production_api() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Setup health check endpoints
+    setup_health_endpoints(app)
 
     @app.get("/")
     async def root():

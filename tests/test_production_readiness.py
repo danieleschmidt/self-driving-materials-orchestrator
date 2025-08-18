@@ -1,20 +1,17 @@
 """Production readiness tests for Materials Orchestrator."""
 
-import pytest
-import time
 import threading
-import tempfile
-import shutil
-from unittest.mock import Mock, patch
-from datetime import datetime, timedelta
-import json
+import time
+from datetime import datetime
 
-from materials_orchestrator import AutonomousLab, MaterialsObjective, ExperimentDatabase
-from materials_orchestrator.security import SecurityValidator
-from materials_orchestrator.monitoring import SystemMonitor, HealthCheck
+import pytest
+
+from materials_orchestrator import AutonomousLab, ExperimentDatabase
 from materials_orchestrator.error_handling import ErrorHandler
-from materials_orchestrator.optimization import LRUCache, ConcurrentExperimentRunner
-from materials_orchestrator.scalability import DistributedJobManager, AutoScaler
+from materials_orchestrator.monitoring import HealthCheck, SystemMonitor
+from materials_orchestrator.optimization import ConcurrentExperimentRunner, LRUCache
+from materials_orchestrator.scalability import AutoScaler, DistributedJobManager
+from materials_orchestrator.security import SecurityValidator
 
 
 class TestProductionResilience:
@@ -56,8 +53,9 @@ class TestProductionResilience:
 
     def test_memory_leak_prevention(self):
         """Test for memory leaks during extended operation."""
-        import psutil
         import os
+
+        import psutil
 
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB
@@ -280,7 +278,7 @@ class TestScalabilityValidation:
         job_manager = DistributedJobManager(enable_auto_scaling=False)
         job_manager.start()
 
-        from materials_orchestrator.scalability import WorkerNode, DistributedJob
+        from materials_orchestrator.scalability import DistributedJob, WorkerNode
 
         # Register workers
         for i in range(3):

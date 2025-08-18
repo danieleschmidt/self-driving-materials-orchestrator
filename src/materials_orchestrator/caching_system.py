@@ -1,15 +1,16 @@
 """Advanced caching system for materials discovery optimization."""
 
 import hashlib
-import pickle
-import time
-import threading
-from typing import Dict, Any, Optional, Tuple, List, Callable
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-import logging
 import json
-from .utils import np, NUMPY_AVAILABLE
+import logging
+import pickle
+import threading
+import time
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
+
+from .utils import np
 
 logger = logging.getLogger(__name__)
 

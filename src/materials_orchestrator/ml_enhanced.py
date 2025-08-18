@@ -1,11 +1,10 @@
 """Enhanced ML capabilities with comprehensive fallbacks."""
 
 import logging
-import json
 import math
-from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass
 import random
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +91,6 @@ class EnhancedMLOptimizer:
                 mean_squared_error,
                 r2_score,
             )
-            import numpy as np
 
             # Prepare data
             X, y = self._prepare_training_data()

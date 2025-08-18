@@ -6,19 +6,13 @@ advanced coordination, consensus mechanisms, and global optimization.
 
 import asyncio
 import logging
-import time
-import json
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Set, Tuple
-from dataclasses import dataclass, field, asdict
-from enum import Enum
-import uuid
 import random
-import numpy as np
-from concurrent.futures import ThreadPoolExecutor
+import uuid
 from collections import defaultdict, deque
-import hashlib
-import threading
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -862,9 +856,9 @@ class GlobalLoadBalancer:
     """Global load balancer for distributed systems."""
 
     def __init__(self):
-        self.region_capacities: Dict[GlobalRegion, float] = {
-            region: 1.0 for region in GlobalRegion
-        }
+        self.region_capacities: Dict[GlobalRegion, float] = dict.fromkeys(
+            GlobalRegion, 1.0
+        )
 
     async def scale_region(self, region: GlobalRegion, scale_factor: float):
         """Scale capacity in a specific region."""

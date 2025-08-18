@@ -2,7 +2,8 @@
 
 import json
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 import numpy as np
 
 
@@ -198,5 +199,5 @@ def save_sample_data(filepath: str) -> None:
 
 def load_sample_data(filepath: str) -> Dict[str, Any]:
     """Load sample data from JSON file."""
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         return json.load(f)

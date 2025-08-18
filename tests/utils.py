@@ -1,12 +1,13 @@
 """Testing utilities and helper functions."""
 
 import asyncio
-import tempfile
 import shutil
-from pathlib import Path
+import tempfile
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Dict, Any, Generator, Optional
-from unittest.mock import Mock, MagicMock
+from pathlib import Path
+from typing import Any, Dict
+
 import pytest
 
 

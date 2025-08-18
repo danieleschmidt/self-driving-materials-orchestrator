@@ -1,7 +1,6 @@
 """Unit tests for experiment planners."""
 
-import pytest
-from materials_orchestrator.planners import BayesianPlanner, RandomPlanner, GridPlanner
+from materials_orchestrator.planners import BayesianPlanner, GridPlanner, RandomPlanner
 
 
 class TestBayesianPlanner:

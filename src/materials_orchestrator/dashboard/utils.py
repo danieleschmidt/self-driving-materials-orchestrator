@@ -1,12 +1,11 @@
 """Utility functions for dashboard components."""
 
 import json
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta
 import logging
+from typing import Any, Dict, List, Optional, Tuple
+
+import pandas as pd
+import plotly.graph_objects as go
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +20,7 @@ def load_campaign_data(file_path: str) -> Optional[Dict[str, Any]]:
         Campaign data dictionary or None if loading fails
     """
     try:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError) as e:
         logger.error(f"Failed to load campaign data from {file_path}: {e}")
@@ -346,13 +345,13 @@ def generate_experiment_summary(experiments: List[Dict[str, Any]]) -> str:
                         best_results[prop] = value
 
     summary_lines = [
-        f"📊 **Experiment Summary**",
+        "📊 **Experiment Summary**",
         f"• Total experiments: {total}",
         f"• Completed: {completed} ({completed/total:.1%})",
         f"• Failed: {failed}",
         f"• Running: {running}",
         "",
-        f"🏆 **Best Results**",
+        "🏆 **Best Results**",
     ]
 
     for prop, value in best_results.items():

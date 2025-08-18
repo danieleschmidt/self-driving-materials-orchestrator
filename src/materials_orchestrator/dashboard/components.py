@@ -1,11 +1,12 @@
 """Reusable dashboard components."""
 
-import streamlit as st
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import pandas as pd
-from typing import Dict, List, Optional, Any
-from datetime import datetime
+import streamlit as st
 
 
 def render_campaign_overview(

@@ -39,12 +39,12 @@ Each algorithm was tested with 30 independent trials under controlled conditions
 
 | Algorithm | Success Rate | Avg Healing Time | Availability |
 |-----------|--------------|------------------|-------------|
-| classical_healing | 80.0% | 1.169s | 80.0% |
-| quantum_annealing | 93.3% | 0.573s | 93.3% |
-| qaoa_optimization | 100.0% | 0.813s | 100.0% |
-| vqe_hybrid | 86.7% | 0.668s | 86.7% |
-| distributed_raft | 96.7% | 1.006s | 96.7% |
-| hybrid_quantum_classical | 100.0% | 0.423s | 100.0% |
+| classical_healing | 83.3% | 1.220s | 83.3% |
+| quantum_annealing | 90.0% | 0.575s | 90.0% |
+| qaoa_optimization | 90.0% | 0.831s | 90.0% |
+| vqe_hybrid | 80.0% | 0.623s | 80.0% |
+| distributed_raft | 90.0% | 0.976s | 90.0% |
+| hybrid_quantum_classical | 100.0% | 0.377s | 100.0% |
 
 
 ### 3.2 Statistical Analysis

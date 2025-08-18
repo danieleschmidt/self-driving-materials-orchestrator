@@ -1,19 +1,20 @@
 """Test enhanced core implementation."""
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from materials_orchestrator import (
     AutonomousLab,
-    MaterialsObjective,
     BayesianPlanner,
-    RandomPlanner,
-    Experiment,
     CampaignResult,
+    Experiment,
+    MaterialsObjective,
+    RandomPlanner,
 )
 
 

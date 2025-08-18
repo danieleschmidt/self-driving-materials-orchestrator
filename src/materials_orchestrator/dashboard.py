@@ -1,25 +1,24 @@
 """Real-time dashboard for monitoring autonomous lab operations."""
 
-import streamlit as st
-from typing import Dict, List, Any, Optional
-import plotly.graph_objects as go
-import plotly.express as px
-from datetime import datetime, timedelta
-import pandas as pd
 import logging
-import time
+from datetime import datetime
+from typing import Optional
+
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
 
 try:
-    from .database import create_database, ExperimentTracker
     from .core import AutonomousLab, MaterialsObjective
+    from .database import ExperimentTracker, create_database
 except ImportError:
     # Handle imports when running as standalone script
     import sys
     from pathlib import Path
 
     sys.path.append(str(Path(__file__).parent))
-    from database import create_database, ExperimentTracker
-    from core import AutonomousLab, MaterialsObjective
+    from core import AutonomousLab
+    from database import ExperimentTracker
 
 logger = logging.getLogger(__name__)
 
@@ -458,9 +457,9 @@ class LabDashboard:
                 with col4:
                     with st.expander("⚙️"):
                         st.text("Robot Controls:")
-                        st.button(f"⏸️ Pause", key=f"pause_{robot['id']}")
-                        st.button(f"🛑 Stop", key=f"stop_{robot['id']}")
-                        st.button(f"🔧 Maintenance", key=f"maint_{robot['id']}")
+                        st.button("⏸️ Pause", key=f"pause_{robot['id']}")
+                        st.button("🛑 Stop", key=f"stop_{robot['id']}")
+                        st.button("🔧 Maintenance", key=f"maint_{robot['id']}")
 
                 st.divider()
 

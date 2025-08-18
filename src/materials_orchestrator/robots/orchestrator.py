@@ -2,12 +2,12 @@
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from .base import RobotDriver, InstrumentDriver, RobotStatus, ActionResult
-from .drivers import SimulatedDriver, OpentronsDriver, ChemspeedDriver, XRDInstrument
+from .base import ActionResult, InstrumentDriver, RobotDriver, RobotStatus
+from .drivers import ChemspeedDriver, OpentronsDriver, SimulatedDriver, XRDInstrument
 
 logger = logging.getLogger(__name__)
 

@@ -1,16 +1,16 @@
 """Command-line interface for the materials orchestrator."""
 
-import typer
-import logging
 import json
-from typing import Optional, Dict, Any
-from pathlib import Path
+import logging
 from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+import typer
 
 from .core import AutonomousLab, MaterialsObjective
-from .planners import BayesianPlanner, RandomPlanner, GridPlanner
+from .planners import BayesianPlanner, GridPlanner, RandomPlanner
 from .robots import RobotOrchestrator
-from .database import ExperimentTracker
 
 app = typer.Typer(
     name="materials-orchestrator",
@@ -104,14 +104,14 @@ def run_campaign(
     )
 
     # Display campaign info
-    typer.echo(f"\\n🔬 Starting Materials Discovery Campaign")
+    typer.echo("\\n🔬 Starting Materials Discovery Campaign")
     typer.echo(f"{'='*50}")
     typer.echo(f"Target Property: {objective.target_property}")
     typer.echo(f"Target Range: {objective.target_range}")
     typer.echo(f"Material System: {objective.material_system}")
     typer.echo(f"Planner: {planner.title()}")
     typer.echo(f"Max Experiments: {max_experiments}")
-    typer.echo(f"")
+    typer.echo("")
 
     # Run campaign
     try:
@@ -140,7 +140,7 @@ def run_campaign(
         raise typer.Exit(1)
 
     # Display results
-    typer.echo(f"\\n🏆 Campaign Results")
+    typer.echo("\\n🏆 Campaign Results")
     typer.echo(f"{'='*30}")
     typer.echo(f"Experiments: {campaign.total_experiments}")
     typer.echo(f"Success Rate: {campaign.success_rate:.1%}")
@@ -151,11 +151,11 @@ def run_campaign(
     )
 
     if campaign.best_material:
-        typer.echo(f"\\n🥇 Best Material:")
+        typer.echo("\\n🥇 Best Material:")
         best_value = campaign.best_properties.get(target_property, "N/A")
         typer.echo(f"  {target_property}: {best_value}")
 
-        typer.echo(f"\\n🔬 Optimal Parameters:")
+        typer.echo("\\n🔬 Optimal Parameters:")
         for param, value in campaign.best_material["parameters"].items():
             typer.echo(f"  {param}: {value:.3f}")
 
@@ -186,7 +186,7 @@ def run_campaign(
 
         typer.echo(f"\\n💾 Results saved to: {output_path}")
 
-    typer.echo(f"\\n✅ Campaign completed successfully!")
+    typer.echo("\\n✅ Campaign completed successfully!")
 
 
 @app.command()
@@ -198,9 +198,10 @@ def dashboard(
     """Launch the real-time dashboard."""
 
     try:
-        import streamlit.web.cli as stcli
         import sys
         from pathlib import Path
+
+        import streamlit.web.cli as stcli
 
         # Get path to dashboard module
         dashboard_script = Path(__file__).parent / "dashboard.py"
@@ -279,19 +280,19 @@ def test_experiment(
         "solvent_ratio": 0.5,
     }
 
-    typer.echo(f"🧪 Running test experiment...")
+    typer.echo("🧪 Running test experiment...")
     typer.echo(f"Parameters: {params}")
 
     # Run experiment
     experiment = lab.run_experiment(params)
 
     # Display results
-    typer.echo(f"\\n📊 Results:")
+    typer.echo("\\n📊 Results:")
     typer.echo(f"Status: {experiment.status}")
     typer.echo(f"Duration: {experiment.duration:.2f}s")
 
     if experiment.results:
-        typer.echo(f"Properties:")
+        typer.echo("Properties:")
         for prop, value in experiment.results.items():
             typer.echo(f"  {prop}: {value}")
     else:
@@ -312,11 +313,11 @@ def status():
 @app.command()
 def version():
     """Show version information."""
-    from . import __version__, __author__
+    from . import __author__, __version__
 
     typer.echo(f"Materials Orchestrator v{__version__}")
     typer.echo(f"Author: {__author__}")
-    typer.echo(f"Self-driving materials discovery platform")
+    typer.echo("Self-driving materials discovery platform")
 
 
 def main():
