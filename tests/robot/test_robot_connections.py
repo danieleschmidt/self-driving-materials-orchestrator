@@ -1,7 +1,8 @@
 """Robot hardware connection tests."""
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 
 @pytest.mark.robot

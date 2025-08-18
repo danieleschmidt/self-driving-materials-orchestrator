@@ -1,122 +1,122 @@
 {
   "classical_healing_vs_quantum_annealing": {
-    "t_statistic": 21.75769395183622,
+    "t_statistic": 20.91258019628879,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": 0.5774546160106537,
-    "effect_size": 5.617812421822635,
+    "mean_difference": 0.6436845647024274,
+    "effect_size": 5.399604988430234,
     "significant": true
   },
   "classical_healing_vs_qaoa_optimization": {
-    "t_statistic": 13.27882323015845,
+    "t_statistic": 14.071443680797689,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": 0.3723219837334242,
-    "effect_size": 3.4285774151757233,
+    "mean_difference": 0.3913586609082913,
+    "effect_size": 3.6332311355216693,
     "significant": true
   },
   "classical_healing_vs_vqe_hybrid": {
-    "t_statistic": 16.29709990110305,
+    "t_statistic": 22.487917108243497,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": 0.47472377100020124,
-    "effect_size": 4.207893100563377,
+    "mean_difference": 0.6040266116152742,
+    "effect_size": 5.8063552300746615,
     "significant": true
   },
   "classical_healing_vs_distributed_raft": {
-    "t_statistic": 5.618534787869601,
+    "t_statistic": 9.501495057864636,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": 0.15849843486330362,
-    "effect_size": 1.4506994442337324,
+    "mean_difference": 0.23501285127343363,
+    "effect_size": 2.453275474878787,
     "significant": true
   },
   "classical_healing_vs_hybrid_quantum_classical": {
-    "t_statistic": 32.33600915329398,
+    "t_statistic": 34.12754046413886,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": 0.8136348915277702,
-    "effect_size": 8.349121662234547,
+    "mean_difference": 0.8821480164754356,
+    "effect_size": 8.81169305764197,
     "significant": true
   },
   "quantum_annealing_vs_qaoa_optimization": {
-    "t_statistic": -8.467587493880607,
+    "t_statistic": -9.377299343736125,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": -0.22141599133786127,
-    "effect_size": -2.1863216897569195,
+    "mean_difference": -0.2689839596703423,
+    "effect_size": -2.4212082793794503,
     "significant": true
   },
   "quantum_annealing_vs_vqe_hybrid": {
-    "t_statistic": -5.241730625169099,
-    "p_value": 0.01,
+    "t_statistic": -2.3415325463791437,
+    "p_value": 0.05,
     "degrees_freedom": 58,
-    "mean_difference": -0.1195348046715119,
-    "effect_size": -1.3534090277723543,
-    "significant": true
+    "mean_difference": -0.060219594286774814,
+    "effect_size": -0.604581103781938,
+    "significant": false
   },
   "quantum_annealing_vs_distributed_raft": {
-    "t_statistic": -13.822538909487212,
+    "t_statistic": -13.182781699686656,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": -0.4132145447112664,
-    "effect_size": -3.568964199916534,
+    "mean_difference": -0.36219425078282697,
+    "effect_size": -3.403779598638288,
     "significant": true
   },
   "quantum_annealing_vs_hybrid_quantum_classical": {
-    "t_statistic": 6.613835598994706,
+    "t_statistic": 8.8612664440622,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": 0.16418485369891572,
-    "effect_size": 1.7076850086306832,
+    "mean_difference": 0.22667551164556354,
+    "effect_size": 2.2879691576106347,
     "significant": true
   },
   "qaoa_optimization_vs_vqe_hybrid": {
-    "t_statistic": 4.684177254374675,
+    "t_statistic": 7.151081005472175,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": 0.1325556042989272,
-    "effect_size": 1.2094493664584465,
+    "mean_difference": 0.21530250388270722,
+    "effect_size": 1.8464011761049284,
     "significant": true
   },
   "qaoa_optimization_vs_distributed_raft": {
-    "t_statistic": -6.936731525725803,
+    "t_statistic": -5.254863883768926,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": -0.19721366793419104,
-    "effect_size": -1.7910563784165334,
+    "mean_difference": -0.13899609554275982,
+    "effect_size": -1.3568000205615918,
     "significant": true
   },
   "qaoa_optimization_vs_hybrid_quantum_classical": {
-    "t_statistic": 11.427595309103214,
+    "t_statistic": 15.191279088062362,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": 0.35526398904821993,
-    "effect_size": 2.9505924212903167,
+    "mean_difference": 0.46904582540414924,
+    "effect_size": 3.9223713943769685,
     "significant": true
   },
   "vqe_hybrid_vs_distributed_raft": {
-    "t_statistic": -12.70499583011601,
+    "t_statistic": -13.21178730164855,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": -0.36151489556256133,
-    "effect_size": -3.2804158175782656,
+    "mean_difference": -0.3895638024699859,
+    "effect_size": -3.411268812861297,
     "significant": true
   },
   "vqe_hybrid_vs_hybrid_quantum_classical": {
-    "t_statistic": 7.5676407821414395,
+    "t_statistic": 8.435055505210247,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": 0.1748045488318115,
-    "effect_size": 1.9539564479542577,
+    "mean_difference": 0.22467901277598318,
+    "effect_size": 2.1779219664009655,
     "significant": true
   },
   "distributed_raft_vs_hybrid_quantum_classical": {
-    "t_statistic": 22.10847008038954,
+    "t_statistic": 18.887196425690895,
     "p_value": 0.01,
     "degrees_freedom": 58,
-    "mean_difference": 0.607153735152153,
-    "effect_size": 5.70838242876491,
+    "mean_difference": 0.5885193487309647,
+    "effect_size": 4.876653147549939,
     "significant": true
   }
 }

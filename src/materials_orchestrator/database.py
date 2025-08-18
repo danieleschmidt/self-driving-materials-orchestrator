@@ -1,19 +1,20 @@
 """Database integration for materials discovery experiments."""
 
-from typing import Dict, List, Any, Optional, Iterator
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
-from abc import ABC, abstractmethod
-import logging
 import json
+import logging
 import uuid
+from abc import ABC, abstractmethod
+from collections.abc import Iterator
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 try:
     import pymongo
-    from pymongo import MongoClient, ASCENDING, DESCENDING
+    from pymongo import ASCENDING, DESCENDING, MongoClient
     from pymongo.errors import ConnectionFailure, OperationFailure
 
     MONGODB_AVAILABLE = True
@@ -174,7 +175,7 @@ class FileDatabase(DatabaseInterface):
         if not self.experiments_file.exists():
             return
 
-        with open(self.experiments_file, "r") as f:
+        with open(self.experiments_file) as f:
             for line in f:
                 line = line.strip()
                 if line:
@@ -537,7 +538,7 @@ class ExperimentDatabase:
     def _load_fallback_data(self):
         """Load data from fallback file."""
         try:
-            with open(self._fallback_file, "r") as f:
+            with open(self._fallback_file) as f:
                 self._fallback_data = json.load(f)
         except FileNotFoundError:
             self._fallback_data = []
@@ -647,7 +648,7 @@ class ExperimentDatabase:
         # Fallback storage
         fallback_campaigns_file = "campaigns_fallback.json"
         try:
-            with open(fallback_campaigns_file, "r") as f:
+            with open(fallback_campaigns_file) as f:
                 campaigns = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             campaigns = []

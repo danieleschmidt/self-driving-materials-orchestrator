@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "timestamp": "2025-08-18T12:16:26.711390",
+    "collection_version": "1.0.0",
+    "collection_duration_seconds": 0.73
+  },
+  "code": {
+    "total_python_files": 54,
+    "total_lines_of_code": 31304,
+    "total_functions": 1211,
+    "total_classes": 273,
+    "avg_lines_per_file": 579.7037037037037
+  },
+  "tests": {
+    "total_test_files": 13,
+    "test_collection_error": "/usr/lib/python3/dist-packages/_pytest/config/__init__.py:331: PluggyTeardownRaisedWarning: A plugin raised an exception during an old-style hookwrapper teardown.\nPlugin: helpconfig, Hook: pytest_cmdline_parse\nConftestImportFailure: ModuleNotFoundError: No module named 'materials_orchestrator' (from /root/repo/tests/conftest.py)\nFor more information see https://pluggy.readthedocs.io/en/stable/api_reference.html#pluggy.PluggyTeardownRaisedWarning\n  config = pluginmanager.hook.pytest_cmdline_parse"
+  },
+  "dependencies": {
+    "pyproject_lines": 132,
+    "has_pyproject": true,
+    "requirements-dev_count": 18
+  },
+  "documentation": {
+    "total_markdown_files": 67,
+    "has_readme_md": true,
+    "readme_md_lines": 675,
+    "has_contributing_md": true,
+    "contributing_md_lines": 282,
+    "has_changelog_md": true,
+    "changelog_md_lines": 53,
+    "has_license": true,
+    "license_lines": 21,
+    "docs_directory_files": 18
+  },
+  "git": {
+    "is_git_repo": true,
+    "total_commits": 43,
+    "current_branch": "terragon/autonomous-sdlc-execution-vrnnlf",
+    "last_commit_hash": "bc2f88c8",
+    "last_commit_message": "Merge pull request #16 from danieleschmidt/terragon/autonomous-sdlc-execution-x4d2vm"
+  },
+  "system": {
+    "python_version": "3.12.3",
+    "platform_system": "Linux",
+    "platform_version": "#1 SMP PREEMPT_DYNAMIC Mon Aug  4 17:13:14 UTC 2025",
+    "platform_machine": "x86_64",
+    "platform_processor": "x86_64",
+    "src_directory_size_bytes": 1994727,
+    "tests_directory_size_bytes": 677286
+  }
+}

@@ -2,7 +2,6 @@
 
 import logging
 import math
-from typing import List, Union, Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +204,7 @@ except ImportError:
 # Scikit-learn fallback
 try:
     from sklearn.gaussian_process import GaussianProcessRegressor
-    from sklearn.gaussian_process.kernels import Matern, RBF
+    from sklearn.gaussian_process.kernels import RBF, Matern
 
     SKLEARN_AVAILABLE = True
     logger.info("Scikit-learn available - using advanced ML models")

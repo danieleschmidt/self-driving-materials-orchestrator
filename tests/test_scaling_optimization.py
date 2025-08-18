@@ -1,21 +1,21 @@
 """Generation 3 - Scaling and optimization tests."""
 
-import pytest
-import asyncio
-import time
 import threading
-from unittest.mock import Mock, patch
+import time
+
+import pytest
+
 from materials_orchestrator import AutonomousLab, MaterialsObjective
-from materials_orchestrator.scaling_optimizer import (
-    PerformanceOptimizer,
-    DistributedExperimentManager,
-    AdaptiveLoadBalancer,
-    ExperimentPriority,
-)
 from materials_orchestrator.caching_system import (
     ExperimentResultCache,
     LRUCache,
     MultiLevelCache,
+)
+from materials_orchestrator.scaling_optimizer import (
+    AdaptiveLoadBalancer,
+    DistributedExperimentManager,
+    ExperimentPriority,
+    PerformanceOptimizer,
 )
 
 

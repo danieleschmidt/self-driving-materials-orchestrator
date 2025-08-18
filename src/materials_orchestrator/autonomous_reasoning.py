@@ -1,14 +1,13 @@
 """Autonomous reasoning and decision-making for materials discovery."""
 
-import logging
-from .utils import np, NUMPY_AVAILABLE
-from typing import Dict, List, Any, Optional, Tuple, Callable
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
 import json
-import math
-import random
+import logging
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from .utils import np
 
 logger = logging.getLogger(__name__)
 

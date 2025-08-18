@@ -1,8 +1,7 @@
 """Integration tests for database operations."""
 
 import pytest
-from unittest.mock import Mock
-import pymongo
+
 from materials_orchestrator.core import AutonomousLab, MaterialsObjective
 
 

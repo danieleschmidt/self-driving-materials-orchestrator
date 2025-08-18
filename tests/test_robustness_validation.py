@@ -1,12 +1,13 @@
 """Generation 2 - Robustness and reliability validation tests."""
 
-import pytest
-import time
 import threading
-from unittest.mock import Mock, patch
+import time
+from unittest.mock import patch
+
+import pytest
+
 from materials_orchestrator import AutonomousLab, MaterialsObjective
-from materials_orchestrator.error_handling import ExperimentError, ValidationError
-from materials_orchestrator.error_recovery import ResilientExecutor
+from materials_orchestrator.error_handling import ValidationError
 
 
 class TestErrorHandling:

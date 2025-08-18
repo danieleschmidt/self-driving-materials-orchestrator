@@ -1,12 +1,13 @@
 """Performance benchmarks for optimization algorithms."""
 
-import pytest
 import time
-import numpy as np
-from typing import Dict, Any, List
+from typing import Any, Dict
 
-from materials_orchestrator.planners import BayesianPlanner
+import numpy as np
+import pytest
+
 from materials_orchestrator.core import MaterialsObjective
+from materials_orchestrator.planners import BayesianPlanner
 from tests.fixtures.sample_data import SampleDataGenerator
 
 
@@ -292,8 +293,9 @@ class TestOptimizationPerformance:
     @pytest.mark.benchmark
     def test_memory_usage(self, benchmark):
         """Benchmark memory usage with large datasets."""
-        import psutil
         import os
+
+        import psutil
 
         process = psutil.Process(os.getpid())
 

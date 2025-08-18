@@ -5,13 +5,11 @@ Monitors pipeline health, detects failures, and implements self-healing mechanis
 
 import asyncio
 import logging
-import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Set
-from dataclasses import dataclass, field
-from enum import Enum
-import json
 import uuid
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -417,8 +415,9 @@ class SelfHealingPipelineGuard:
     async def _monitor_pipeline_health(self):
         """Monitor pipeline health metrics."""
         # Simulate health metric collection
-        import psutil
         import random
+
+        import psutil
 
         # CPU usage monitoring
         cpu_percent = psutil.cpu_percent(interval=1)

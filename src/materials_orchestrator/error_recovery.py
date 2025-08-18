@@ -1,16 +1,15 @@
 """Advanced error recovery and resilience system."""
 
-import logging
-import time
-import traceback
 import json
-from typing import Dict, List, Any, Optional, Callable, Tuple
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
+import logging
 import random
 import threading
-from pathlib import Path
+import time
+import traceback
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

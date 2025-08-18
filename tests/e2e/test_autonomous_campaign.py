@@ -1,12 +1,12 @@
 """End-to-end tests for autonomous campaigns."""
 
+from unittest.mock import patch
+
 import pytest
-from datetime import datetime
-from unittest.mock import Mock, patch
 
 from materials_orchestrator.core import AutonomousLab, MaterialsObjective
 from materials_orchestrator.planners import BayesianPlanner
-from tests.utils import MockRobot, MockInstrument, MockDatabase
+from tests.utils import MockDatabase, MockInstrument, MockRobot
 
 
 class TestAutonomousCampaign:

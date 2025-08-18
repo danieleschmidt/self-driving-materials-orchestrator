@@ -1,16 +1,13 @@
 """Advanced health monitoring and diagnostics system."""
 
-import logging
-import time
-import threading
 import json
-import psutil  # Will use fallback if not available
-from typing import Dict, List, Any, Optional, Callable, Tuple
+import logging
+import threading
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from pathlib import Path
-import os
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

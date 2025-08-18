@@ -1,19 +1,16 @@
 """Advanced performance optimization and scaling system."""
 
-import logging
-import time
-import threading
 import concurrent.futures
-import queue
-import json
-from typing import Dict, List, Any, Optional, Callable, Tuple, Set
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
-from pathlib import Path
-import hashlib
-import pickle
+import logging
 import os
+import pickle
+import queue
+import threading
+import time
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -311,7 +308,7 @@ class ConcurrentExecutionPool:
         self._lock = threading.Lock()
 
         # Load balancing
-        self.worker_loads: Dict[int, int] = {i: 0 for i in range(self.max_workers)}
+        self.worker_loads: Dict[int, int] = dict.fromkeys(range(self.max_workers), 0)
         self.load_balancing_strategy = LoadBalancingStrategy.LEAST_CONNECTIONS
 
         logger.info(

@@ -1,17 +1,18 @@
 """High-performance computing optimizations for materials discovery."""
 
-import logging
-import numpy as np
-import time
-import threading
-from typing import Dict, List, Any, Optional, Callable, Tuple
-from dataclasses import dataclass, field
-from datetime import datetime
-import multiprocessing as mp
 import concurrent.futures
-import psutil
 import gc
+import logging
+import multiprocessing as mp
+import threading
+import time
 from contextlib import contextmanager
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional
+
+import numpy as np
+import psutil
 
 logger = logging.getLogger(__name__)
 

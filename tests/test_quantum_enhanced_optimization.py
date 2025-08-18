@@ -1,25 +1,22 @@
 """Comprehensive tests for quantum-enhanced pipeline optimization."""
 
-import asyncio
-import pytest
-import numpy as np
 import time
-from unittest.mock import Mock, patch
+
+import numpy as np
+import pytest
 
 from materials_orchestrator import (
     DistributedQuantumPipelineGuard,
-    get_quantum_pipeline_guard,
-    QuantumConfiguration,
     PipelineOptimizationProblem,
+    QuantumConfiguration,
     create_quantum_optimization_problem,
+    get_quantum_pipeline_guard,
 )
 from materials_orchestrator.quantum_enhanced_pipeline_guard import (
-    QuantumAnnealingOptimizer,
     HybridClassicalQuantumOptimizer,
+    QuantumAnnealingOptimizer,
     QuantumLoadBalancer,
     QuantumResultCache,
-    OptimizationStrategy,
-    QuantumState,
 )
 
 

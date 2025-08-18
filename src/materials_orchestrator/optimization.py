@@ -1,18 +1,16 @@
 """Performance optimization and caching for autonomous lab operations."""
 
-import time
-import threading
 import concurrent.futures
-import os
-from typing import Dict, List, Any, Optional, Callable, Tuple
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from functools import wraps, lru_cache
-import logging
 import hashlib
 import json
-import pickle
-from pathlib import Path
+import logging
+import os
+import threading
+import time
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from functools import wraps
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

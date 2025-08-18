@@ -1,20 +1,17 @@
 """Multi-region orchestrator for global materials discovery campaigns."""
 
-import logging
-import asyncio
 import concurrent.futures
-from typing import Dict, List, Any, Optional, Tuple
+import logging
+import threading
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-import json
-import time
-import threading
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 from .global_deployment import (
-    Region,
     GlobalDeploymentManager,
-    get_global_deployment_manager,
+    Region,
 )
 
 logger = logging.getLogger(__name__)
@@ -245,7 +242,7 @@ class MultiRegionOrchestrator:
         else:
             # Equal weights if no performance data
             equal_weight = 1.0 / len(regions)
-            weights = {region: equal_weight for region in regions}
+            weights = dict.fromkeys(regions, equal_weight)
 
         return weights
 
@@ -694,7 +691,6 @@ class RegionCoordinator:
         try:
             # Import here to avoid circular imports
             from .core import AutonomousLab
-            from .distributed_computing import get_global_orchestrator
 
             # Create regional lab instance
             lab = AutonomousLab()

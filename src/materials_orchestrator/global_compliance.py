@@ -5,16 +5,15 @@ regulations, multi-region deployment, and internationalization support.
 """
 
 import asyncio
-import logging
-import json
-import hashlib
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Set
-from dataclasses import dataclass, field
-from enum import Enum
-from pathlib import Path
-import uuid
 import base64
+import hashlib
+import json
+import logging
+import uuid
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -854,7 +853,7 @@ class InternationalizationManager:
     def load_translations_from_file(self, file_path: str, locale: str):
         """Load translations from JSON file."""
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 translations = json.load(f)
                 self.translations[locale] = translations
         except (FileNotFoundError, json.JSONDecodeError) as e:
@@ -868,7 +867,7 @@ class InternationalizationManager:
         try:
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(self.translations[locale], f, ensure_ascii=False, indent=2)
-        except IOError as e:
+        except OSError as e:
             logger.error(f"Failed to export translations to {file_path}: {e}")
 
 

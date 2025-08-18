@@ -1,26 +1,24 @@
 """Comprehensive integration tests for Materials Orchestrator."""
 
-import pytest
 import asyncio
+import os
 import time
 from datetime import datetime
-import tempfile
-import os
-import json
+
+import pytest
 
 from materials_orchestrator import (
     AutonomousLab,
-    MaterialsObjective,
     BayesianPlanner,
-    RandomPlanner,
     ExperimentDatabase,
+    MaterialsObjective,
     RobotOrchestrator,
 )
-from materials_orchestrator.security import SecurityValidator, SecurityConfig
+from materials_orchestrator.error_handling import ErrorHandler
 from materials_orchestrator.monitoring import SystemMonitor
-from materials_orchestrator.error_handling import ErrorHandler, ErrorContext
 from materials_orchestrator.optimization import ConcurrentExperimentRunner, LRUCache
 from materials_orchestrator.scalability import DistributedJobManager, WorkerNode
+from materials_orchestrator.security import SecurityConfig, SecurityValidator
 
 
 class TestFullSystemIntegration:
@@ -126,9 +124,9 @@ class TestFullSystemIntegration:
     def test_error_handling_integration(self):
         """Test error handling and recovery."""
         from materials_orchestrator.error_handling import (
-            handle_errors,
             ErrorCategory,
             ErrorSeverity,
+            handle_errors,
         )
 
         error_handler = ErrorHandler()
@@ -323,8 +321,8 @@ class TestFullSystemIntegration:
         """Test dashboard data integration."""
         from materials_orchestrator.dashboard.utils import (
             calculate_success_metrics,
-            generate_experiment_summary,
             create_property_evolution_plot,
+            generate_experiment_summary,
         )
 
         # Create test experiment data
@@ -461,7 +459,6 @@ class TestPerformanceBenchmarks:
     def test_memory_usage(self):
         """Test memory usage stays reasonable."""
         import psutil
-        import os
 
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB

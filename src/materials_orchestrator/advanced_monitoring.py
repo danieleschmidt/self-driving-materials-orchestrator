@@ -6,14 +6,11 @@ for materials discovery pipelines with real-time dashboards and SLA tracking.
 
 import asyncio
 import logging
-import time
-import json
-import threading
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Union
-from dataclasses import dataclass, field, asdict
-from enum import Enum
 from collections import defaultdict, deque
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 # Conditional import for psutil
 try:

@@ -1,17 +1,16 @@
 """Enhanced security system with comprehensive protection measures."""
 
-import logging
 import hashlib
-import secrets
-import time
 import json
+import logging
 import re
-from typing import Dict, List, Any, Optional, Tuple, Set
+import secrets
+import threading
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-import threading
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -513,7 +512,7 @@ class AdvancedInputValidator:
                 if isinstance(sanitized_value, float):
                     if not (
                         isinstance(sanitized_value, (int, float))
-                        and not (str(sanitized_value).lower() in ["nan", "inf", "-inf"])
+                        and str(sanitized_value).lower() not in ["nan", "inf", "-inf"]
                     ):
                         sanitized_value = 0.0
 

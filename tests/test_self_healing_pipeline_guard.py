@@ -1,26 +1,26 @@
 """Comprehensive tests for self-healing pipeline guard system."""
 
 import asyncio
-import pytest
 import time
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from materials_orchestrator import (
-    SelfHealingPipelineGuard,
-    get_pipeline_guard,
-    PipelineStatus,
+    AdvancedMonitoringSystem,
+    ComponentType,
+    ErrorCategory,
+    ErrorSeverity,
+    FailoverStrategy,
     FailureType,
     IntelligentFailoverManager,
-    get_failover_manager,
-    ComponentType,
-    FailoverStrategy,
+    PipelineStatus,
     RobustErrorHandler,
+    SelfHealingPipelineGuard,
+    get_failover_manager,
     get_global_error_handler,
-    ErrorSeverity,
-    ErrorCategory,
-    AdvancedMonitoringSystem,
     get_monitoring_system,
+    get_pipeline_guard,
 )
 
 

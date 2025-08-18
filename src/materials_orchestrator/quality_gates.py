@@ -1,16 +1,13 @@
 """Comprehensive quality gates and validation system."""
 
+import json
 import logging
 import time
-import json
 import traceback
-from typing import Dict, List, Any, Optional, Callable, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
-import hashlib
-import re
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -317,7 +314,7 @@ class QualityGateRunner:
     def _log_test_results(self, result: QualityGateResult):
         """Log comprehensive test results."""
 
-        logger.info(f"Quality Gates Results:")
+        logger.info("Quality Gates Results:")
         logger.info(f"  Total Tests: {result.total_tests}")
         logger.info(f"  Passed: {result.passed_tests}")
         logger.info(f"  Failed: {result.failed_tests}")
@@ -485,8 +482,8 @@ class QualityGateRunner:
         try:
             from materials_orchestrator import (
                 AutonomousLab,
-                MaterialsObjective,
                 BayesianPlanner,
+                MaterialsObjective,
             )
 
             objective = MaterialsObjective("band_gap", (1.2, 1.6), "target")
@@ -773,8 +770,8 @@ class QualityGateRunner:
         try:
             from materials_orchestrator import (
                 AutonomousLab,
-                MaterialsObjective,
                 BayesianPlanner,
+                MaterialsObjective,
             )
 
             lab = AutonomousLab(planner=BayesianPlanner("band_gap"))
@@ -839,7 +836,7 @@ class QualityGateRunner:
             cache = AdaptivePerformanceCache(max_size=100)
 
             # Test cache operations
-            test_key = "test_key"
+            test_key = f"test_key_{hash('cache_test')}"
             test_value = {"result": 42.0}
 
             # Put and get
@@ -887,6 +884,7 @@ class QualityGateRunner:
         """Test memory usage during operations."""
         try:
             import sys
+
             from materials_orchestrator import AutonomousLab, MaterialsObjective
 
             # Get initial memory usage (simplified)

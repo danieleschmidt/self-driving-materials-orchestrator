@@ -1,12 +1,11 @@
 """Data validation and quality assurance for experiment data."""
 
 import logging
-from typing import Dict, List, Any, Optional, Tuple, Union
+import statistics
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-import statistics
-import math
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

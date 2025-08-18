@@ -1,20 +1,17 @@
 """Autonomous SDLC execution with research capabilities and self-improvement."""
 
-import asyncio
 import logging
-from typing import Dict, List, Any, Optional, Callable, Union
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from pathlib import Path
-import json
+from datetime import datetime
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
-from .utils import np, NUMPY_AVAILABLE, safe_numerical_operation
-from .core import AutonomousLab, MaterialsObjective, CampaignResult
+from .adaptive_learning import AdaptiveLearningEngine as AdaptiveLearningSystem
+from .core import AutonomousLab, MaterialsObjective
+from .error_recovery import ResilientExecutor
 from .monitoring import HealthMonitor
 from .security_enhanced import EnhancedSecurityManager as SecurityManager
-from .error_recovery import ResilientExecutor
-from .adaptive_learning import AdaptiveLearningEngine as AdaptiveLearningSystem
+from .utils import np, safe_numerical_operation
 
 # from .autonomous_reasoning import AutonomousReasoningEngine  # Optional
 

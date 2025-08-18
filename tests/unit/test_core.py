@@ -1,7 +1,8 @@
 """Unit tests for core functionality."""
 
 import pytest
-from materials_orchestrator.core import AutonomousLab, MaterialsObjective, LabStatus
+
+from materials_orchestrator.core import AutonomousLab, LabStatus, MaterialsObjective
 
 
 class TestMaterialsObjective:

@@ -6,14 +6,12 @@ failover, data replication, and regional compliance.
 
 import asyncio
 import logging
-import json
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Set, Tuple
-from dataclasses import dataclass, field
-from enum import Enum
-import uuid
 import random
-from collections import defaultdict
+import uuid
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -706,7 +704,6 @@ class MultiRegionDeploymentManager:
         self, regions: List[DeploymentRegion], weights: Dict[str, float]
     ) -> DeploymentRegion:
         """Select region based on weighted distribution."""
-        import random
 
         total_weight = 0.0
         region_weights = []
@@ -798,7 +795,6 @@ class MultiRegionDeploymentManager:
         status = self.deployment_status[region]
 
         # Simulate health metrics collection
-        import random
 
         # Update metrics
         status.cpu_utilization = random.uniform(20, 80)
@@ -887,7 +883,6 @@ class MultiRegionDeploymentManager:
         """Update cross-region latency measurements."""
         # In production, would measure actual latencies
         # For now, simulate with some variation
-        import random
 
         for (region1, region2), base_latency in self.region_latency_matrix.items():
             if region1 != region2:
