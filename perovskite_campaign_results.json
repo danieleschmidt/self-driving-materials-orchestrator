@@ -1,5 +1,5 @@
 {
-  "campaign_id": "93f57dca-246b-4edb-b092-54f92bda8d4b",
+  "campaign_id": "7b9ee16b-ebd8-4824-a524-ec64b1154830",
   "objective": {
     "target_property": "band_gap",
     "target_range": [
@@ -9,30 +9,30 @@
     "material_system": "perovskites"
   },
   "results": {
-    "total_experiments": 40,
-    "successful_experiments": 38,
-    "success_rate": 0.95,
+    "total_experiments": 60,
+    "successful_experiments": 54,
+    "success_rate": 0.9,
     "best_properties": {
-      "band_gap": 1.459,
-      "efficiency": 26.59,
-      "stability": 0.875
+      "band_gap": 1.439,
+      "efficiency": 24.25,
+      "stability": 0.802
     },
-    "acceleration_factor": 5.0
+    "acceleration_factor": 3.3333333333333335
   },
   "best_material": {
     "parameters": {
-      "precursor_A_conc": 0.9811928266109644,
-      "precursor_B_conc": 0.24406243606391148,
-      "temperature": 161.49520478011348,
-      "reaction_time": 3.012352536201003,
-      "pH": 8.740667279506958,
-      "solvent_ratio": 0.6753340925890144
+      "precursor_A_conc": 0.46047606267289876,
+      "precursor_B_conc": 1.6329406031723503,
+      "temperature": 104.06536904933648,
+      "reaction_time": 3.893374169462776,
+      "pH": 3.671305988536365,
+      "solvent_ratio": 0.822087945020118
     },
     "properties": {
-      "band_gap": 1.459,
-      "efficiency": 26.59,
-      "stability": 0.875
+      "band_gap": 1.439,
+      "efficiency": 24.25,
+      "stability": 0.802
     },
-    "experiment_id": "bfc783c1-157e-403a-a582-c16cb55645e9"
+    "experiment_id": "b65ab15a-7e4b-4613-bf58-94e64ec292d4"
   }
 }

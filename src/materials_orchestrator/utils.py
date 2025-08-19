@@ -40,6 +40,69 @@ except ImportError:
             mean_val = sum(x) / len(x)
             variance = sum((i - mean_val) ** 2 for i in x) / len(x)
             return variance**0.5
+        
+        @staticmethod
+        def var(x):
+            """Calculate variance."""
+            if not x:
+                return 0.0
+            mean_val = sum(x) / len(x)
+            return sum((i - mean_val) ** 2 for i in x) / len(x)
+        
+        @staticmethod
+        def corrcoef(x, y):
+            """Calculate correlation coefficient matrix."""
+            if not x or not y or len(x) != len(y):
+                return MockArray([[0.0, 0.0], [0.0, 0.0]])
+            
+            n = len(x)
+            if n == 1:
+                return MockArray([[1.0, 0.0], [0.0, 1.0]])
+            
+            mean_x = sum(x) / n
+            mean_y = sum(y) / n
+            
+            # Calculate covariance and standard deviations
+            cov = sum((x[i] - mean_x) * (y[i] - mean_y) for i in range(n)) / (n - 1)
+            std_x = (sum((xi - mean_x) ** 2 for xi in x) / (n - 1)) ** 0.5
+            std_y = (sum((yi - mean_y) ** 2 for yi in y) / (n - 1)) ** 0.5
+            
+            if std_x == 0 or std_y == 0:
+                corr = 0.0
+            else:
+                corr = cov / (std_x * std_y)
+            
+            return MockArray([[1.0, corr], [corr, 1.0]])
+        
+        @staticmethod
+        def isnan(x):
+            """Check if value is NaN."""
+            if hasattr(x, '__iter__') and not isinstance(x, (str, bytes)):
+                return [math.isnan(float(v)) if isinstance(v, (int, float)) else False for v in x]
+            try:
+                return math.isnan(float(x))
+            except (ValueError, TypeError):
+                return False
+
+
+    class MockArray:
+        """Mock numpy array that supports 2D indexing."""
+        
+        def __init__(self, data):
+            self.data = data
+        
+        def __getitem__(self, key):
+            if isinstance(key, tuple) and len(key) == 2:
+                row, col = key
+                return self.data[row][col]
+            return self.data[key]
+        
+        def __setitem__(self, key, value):
+            if isinstance(key, tuple) and len(key) == 2:
+                row, col = key
+                self.data[row][col] = value
+            else:
+                self.data[key] = value
 
         @staticmethod
         def zeros(shape):
