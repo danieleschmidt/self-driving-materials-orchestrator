@@ -72,6 +72,46 @@ from .scaling_optimizer import PerformanceOptimizer, get_global_optimizer
 from .security import SecurityManager
 from .validation import ExperimentValidator
 
+# Next-Generation AI Enhancements (Generation 4+)
+from .autonomous_hypothesis_generator import (
+    AutonomousHypothesisGenerator,
+    ScientificHypothesis,
+    HypothesisType,
+    HypothesisConfidence,
+    generate_scientific_hypotheses,
+    get_global_hypothesis_generator
+)
+from .quantum_hybrid_optimizer import (
+    QuantumHybridOptimizer,
+    QuantumOptimizationProblem,
+    QuantumOptimizationResult,
+    OptimizationStrategy,
+    QuantumBackend,
+    optimize_with_quantum_hybrid,
+    get_global_quantum_optimizer
+)
+from .federated_learning_coordinator import (
+    FederatedLearningCoordinator,
+    LabNode,
+    FederatedModel,
+    ModelUpdate,
+    LabRole,
+    PrivacyLevel,
+    FederationStatus,
+    create_federated_materials_network,
+    get_global_federation_coordinator
+)
+from .realtime_adaptive_protocols import (
+    AdaptiveProtocolEngine,
+    ExperimentalCondition,
+    RealTimeResult,
+    AdaptationStrategy,
+    AdaptationTrigger,
+    ProtocolStatus,
+    process_realtime_experiment_data,
+    get_global_adaptive_engine
+)
+
 # Optional dashboard import (requires streamlit)
 try:
     from .dashboard import LabDashboard
@@ -140,6 +180,38 @@ __all__ = [
     "DeploymentRegion",
     "RegionStatus",
     "DASHBOARD_AVAILABLE",
+    # Next-Generation AI Enhancements
+    "AutonomousHypothesisGenerator",
+    "ScientificHypothesis",
+    "HypothesisType",
+    "HypothesisConfidence",
+    "generate_scientific_hypotheses",
+    "get_global_hypothesis_generator",
+    "QuantumHybridOptimizer",
+    "QuantumOptimizationProblem",
+    "QuantumOptimizationResult",
+    "OptimizationStrategy",
+    "QuantumBackend",
+    "optimize_with_quantum_hybrid",
+    "get_global_quantum_optimizer",
+    "FederatedLearningCoordinator",
+    "LabNode",
+    "FederatedModel",
+    "ModelUpdate",
+    "LabRole",
+    "PrivacyLevel",
+    "FederationStatus",
+    "create_federated_materials_network",
+    "get_global_federation_coordinator",
+    "AdaptiveProtocolEngine",
+    "ExperimentalCondition",
+    "RealTimeResult",
+    "AdaptationStrategy",
+    "AdaptationTrigger",
+    "ProtocolStatus",
+    "process_realtime_experiment_data",
+    "get_global_adaptive_engine",
+    # Factory functions
     "create_database",
     "create_health_monitor",
     "create_security_manager",
