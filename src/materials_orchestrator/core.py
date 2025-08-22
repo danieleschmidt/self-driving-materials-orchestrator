@@ -9,6 +9,18 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 if TYPE_CHECKING:
     pass
 import logging
+
+# Import breakthrough AI for enhanced discovery
+try:
+    from .breakthrough_scientific_ai import (
+        BreakthroughScientificAI,
+        ScientificDiscovery,
+        DiscoveryConfidence,
+        get_global_breakthrough_ai
+    )
+    BREAKTHROUGH_AI_AVAILABLE = True
+except ImportError:
+    BREAKTHROUGH_AI_AVAILABLE = False
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -112,10 +124,17 @@ class AutonomousLab:
 
         # Initialize performance optimization
         self._setup_performance_optimization()
+        
+        # Initialize breakthrough AI system
+        self._setup_breakthrough_ai()
 
         logger.info(
             f"Autonomous lab initialized with {len(self.robots)} robots and {len(self.instruments)} instruments"
         )
+        
+        # Breakthrough capabilities
+        self.breakthrough_discoveries: List[Any] = []
+        self.research_hypotheses: List[Dict[str, Any]] = []
 
     def _setup_monitoring(self):
         """Setup health monitoring and security systems."""
@@ -210,6 +229,19 @@ class AutonomousLab:
         except ImportError as e:
             logger.warning(f"Performance optimization not available: {e}")
             self.performance_optimizer = None
+    
+    def _setup_breakthrough_ai(self):
+        """Setup breakthrough AI discovery system."""
+        if BREAKTHROUGH_AI_AVAILABLE:
+            try:
+                self.breakthrough_ai = get_global_breakthrough_ai()
+                logger.info("Breakthrough AI discovery system enabled")
+            except Exception as e:
+                logger.warning(f"Breakthrough AI initialization failed: {e}")
+                self.breakthrough_ai = None
+        else:
+            logger.info("Breakthrough AI not available - running in standard mode")
+            self.breakthrough_ai = None
 
     @property
     def total_experiments(self) -> int:
@@ -665,6 +697,40 @@ class AutonomousLab:
                             )
                             if property_value is not None:
                                 fitness = objective.calculate_fitness(property_value)
+                                
+                                # Breakthrough AI analysis
+                                if self.breakthrough_ai and len(self._experiments_history) % 10 == 0:
+                                    try:
+                                        import asyncio
+                                        # Analyze recent experiments for discoveries
+                                        recent_experiments = [
+                                            {
+                                                'parameters': exp.parameters,
+                                                'results': exp.results,
+                                                'timestamp': exp.timestamp or datetime.now()
+                                            }
+                                            for exp in self._experiments_history[-20:]
+                                            if exp.results
+                                        ]
+                                        
+                                        # Run breakthrough analysis asynchronously
+                                        loop = asyncio.new_event_loop()
+                                        asyncio.set_event_loop(loop)
+                                        discoveries = loop.run_until_complete(
+                                            self.breakthrough_ai.analyze_experimental_data(recent_experiments)
+                                        )
+                                        loop.close()
+                                        
+                                        if discoveries:
+                                            self.breakthrough_discoveries.extend(discoveries)
+                                            logger.info(f"Breakthrough AI identified {len(discoveries)} potential discoveries")
+                                            
+                                            # Log breakthrough discoveries
+                                            for discovery in discoveries:
+                                                if discovery.confidence.value in ['breakthrough', 'strong']:
+                                                    logger.info(f"🚀 BREAKTHROUGH: {discovery.discovery_text}")
+                                    except Exception as e:
+                                        logger.debug(f"Breakthrough AI analysis failed: {e}")
 
                                 if fitness > best_fitness:
                                     best_fitness = fitness

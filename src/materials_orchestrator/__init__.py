@@ -3,9 +3,13 @@
 End-to-end agentic pipeline for autonomous materials-discovery experiments.
 """
 
+import logging
+
 __version__ = "0.1.0"
 __author__ = "Daniel Schmidt"
 __email__ = "daniel@terragonlabs.com"
+
+logger = logging.getLogger(__name__)
 
 from .advanced_monitoring import (
     AdvancedMonitoringSystem,
@@ -73,44 +77,59 @@ from .security import SecurityManager
 from .validation import ExperimentValidator
 
 # Next-Generation AI Enhancements (Generation 4+)
-from .autonomous_hypothesis_generator import (
-    AutonomousHypothesisGenerator,
-    ScientificHypothesis,
-    HypothesisType,
-    HypothesisConfidence,
-    generate_scientific_hypotheses,
-    get_global_hypothesis_generator
-)
-from .quantum_hybrid_optimizer import (
-    QuantumHybridOptimizer,
-    QuantumOptimizationProblem,
-    QuantumOptimizationResult,
-    OptimizationStrategy,
-    QuantumBackend,
-    optimize_with_quantum_hybrid,
-    get_global_quantum_optimizer
-)
-from .federated_learning_coordinator import (
-    FederatedLearningCoordinator,
-    LabNode,
-    FederatedModel,
-    ModelUpdate,
-    LabRole,
-    PrivacyLevel,
-    FederationStatus,
+try:
+    from .autonomous_hypothesis_generator import (
+        AutonomousHypothesisGenerator,
+        ScientificHypothesis,
+        HypothesisType,
+        HypothesisConfidence,
+        generate_scientific_hypotheses,
+        get_global_hypothesis_generator
+    )
+except ImportError as e:
+    logger.warning(f"Autonomous hypothesis generator not available: {e}")
+
+try:
+    from .quantum_hybrid_optimizer import (
+        QuantumHybridOptimizer,
+        QuantumOptimizationProblem,
+        QuantumOptimizationResult,
+        OptimizationStrategy,
+        QuantumBackend,
+        optimize_with_quantum_hybrid,
+        get_global_quantum_optimizer
+    )
+except ImportError as e:
+    logger.warning(f"Quantum hybrid optimizer not available: {e}")
+
+try:
+    from .federated_learning_coordinator import (
+        FederatedLearningCoordinator,
+        LabNode,
+        FederatedModel,
+        ModelUpdate,
+        LabRole,
+        PrivacyLevel,
+        FederationStatus,
     create_federated_materials_network,
     get_global_federation_coordinator
-)
-from .realtime_adaptive_protocols import (
-    AdaptiveProtocolEngine,
-    ExperimentalCondition,
-    RealTimeResult,
-    AdaptationStrategy,
-    AdaptationTrigger,
-    ProtocolStatus,
-    process_realtime_experiment_data,
-    get_global_adaptive_engine
-)
+    )
+except ImportError as e:
+    logger.warning(f"Federated learning coordinator not available: {e}")
+
+try:
+    from .realtime_adaptive_protocols import (
+        AdaptiveProtocolEngine,
+        ExperimentalCondition,
+        RealTimeResult,
+        AdaptationStrategy,
+        AdaptationTrigger,
+        ProtocolStatus,
+        process_realtime_experiment_data,
+        get_global_adaptive_engine
+    )
+except ImportError as e:
+    logger.warning(f"Realtime adaptive protocols not available: {e}")
 
 # Optional dashboard import (requires streamlit)
 try:
