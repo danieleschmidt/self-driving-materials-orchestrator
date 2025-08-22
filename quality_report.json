@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-08-18 12:20:24.593506",
-  "overall_score": 68.46801760127127,
+  "timestamp": "2025-08-22 13:33:50.580874",
+  "overall_score": 65.08892085530371,
   "passed": false,
   "results": [
     {
@@ -15,20 +15,23 @@
         "coverage_threshold": 85.0,
         "success_rate_threshold": 95.0
       },
-      "duration": 9.086247205734253,
+      "duration": 0.03965139389038086,
       "error": ""
     },
     {
       "name": "Security Analysis",
-      "passed": true,
-      "score": 100.0,
+      "passed": false,
+      "score": 85.0,
       "details": {
-        "issues_found": 0,
-        "issues": [],
-        "files_scanned": 56,
+        "issues_found": 2,
+        "issues": [
+          "Potential eval() usage in /root/repo/src/materials_orchestrator/advanced_security.py",
+          "Unsafe pickle usage in /root/repo/src/materials_orchestrator/federated_learning_coordinator.py"
+        ],
+        "files_scanned": 68,
         "threshold": 90.0
       },
-      "duration": 0.3820793628692627,
+      "duration": 0.028586387634277344,
       "error": ""
     },
     {
@@ -36,66 +39,66 @@
       "passed": true,
       "score": 100.0,
       "details": {
-        "import_time_seconds": 2.86187744140625,
-        "functionality_time_seconds": 5.298271417617798,
+        "import_time_seconds": 0.2550053596496582,
+        "functionality_time_seconds": 2.276472568511963,
         "performance_score": 100.0,
         "threshold": 80.0,
         "test_successful": true
       },
-      "duration": 8.160161256790161,
+      "duration": 2.531489372253418,
       "error": ""
     },
     {
       "name": "Code Quality Analysis",
       "passed": false,
-      "score": 61.30513493859082,
+      "score": 59.028971786619195,
       "details": {
-        "total_files": 56,
-        "total_lines": 32493,
-        "total_functions": 1050,
-        "total_classes": 276,
-        "avg_file_size": 580.2321428571429,
-        "complexity_score": 61.97678571428571,
-        "docstring_score": 60.633484162895925,
+        "total_files": 68,
+        "total_lines": 42366,
+        "total_functions": 1361,
+        "total_classes": 357,
+        "avg_file_size": 623.0294117647059,
+        "complexity_score": 57.69705882352942,
+        "docstring_score": 60.360884749708966,
         "threshold": 85.0
       },
-      "duration": 0.020895957946777344,
+      "duration": 0.02697014808654785,
       "error": ""
     },
     {
       "name": "Documentation Analysis",
       "passed": true,
-      "score": 92.72247360482655,
+      "score": 92.34575087310827,
       "details": {
-        "doc_files_count": 39,
-        "docstring_coverage": 85.4449472096531,
-        "documented_items": 1133,
-        "total_items": 1326,
+        "doc_files_count": 43,
+        "docstring_coverage": 84.69150174621653,
+        "documented_items": 1455,
+        "total_items": 1718,
         "threshold": 70.0
       },
-      "duration": 0.01657700538635254,
+      "duration": 0.02160930633544922,
       "error": ""
     },
     {
       "name": "Integration Tests",
-      "passed": true,
-      "score": 100.0,
+      "passed": false,
+      "score": 100,
       "details": {
-        "total_tests": 3,
+        "total_tests": 0,
         "failed_tests": 0,
-        "success_rate": 100.0,
-        "return_code": 0
+        "success_rate": 100,
+        "return_code": 1
       },
-      "duration": 4.574075698852539,
+      "duration": 0.03197908401489258,
       "error": ""
     }
   ],
   "summary": {
     "total_gates": 6,
-    "passed_gates": 4,
-    "failed_gates": 2,
-    "success_rate": 66.66666666666666,
-    "total_duration": 22.2412326335907,
-    "avg_gate_duration": 3.7068721055984497
+    "passed_gates": 2,
+    "failed_gates": 4,
+    "success_rate": 33.33333333333333,
+    "total_duration": 2.6814157962799072,
+    "avg_gate_duration": 0.44690263271331787
   }
 }

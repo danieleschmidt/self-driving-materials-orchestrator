@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-08-22T13:33:32.486066",
+  "tests_passed": 10,
+  "tests_failed": 0,
+  "performance_metrics": {
+    "objective_evaluation": {
+      "success": true,
+      "fitness": -0.0
+    },
+    "simulation": {
+      "execution_time": 9.1552734375e-05,
+      "results": {
+        "band_gap": 1.525,
+        "efficiency": 19.89,
+        "stability": 0.578
+      }
+    },
+    "mini_campaign": {
+      "total_experiments": 5,
+      "success_rate": 0.8,
+      "execution_time": 0.5341019630432129,
+      "best_material": {
+        "parameters": {
+          "temperature": 111.00599210783452,
+          "concentration": 1.9706034845417226,
+          "time": 2.271669975075504
+        },
+        "properties": {
+          "band_gap": 1.463,
+          "efficiency": 22.73,
+          "stability": 0.99
+        },
+        "experiment_id": "3ac22c3d-ca77-428f-b979-de18f04d0a80"
+      }
+    },
+    "overall_score": 80.0
+  },
+  "quality_assessments": {},
+  "breakthrough_features": {
+    "breakthrough_ai": true,
+    "resilient_engine": true,
+    "quality_assurance": true,
+    "quantum_acceleration": true
+  },
+  "system_status": "EXCELLENT"
+}

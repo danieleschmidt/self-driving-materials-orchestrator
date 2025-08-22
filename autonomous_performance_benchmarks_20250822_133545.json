@@ -1,0 +1,98 @@
+{
+  "timestamp": "2025-08-22T13:35:24.030881",
+  "benchmarks": {
+    "core_initialization": {
+      "avg_time": 0.02268519401550293,
+      "std_time": 0.0504152288440917,
+      "score": 100,
+      "details": [
+        0.11287069320678711,
+        0.00012564659118652344,
+        0.0001232624053955078,
+        0.0001575946807861328,
+        0.000148773193359375
+      ]
+    },
+    "experiment_simulation": {
+      "avg_time": Infinity,
+      "throughput": 0.0,
+      "total_experiments": 50,
+      "score": 40
+    },
+    "optimization_performance": {
+      "optimization_time": 2.537132978439331,
+      "success_rate": 0.96,
+      "total_experiments": 25,
+      "score": 94.66286702156067
+    },
+    "concurrent_execution": {
+      "sequential_time": 2.012340784072876,
+      "concurrent_time": 0.5070297718048096,
+      "speedup": 3.968880913856008,
+      "concurrent_success_rate": 1.0,
+      "score": 100.0
+    },
+    "memory_efficiency": {
+      "fallback": true,
+      "score": 70
+    },
+    "scalability": {
+      "problem_sizes": [
+        5,
+        10,
+        20,
+        50
+      ],
+      "execution_times": [
+        0.5064699649810791,
+        1.0107004642486572,
+        1.01051926612854,
+        1.0148532390594482
+      ],
+      "scaling_factor": 2.00377773457378,
+      "scaling_efficiency": 4.990573469031525,
+      "score": 100
+    },
+    "breakthrough_ai": {
+      "analysis_time": 0.0017576217651367188,
+      "discoveries_found": 0,
+      "score": 49.98242378234863
+    },
+    "resilient_engine": {
+      "execution_time": 13.045446872711182,
+      "success_rate": 0.0,
+      "score": 0.0
+    },
+    "quality_assurance": {
+      "analysis_time": 0.007946491241455078,
+      "assessments_completed": 8,
+      "score": 99.96026754379272
+    },
+    "quantum_acceleration": {
+      "error": "np.<lambda>() takes from 0 to 3 positional arguments but 4 were given",
+      "score": 0
+    }
+  },
+  "overall_score": 68.40526348994328,
+  "recommendations": [
+    "Improve simulation performance with vectorization or caching",
+    "Optimize AI analysis algorithms for speed",
+    "Improve error recovery mechanisms",
+    "Optimize quantum circuit compilation and execution",
+    "Consider upgrading hardware for better performance",
+    "Profile code to identify performance bottlenecks"
+  ],
+  "individual_scores": [
+    100,
+    40,
+    94.66286702156067,
+    100.0,
+    70,
+    100,
+    49.98242378234863,
+    0.0,
+    99.96026754379272,
+    0
+  ],
+  "benchmark_count": 10
+}
