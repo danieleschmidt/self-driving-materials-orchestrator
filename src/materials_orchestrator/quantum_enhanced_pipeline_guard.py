@@ -21,14 +21,14 @@ try:
     import numpy as np
 except ImportError:
     print("NumPy not available - using fallback quantum implementations")
-    
+
     class NumpyFallback:
         """Fallback implementation for numpy functions."""
-        
+
         @staticmethod
         def array(data):
             return data if isinstance(data, list) else [data]
-        
+
         @staticmethod
         def zeros(shape):
             if isinstance(shape, int):
@@ -39,28 +39,28 @@ except ImportError:
                 elif len(shape) == 2:
                     return [[0.0] * shape[1] for _ in range(shape[0])]
             return []
-        
+
         @staticmethod
         def random():
             import random
             return random.random()
-        
+
         @staticmethod
         def exp(x):
             return math.exp(x) if isinstance(x, (int, float)) else [math.exp(v) for v in x]
-        
+
         @staticmethod
         def cos(x):
             return math.cos(x) if isinstance(x, (int, float)) else [math.cos(v) for v in x]
-        
+
         @staticmethod
         def sin(x):
             return math.sin(x) if isinstance(x, (int, float)) else [math.sin(v) for v in x]
-        
+
         @staticmethod
         def mean(data):
             return sum(data) / len(data) if data else 0.0
-        
+
         @staticmethod
         def std(data):
             if not data:
@@ -68,10 +68,10 @@ except ImportError:
             mean_val = sum(data) / len(data)
             variance = sum((x - mean_val) ** 2 for x in data) / len(data)
             return variance ** 0.5
-        
+
         # Add ndarray attribute for compatibility
         ndarray = list
-    
+
     np = NumpyFallback()
 
 logger = logging.getLogger(__name__)

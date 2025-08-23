@@ -80,24 +80,24 @@ from .validation import ExperimentValidator
 try:
     from .autonomous_hypothesis_generator import (
         AutonomousHypothesisGenerator,
-        ScientificHypothesis,
-        HypothesisType,
         HypothesisConfidence,
+        HypothesisType,
+        ScientificHypothesis,
         generate_scientific_hypotheses,
-        get_global_hypothesis_generator
+        get_global_hypothesis_generator,
     )
 except ImportError as e:
     logger.warning(f"Autonomous hypothesis generator not available: {e}")
 
 try:
     from .quantum_hybrid_optimizer import (
+        OptimizationStrategy,
+        QuantumBackend,
         QuantumHybridOptimizer,
         QuantumOptimizationProblem,
         QuantumOptimizationResult,
-        OptimizationStrategy,
-        QuantumBackend,
+        get_global_quantum_optimizer,
         optimize_with_quantum_hybrid,
-        get_global_quantum_optimizer
     )
 except ImportError as e:
     logger.warning(f"Quantum hybrid optimizer not available: {e}")
@@ -105,28 +105,28 @@ except ImportError as e:
 try:
     from .federated_learning_coordinator import (
         FederatedLearningCoordinator,
-        LabNode,
         FederatedModel,
-        ModelUpdate,
-        LabRole,
-        PrivacyLevel,
         FederationStatus,
-    create_federated_materials_network,
-    get_global_federation_coordinator
+        LabNode,
+        LabRole,
+        ModelUpdate,
+        PrivacyLevel,
+        create_federated_materials_network,
+        get_global_federation_coordinator,
     )
 except ImportError as e:
     logger.warning(f"Federated learning coordinator not available: {e}")
 
 try:
     from .realtime_adaptive_protocols import (
-        AdaptiveProtocolEngine,
-        ExperimentalCondition,
-        RealTimeResult,
         AdaptationStrategy,
         AdaptationTrigger,
+        AdaptiveProtocolEngine,
+        ExperimentalCondition,
         ProtocolStatus,
+        RealTimeResult,
+        get_global_adaptive_engine,
         process_realtime_experiment_data,
-        get_global_adaptive_engine
     )
 except ImportError as e:
     logger.warning(f"Realtime adaptive protocols not available: {e}")
