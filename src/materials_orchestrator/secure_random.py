@@ -37,7 +37,7 @@ def secure_choice(sequence: List[Union[int, float, str]]) -> Union[int, float, s
     """
     if not sequence:
         raise ValueError("Cannot choose from empty sequence")
-    
+
     index = secrets.randbelow(len(sequence))
     return sequence[index]
 

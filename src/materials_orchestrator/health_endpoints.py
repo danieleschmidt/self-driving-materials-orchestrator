@@ -51,20 +51,20 @@ class HealthChecker:
 
         for name, check_info in self._checks.items():
             check_start = time.time()
-            
+
             try:
                 # Run check with timeout
                 is_healthy, details = check_info["func"]()
-                
+
                 check_result = {
                     "status": "healthy" if is_healthy else "unhealthy",
                     "response_time": time.time() - check_start,
                     "details": details,
                 }
-                
+
                 if not is_healthy:
                     overall_healthy = False
-                    
+
             except Exception as e:
                 check_result = {
                     "status": "error",
@@ -97,7 +97,7 @@ def setup_health_endpoints(app: FastAPI) -> None:
     async def health_check():
         """Basic health check endpoint."""
         results = health_checker.run_checks()
-        
+
         status_code = 200 if results["status"] == "healthy" else 503
         return JSONResponse(content=results, status_code=status_code)
 
@@ -105,7 +105,7 @@ def setup_health_endpoints(app: FastAPI) -> None:
     async def readiness_check():
         """Kubernetes readiness probe."""
         results = health_checker.run_checks()
-        
+
         # Check critical components
         critical_checks = ["database", "core_system"]
         ready = all(
@@ -113,7 +113,7 @@ def setup_health_endpoints(app: FastAPI) -> None:
             for check in critical_checks
             if check in results["checks"]
         )
-        
+
         if ready:
             return {"status": "ready", "timestamp": datetime.now().isoformat()}
         else:
@@ -137,16 +137,16 @@ def setup_health_endpoints(app: FastAPI) -> None:
         # This would typically return metrics in Prometheus format
         # For now, return basic metrics
         uptime = time.time() - health_checker._start_time
-        
+
         metrics = [
-            f"# HELP materials_orchestrator_uptime_seconds Time since startup",
-            f"# TYPE materials_orchestrator_uptime_seconds counter",
+            "# HELP materials_orchestrator_uptime_seconds Time since startup",
+            "# TYPE materials_orchestrator_uptime_seconds counter",
             f"materials_orchestrator_uptime_seconds {uptime}",
             "",
-            f"# HELP materials_orchestrator_health_checks_total Health check results",
-            f"# TYPE materials_orchestrator_health_checks_total counter",
+            "# HELP materials_orchestrator_health_checks_total Health check results",
+            "# TYPE materials_orchestrator_health_checks_total counter",
         ]
-        
+
         # Add health check metrics
         for name, check_info in health_checker._checks.items():
             if check_info["last_result"]:
@@ -154,7 +154,7 @@ def setup_health_endpoints(app: FastAPI) -> None:
                 metrics.append(
                     f'materials_orchestrator_health_check{{check="{name}"}} {status_value}'
                 )
-        
+
         return "\n".join(metrics)
 
 
@@ -176,8 +176,7 @@ def core_system_health_check() -> tuple[bool, dict]:
     """Check core system health."""
     try:
         # Check if core components can be imported and initialized
-        from .core import AutonomousLab
-        
+
         return True, {
             "core_modules": "loaded",
             "status": "operational",
@@ -190,13 +189,13 @@ def memory_health_check() -> tuple[bool, dict]:
     """Check system memory usage."""
     try:
         import psutil
-        
+
         memory = psutil.virtual_memory()
         disk = psutil.disk_usage('/')
-        
+
         memory_healthy = memory.percent < 90
         disk_healthy = disk.percent < 90
-        
+
         return memory_healthy and disk_healthy, {
             "memory_percent": memory.percent,
             "disk_percent": disk.percent,
