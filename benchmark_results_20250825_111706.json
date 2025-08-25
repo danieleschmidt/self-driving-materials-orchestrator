@@ -1,0 +1,51 @@
+{
+  "export_info": {
+    "timestamp": "2025-08-25T11:17:06.286333",
+    "total_results": 0,
+    "benchmark_configurations": {
+      "Algorithm Performance Comparison": {
+        "type": "algorithm_comparison",
+        "metrics": [
+          "accuracy",
+          "speed",
+          "convergence"
+        ],
+        "iterations": 20
+      },
+      "Performance Scaling Analysis": {
+        "type": "performance_scaling",
+        "metrics": [
+          "speed",
+          "scalability"
+        ],
+        "iterations": 15
+      },
+      "Accuracy Validation": {
+        "type": "accuracy_validation",
+        "metrics": [
+          "accuracy",
+          "reliability"
+        ],
+        "iterations": 30
+      },
+      "Robustness Testing": {
+        "type": "robustness_testing",
+        "metrics": [
+          "reliability",
+          "efficiency"
+        ],
+        "iterations": 25
+      },
+      "Materials Discovery Algorithm Comparison": {
+        "type": "algorithm_comparison",
+        "metrics": [
+          "accuracy",
+          "speed",
+          "convergence"
+        ],
+        "iterations": 5
+      }
+    }
+  },
+  "results": []
+}
