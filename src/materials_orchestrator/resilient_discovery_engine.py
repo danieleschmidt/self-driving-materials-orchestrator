@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class FailureMode(Enum):
     """Types of failure modes in materials discovery."""
+
     EXPERIMENT_FAILURE = "experiment_failure"
     ROBOT_MALFUNCTION = "robot_malfunction"
     INSTRUMENT_ERROR = "instrument_error"
@@ -30,6 +31,7 @@ class FailureMode(Enum):
 
 class RecoveryStrategy(Enum):
     """Recovery strategies for different failure modes."""
+
     RETRY_IMMEDIATE = "retry_immediate"
     RETRY_WITH_DELAY = "retry_with_delay"
     FALLBACK_METHOD = "fallback_method"
@@ -57,30 +59,34 @@ class FailureEvent:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for logging and analysis."""
         return {
-            'id': self.id,
-            'failure_mode': self.failure_mode.value,
-            'timestamp': self.timestamp.isoformat(),
-            'component': self.component,
-            'error_message': self.error_message,
-            'context': self.context,
-            'recovery_attempted': self.recovery_attempted,
-            'recovery_strategy': self.recovery_strategy.value if self.recovery_strategy else None,
-            'recovery_successful': self.recovery_successful,
-            'impact_severity': self.impact_severity
+            "id": self.id,
+            "failure_mode": self.failure_mode.value,
+            "timestamp": self.timestamp.isoformat(),
+            "component": self.component,
+            "error_message": self.error_message,
+            "context": self.context,
+            "recovery_attempted": self.recovery_attempted,
+            "recovery_strategy": (
+                self.recovery_strategy.value if self.recovery_strategy else None
+            ),
+            "recovery_successful": self.recovery_successful,
+            "impact_severity": self.impact_severity,
         }
 
 
 class ResilientDiscoveryEngine:
     """Production-grade resilient discovery engine for materials research."""
 
-    def __init__(self,
-                 max_retries: int = 3,
-                 base_retry_delay: float = 1.0,
-                 max_retry_delay: float = 60.0,
-                 circuit_breaker_threshold: int = 5,
-                 enable_predictive_maintenance: bool = True):
+    def __init__(
+        self,
+        max_retries: int = 3,
+        base_retry_delay: float = 1.0,
+        max_retry_delay: float = 60.0,
+        circuit_breaker_threshold: int = 5,
+        enable_predictive_maintenance: bool = True,
+    ):
         """Initialize resilient discovery engine.
-        
+
         Args:
             max_retries: Maximum retry attempts for failed operations
             base_retry_delay: Base delay between retries (exponential backoff)
@@ -120,19 +126,17 @@ class ResilientDiscoveryEngine:
 
         logger.info("Resilient Discovery Engine initialized")
 
-    async def execute_resilient_operation(self,
-                                        operation: Callable,
-                                        operation_name: str,
-                                        *args,
-                                        **kwargs) -> Tuple[Any, bool]:
+    async def execute_resilient_operation(
+        self, operation: Callable, operation_name: str, *args, **kwargs
+    ) -> Tuple[Any, bool]:
         """Execute an operation with comprehensive error handling and recovery.
-        
+
         Args:
             operation: Function to execute
             operation_name: Name for logging and tracking
             *args: Positional arguments for operation
             **kwargs: Keyword arguments for operation
-            
+
         Returns:
             Tuple of (result, success_flag)
         """
@@ -148,8 +152,7 @@ class ResilientDiscoveryEngine:
                 # Execute operation with timeout
                 if asyncio.iscoroutinefunction(operation):
                     result = await asyncio.wait_for(
-                        operation(*args, **kwargs),
-                        timeout=kwargs.get('timeout', 300.0)
+                        operation(*args, **kwargs), timeout=kwargs.get("timeout", 300.0)
                     )
                 else:
                     result = operation(*args, **kwargs)
@@ -170,7 +173,9 @@ class ResilientDiscoveryEngine:
                 self.failure_history.append(failure_event)
 
                 # Determine if this is a recoverable failure
-                is_recoverable = self._is_recoverable_failure(e, failure_event.failure_mode)
+                is_recoverable = self._is_recoverable_failure(
+                    e, failure_event.failure_mode
+                )
 
                 if attempt < self.max_retries and is_recoverable:
                     # Attempt recovery
@@ -179,11 +184,12 @@ class ResilientDiscoveryEngine:
                     if recovery_successful:
                         # Calculate retry delay with exponential backoff
                         delay = min(
-                            self.base_retry_delay * (2 ** attempt),
-                            self.max_retry_delay
+                            self.base_retry_delay * (2**attempt), self.max_retry_delay
                         )
 
-                        logger.info(f"Retrying {operation_name} in {delay:.1f}s (attempt {attempt + 2})")
+                        logger.info(
+                            f"Retrying {operation_name} in {delay:.1f}s (attempt {attempt + 2})"
+                        )
                         await asyncio.sleep(delay)
                         continue
 
@@ -193,12 +199,14 @@ class ResilientDiscoveryEngine:
 
         return None, False
 
-    def _create_failure_event(self,
-                            operation_name: str,
-                            exception: Exception,
-                            attempt: int,
-                            args: tuple,
-                            kwargs: dict) -> FailureEvent:
+    def _create_failure_event(
+        self,
+        operation_name: str,
+        exception: Exception,
+        attempt: int,
+        args: tuple,
+        kwargs: dict,
+    ) -> FailureEvent:
         """Create a failure event from an exception."""
 
         # Classify failure mode
@@ -212,12 +220,12 @@ class ResilientDiscoveryEngine:
             component=operation_name,
             error_message=str(exception),
             context={
-                'attempt': attempt,
-                'args_count': len(args),
-                'kwargs_keys': list(kwargs.keys()),
-                'exception_type': type(exception).__name__
+                "attempt": attempt,
+                "args_count": len(args),
+                "kwargs_keys": list(kwargs.keys()),
+                "exception_type": type(exception).__name__,
             },
-            impact_severity=impact_severity
+            impact_severity=impact_severity,
         )
 
     def _classify_failure_mode(self, exception: Exception) -> FailureMode:
@@ -226,24 +234,28 @@ class ResilientDiscoveryEngine:
         exception_str = str(exception).lower()
         exception_type = type(exception).__name__.lower()
 
-        if 'timeout' in exception_str or 'timeout' in exception_type:
+        if "timeout" in exception_str or "timeout" in exception_type:
             return FailureMode.NETWORK_TIMEOUT
-        elif 'robot' in exception_str or 'device' in exception_str:
+        elif "robot" in exception_str or "device" in exception_str:
             return FailureMode.ROBOT_MALFUNCTION
-        elif 'instrument' in exception_str or 'sensor' in exception_str:
+        elif "instrument" in exception_str or "sensor" in exception_str:
             return FailureMode.INSTRUMENT_ERROR
-        elif 'data' in exception_str and ('corrupt' in exception_str or 'invalid' in exception_str):
+        elif "data" in exception_str and (
+            "corrupt" in exception_str or "invalid" in exception_str
+        ):
             return FailureMode.DATA_CORRUPTION
-        elif 'safety' in exception_str or 'emergency' in exception_str:
+        elif "safety" in exception_str or "emergency" in exception_str:
             return FailureMode.SAFETY_VIOLATION
-        elif 'memory' in exception_str or 'resource' in exception_str:
+        elif "memory" in exception_str or "resource" in exception_str:
             return FailureMode.RESOURCE_EXHAUSTION
-        elif 'converge' in exception_str or 'optimization' in exception_str:
+        elif "converge" in exception_str or "optimization" in exception_str:
             return FailureMode.OPTIMIZATION_STALL
         else:
             return FailureMode.EXPERIMENT_FAILURE
 
-    def _calculate_impact_severity(self, failure_mode: FailureMode, component: str) -> float:
+    def _calculate_impact_severity(
+        self, failure_mode: FailureMode, component: str
+    ) -> float:
         """Calculate the impact severity of a failure."""
 
         base_severity = {
@@ -258,13 +270,15 @@ class ResilientDiscoveryEngine:
         }.get(failure_mode, 0.5)
 
         # Adjust based on component criticality
-        critical_components = ['safety_system', 'main_reactor', 'control_system']
+        critical_components = ["safety_system", "main_reactor", "control_system"]
         if any(critical in component.lower() for critical in critical_components):
             base_severity *= 1.5
 
         return min(base_severity, 1.0)
 
-    def _is_recoverable_failure(self, exception: Exception, failure_mode: FailureMode) -> bool:
+    def _is_recoverable_failure(
+        self, exception: Exception, failure_mode: FailureMode
+    ) -> bool:
         """Determine if a failure is recoverable."""
 
         # Safety violations are not recoverable
@@ -296,7 +310,9 @@ class ResilientDiscoveryEngine:
                 failure_event.recovery_strategy = recovery_strategy
 
                 # Execute recovery strategy
-                success = await self._execute_recovery_strategy(recovery_strategy, failure_event)
+                success = await self._execute_recovery_strategy(
+                    recovery_strategy, failure_event
+                )
                 failure_event.recovery_successful = success
 
                 return success
@@ -307,9 +323,9 @@ class ResilientDiscoveryEngine:
             logger.error(f"Recovery attempt failed: {e}")
             return False
 
-    async def _execute_recovery_strategy(self,
-                                       strategy: RecoveryStrategy,
-                                       failure_event: FailureEvent) -> bool:
+    async def _execute_recovery_strategy(
+        self, strategy: RecoveryStrategy, failure_event: FailureEvent
+    ) -> bool:
         """Execute a specific recovery strategy."""
 
         try:
@@ -343,7 +359,9 @@ class ResilientDiscoveryEngine:
             logger.error(f"Recovery strategy execution failed: {e}")
             return False
 
-    async def _handle_experiment_failure(self, failure_event: FailureEvent) -> RecoveryStrategy:
+    async def _handle_experiment_failure(
+        self, failure_event: FailureEvent
+    ) -> RecoveryStrategy:
         """Handle experiment failure."""
 
         # Check if this is a systematic failure
@@ -354,7 +372,9 @@ class ResilientDiscoveryEngine:
         else:
             return RecoveryStrategy.RETRY_WITH_DELAY
 
-    async def _handle_robot_malfunction(self, failure_event: FailureEvent) -> RecoveryStrategy:
+    async def _handle_robot_malfunction(
+        self, failure_event: FailureEvent
+    ) -> RecoveryStrategy:
         """Handle robot malfunction."""
 
         # Check severity
@@ -363,37 +383,49 @@ class ResilientDiscoveryEngine:
         else:
             return RecoveryStrategy.RECALIBRATE_SYSTEM
 
-    async def _handle_instrument_error(self, failure_event: FailureEvent) -> RecoveryStrategy:
+    async def _handle_instrument_error(
+        self, failure_event: FailureEvent
+    ) -> RecoveryStrategy:
         """Handle instrument error."""
 
         # Try recalibration first
         return RecoveryStrategy.RECALIBRATE_SYSTEM
 
-    async def _handle_data_corruption(self, failure_event: FailureEvent) -> RecoveryStrategy:
+    async def _handle_data_corruption(
+        self, failure_event: FailureEvent
+    ) -> RecoveryStrategy:
         """Handle data corruption."""
 
         # Skip corrupted data and continue
         return RecoveryStrategy.SKIP_AND_CONTINUE
 
-    async def _handle_network_timeout(self, failure_event: FailureEvent) -> RecoveryStrategy:
+    async def _handle_network_timeout(
+        self, failure_event: FailureEvent
+    ) -> RecoveryStrategy:
         """Handle network timeout."""
 
         return RecoveryStrategy.RETRY_WITH_DELAY
 
-    async def _handle_safety_violation(self, failure_event: FailureEvent) -> RecoveryStrategy:
+    async def _handle_safety_violation(
+        self, failure_event: FailureEvent
+    ) -> RecoveryStrategy:
         """Handle safety violation."""
 
         # Safety violations trigger emergency stop
         return RecoveryStrategy.EMERGENCY_STOP
 
-    async def _handle_resource_exhaustion(self, failure_event: FailureEvent) -> RecoveryStrategy:
+    async def _handle_resource_exhaustion(
+        self, failure_event: FailureEvent
+    ) -> RecoveryStrategy:
         """Handle resource exhaustion."""
 
         # Wait for resources to become available
         await asyncio.sleep(10.0)
         return RecoveryStrategy.RETRY_WITH_DELAY
 
-    async def _handle_optimization_stall(self, failure_event: FailureEvent) -> RecoveryStrategy:
+    async def _handle_optimization_stall(
+        self, failure_event: FailureEvent
+    ) -> RecoveryStrategy:
         """Handle optimization stall."""
 
         return RecoveryStrategy.FALLBACK_METHOD
@@ -404,17 +436,17 @@ class ResilientDiscoveryEngine:
         logger.info(f"Activating fallback method for {failure_event.component}")
 
         # Implement fallback logic based on component
-        if 'synthesis' in failure_event.component.lower():
+        if "synthesis" in failure_event.component.lower():
             # Use alternative synthesis method
             logger.info("Switching to alternative synthesis method")
             return True
 
-        elif 'characterization' in failure_event.component.lower():
+        elif "characterization" in failure_event.component.lower():
             # Use alternative characterization technique
             logger.info("Switching to alternative characterization method")
             return True
 
-        elif 'optimization' in failure_event.component.lower():
+        elif "optimization" in failure_event.component.lower():
             # Switch to simpler optimization algorithm
             logger.info("Switching to fallback optimization algorithm")
             return True
@@ -443,13 +475,16 @@ class ResilientDiscoveryEngine:
         logger.info(f"Backup activated for {failure_event.component}")
         return True
 
-    def _get_recent_failures(self, component: str, minutes: int = 10) -> List[FailureEvent]:
+    def _get_recent_failures(
+        self, component: str, minutes: int = 10
+    ) -> List[FailureEvent]:
         """Get recent failures for a component."""
 
         cutoff_time = datetime.now() - timedelta(minutes=minutes)
 
         return [
-            event for event in self.failure_history
+            event
+            for event in self.failure_history
             if event.component == component and event.timestamp > cutoff_time
         ]
 
@@ -462,11 +497,11 @@ class ResilientDiscoveryEngine:
             return False
 
         # Check if enough time has passed to reset the breaker
-        if breaker['open_until'] and datetime.now() > breaker['open_until']:
+        if breaker["open_until"] and datetime.now() > breaker["open_until"]:
             del self.circuit_breakers[operation_name]
             return False
 
-        return breaker.get('is_open', False)
+        return breaker.get("is_open", False)
 
     def _record_successful_operation(self, operation_name: str, execution_time: float):
         """Record successful operation for monitoring."""
@@ -478,17 +513,23 @@ class ResilientDiscoveryEngine:
 
         # Keep only recent timings
         if len(self.operation_timings[operation_name]) > 100:
-            self.operation_timings[operation_name] = self.operation_timings[operation_name][-50:]
+            self.operation_timings[operation_name] = self.operation_timings[
+                operation_name
+            ][-50:]
 
     async def _handle_final_failure(self, failure_event: FailureEvent):
         """Handle final failure after all retries exhausted."""
 
         # Update failure count
-        self.failure_counts[failure_event.component] = \
+        self.failure_counts[failure_event.component] = (
             self.failure_counts.get(failure_event.component, 0) + 1
+        )
 
         # Check if circuit breaker should trip
-        if self.failure_counts[failure_event.component] >= self.circuit_breaker_threshold:
+        if (
+            self.failure_counts[failure_event.component]
+            >= self.circuit_breaker_threshold
+        ):
             self._trip_circuit_breaker(failure_event.component)
 
         # Log final failure
@@ -506,9 +547,13 @@ class ResilientDiscoveryEngine:
         logger.warning(f"Circuit breaker tripped for {operation_name}")
 
         self.circuit_breakers[operation_name] = {
-            'is_open': True,
-            'open_until': datetime.now() + timedelta(minutes=5),  # Reset after 5 minutes
-            'trip_count': self.circuit_breakers.get(operation_name, {}).get('trip_count', 0) + 1
+            "is_open": True,
+            "open_until": datetime.now()
+            + timedelta(minutes=5),  # Reset after 5 minutes
+            "trip_count": self.circuit_breakers.get(operation_name, {}).get(
+                "trip_count", 0
+            )
+            + 1,
         }
 
     async def _trigger_predictive_maintenance(self, failure_event: FailureEvent):
@@ -518,14 +563,19 @@ class ResilientDiscoveryEngine:
 
         # Analyze failure patterns
         component_failures = [
-            event for event in self.failure_history
+            event
+            for event in self.failure_history
             if event.component == failure_event.component
         ]
 
         if len(component_failures) > 3:
             # Calculate failure rate
-            time_span = (component_failures[-1].timestamp - component_failures[0].timestamp).total_seconds()
-            failure_rate = len(component_failures) / (time_span / 3600)  # failures per hour
+            time_span = (
+                component_failures[-1].timestamp - component_failures[0].timestamp
+            ).total_seconds()
+            failure_rate = len(component_failures) / (
+                time_span / 3600
+            )  # failures per hour
 
             if failure_rate > 0.1:  # More than 0.1 failures per hour
                 logger.warning(
@@ -582,21 +632,29 @@ class ResilientDiscoveryEngine:
         recommendations = []
 
         if recent_failures > 10:
-            recommendations.append("High recent failure rate - consider system inspection")
+            recommendations.append(
+                "High recent failure rate - consider system inspection"
+            )
 
         for component, health in component_health.items():
             if health < 0.5:
-                recommendations.append(f"Component {component} requires attention (health: {health:.2f})")
+                recommendations.append(
+                    f"Component {component} requires attention (health: {health:.2f})"
+                )
 
         return {
-            'timestamp': datetime.now().isoformat(),
-            'total_failures': total_failures,
-            'recent_failures_1h': recent_failures,
-            'component_health': component_health,
-            'circuit_breakers_active': len(self.circuit_breakers),
-            'average_operation_time': self._calculate_average_operation_time(),
-            'recommendations': recommendations,
-            'system_status': 'HEALTHY' if recent_failures < 5 else 'DEGRADED' if recent_failures < 15 else 'CRITICAL'
+            "timestamp": datetime.now().isoformat(),
+            "total_failures": total_failures,
+            "recent_failures_1h": recent_failures,
+            "component_health": component_health,
+            "circuit_breakers_active": len(self.circuit_breakers),
+            "average_operation_time": self._calculate_average_operation_time(),
+            "recommendations": recommendations,
+            "system_status": (
+                "HEALTHY"
+                if recent_failures < 5
+                else "DEGRADED" if recent_failures < 15 else "CRITICAL"
+            ),
         }
 
     def _get_recent_failures_all(self, minutes: int = 10) -> List[FailureEvent]:
@@ -605,8 +663,7 @@ class ResilientDiscoveryEngine:
         cutoff_time = datetime.now() - timedelta(minutes=minutes)
 
         return [
-            event for event in self.failure_history
-            if event.timestamp > cutoff_time
+            event for event in self.failure_history if event.timestamp > cutoff_time
         ]
 
     def _calculate_average_operation_time(self) -> float:
@@ -621,6 +678,7 @@ class ResilientDiscoveryEngine:
 
 # Global instance
 _global_resilient_engine = None
+
 
 def get_global_resilient_engine() -> ResilientDiscoveryEngine:
     """Get global resilient discovery engine instance."""

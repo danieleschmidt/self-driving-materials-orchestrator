@@ -1,6 +1,6 @@
 """Breakthrough Scientific AI for Autonomous Discovery.
 
-Next-generation AI system that combines multiple advanced techniques for 
+Next-generation AI system that combines multiple advanced techniques for
 autonomous scientific discovery and hypothesis generation.
 """
 
@@ -14,9 +14,11 @@ from typing import Any, Dict, List
 # Graceful dependency handling
 try:
     import numpy as np
+
     NUMPY_AVAILABLE = True
 except ImportError:
     NUMPY_AVAILABLE = False
+
     # Minimal numpy-like implementation
     class np:
         @staticmethod
@@ -33,7 +35,7 @@ except ImportError:
                 return 0
             mean_val = sum(data) / len(data)
             variance = sum((x - mean_val) ** 2 for x in data) / len(data)
-            return variance ** 0.5
+            return variance**0.5
 
         @staticmethod
         def corrcoef(x, y):
@@ -48,17 +50,23 @@ except ImportError:
             den_y = sum((y[i] - mean_y) ** 2 for i in range(n)) ** 0.5
             return num / (den_x * den_y) if den_x * den_y > 0 else 0
 
-        random = type('random', (), {
-            'random': lambda: __import__('random').random(),
-            'randint': lambda a, b: __import__('random').randint(a, b),
-            'choice': lambda seq: __import__('random').choice(seq)
-        })()
+        random = type(
+            "random",
+            (),
+            {
+                "random": lambda: __import__("random").random(),
+                "randint": lambda a, b: __import__("random").randint(a, b),
+                "choice": lambda seq: __import__("random").choice(seq),
+            },
+        )()
+
 
 logger = logging.getLogger(__name__)
 
 
 class DiscoveryConfidence(Enum):
     """Confidence levels for scientific discoveries."""
+
     PRELIMINARY = "preliminary"
     PROMISING = "promising"
     STRONG = "strong"
@@ -67,6 +75,7 @@ class DiscoveryConfidence(Enum):
 
 class DiscoveryType(Enum):
     """Types of scientific discoveries."""
+
     MATERIAL_PROPERTY = "material_property"
     SYNTHESIS_PATHWAY = "synthesis_pathway"
     STRUCTURE_FUNCTION = "structure_function"
@@ -111,12 +120,14 @@ class ScientificDiscovery:
 class BreakthroughScientificAI:
     """Advanced AI system for autonomous scientific discovery."""
 
-    def __init__(self,
-                 discovery_threshold: float = 0.8,
-                 enable_quantum_acceleration: bool = False,
-                 enable_federated_learning: bool = False):
+    def __init__(
+        self,
+        discovery_threshold: float = 0.8,
+        enable_quantum_acceleration: bool = False,
+        enable_federated_learning: bool = False,
+    ):
         """Initialize the breakthrough scientific AI system.
-        
+
         Args:
             discovery_threshold: Minimum confidence for breakthrough discoveries
             enable_quantum_acceleration: Use quantum computing for optimization
@@ -138,18 +149,23 @@ class BreakthroughScientificAI:
 
         logger.info("Breakthrough Scientific AI initialized")
 
-    async def analyze_experimental_data(self,
-                                      experiments: List[Dict[str, Any]]) -> List[ScientificDiscovery]:
+    async def analyze_experimental_data(
+        self, experiments: List[Dict[str, Any]]
+    ) -> List[ScientificDiscovery]:
         """Analyze experimental data for potential discoveries."""
         discoveries = []
 
         try:
             # Multi-dimensional pattern analysis
-            patterns = await self.pattern_recognizer.find_breakthrough_patterns(experiments)
+            patterns = await self.pattern_recognizer.find_breakthrough_patterns(
+                experiments
+            )
 
             for pattern in patterns:
-                if pattern['significance'] > self.discovery_threshold:
-                    discovery = self._create_discovery_from_pattern(pattern, experiments)
+                if pattern["significance"] > self.discovery_threshold:
+                    discovery = self._create_discovery_from_pattern(
+                        pattern, experiments
+                    )
 
                     # Validate discovery
                     if discovery.validate_discovery():
@@ -166,16 +182,18 @@ class BreakthroughScientificAI:
 
             self.discoveries.extend(validated_discoveries)
 
-            logger.info(f"Identified {len(validated_discoveries)} validated discoveries")
+            logger.info(
+                f"Identified {len(validated_discoveries)} validated discoveries"
+            )
             return validated_discoveries
 
         except Exception as e:
             logger.error(f"Error in experimental data analysis: {e}")
             return []
 
-    def _create_discovery_from_pattern(self,
-                                     pattern: Dict[str, Any],
-                                     experiments: List[Dict[str, Any]]) -> ScientificDiscovery:
+    def _create_discovery_from_pattern(
+        self, pattern: Dict[str, Any], experiments: List[Dict[str, Any]]
+    ) -> ScientificDiscovery:
         """Create a scientific discovery from a detected pattern."""
 
         # Determine discovery type
@@ -195,35 +213,35 @@ class BreakthroughScientificAI:
             discovery_type=discovery_type,
             confidence=self._determine_confidence(significance, novelty),
             significance_score=significance,
-            experimental_evidence=pattern.get('supporting_experiments', []),
+            experimental_evidence=pattern.get("supporting_experiments", []),
             novelty_assessment=novelty,
-            reproducibility_score=pattern.get('reproducibility', 0.5)
+            reproducibility_score=pattern.get("reproducibility", 0.5),
         )
 
     def _classify_discovery_type(self, pattern: Dict[str, Any]) -> DiscoveryType:
         """Classify the type of discovery based on pattern characteristics."""
 
-        if 'property_correlation' in pattern:
+        if "property_correlation" in pattern:
             return DiscoveryType.MATERIAL_PROPERTY
-        elif 'synthesis_optimization' in pattern:
+        elif "synthesis_optimization" in pattern:
             return DiscoveryType.SYNTHESIS_PATHWAY
-        elif 'structure_property' in pattern:
+        elif "structure_property" in pattern:
             return DiscoveryType.STRUCTURE_FUNCTION
-        elif 'optimization_breakthrough' in pattern:
+        elif "optimization_breakthrough" in pattern:
             return DiscoveryType.OPTIMIZATION_STRATEGY
         else:
             return DiscoveryType.NOVEL_MECHANISM
 
-    def _calculate_significance(self,
-                              pattern: Dict[str, Any],
-                              experiments: List[Dict[str, Any]]) -> float:
+    def _calculate_significance(
+        self, pattern: Dict[str, Any], experiments: List[Dict[str, Any]]
+    ) -> float:
         """Calculate the significance score of a pattern."""
 
         # Statistical significance
-        statistical_score = pattern.get('statistical_significance', 0.5)
+        statistical_score = pattern.get("statistical_significance", 0.5)
 
         # Effect size
-        effect_size = pattern.get('effect_size', 0.5)
+        effect_size = pattern.get("effect_size", 0.5)
 
         # Consistency across experiments
         consistency = self._calculate_consistency(pattern, experiments)
@@ -233,27 +251,27 @@ class BreakthroughScientificAI:
 
         # Weighted combination
         significance = (
-            0.3 * statistical_score +
-            0.25 * effect_size +
-            0.25 * consistency +
-            0.2 * practical_importance
+            0.3 * statistical_score
+            + 0.25 * effect_size
+            + 0.25 * consistency
+            + 0.2 * practical_importance
         )
 
         return min(significance, 1.0)
 
-    def _calculate_consistency(self,
-                             pattern: Dict[str, Any],
-                             experiments: List[Dict[str, Any]]) -> float:
+    def _calculate_consistency(
+        self, pattern: Dict[str, Any], experiments: List[Dict[str, Any]]
+    ) -> float:
         """Calculate how consistently the pattern appears across experiments."""
 
         if not experiments:
             return 0.0
 
-        pattern_features = pattern.get('features', [])
+        pattern_features = pattern.get("features", [])
         consistent_count = 0
 
         for exp in experiments:
-            exp_features = exp.get('features', [])
+            exp_features = exp.get("features", [])
             overlap = set(pattern_features) & set(exp_features)
             if len(overlap) / len(pattern_features) > 0.7:
                 consistent_count += 1
@@ -264,22 +282,22 @@ class BreakthroughScientificAI:
         """Assess the practical importance of a discovery."""
 
         # Performance improvement
-        improvement = pattern.get('performance_improvement', 0.0)
+        improvement = pattern.get("performance_improvement", 0.0)
 
         # Cost reduction potential
-        cost_reduction = pattern.get('cost_reduction', 0.0)
+        cost_reduction = pattern.get("cost_reduction", 0.0)
 
         # Scalability potential
-        scalability = pattern.get('scalability', 0.5)
+        scalability = pattern.get("scalability", 0.5)
 
         # Market impact potential
-        market_impact = pattern.get('market_impact', 0.5)
+        market_impact = pattern.get("market_impact", 0.5)
 
         importance = (
-            0.4 * improvement +
-            0.3 * cost_reduction +
-            0.2 * scalability +
-            0.1 * market_impact
+            0.4 * improvement
+            + 0.3 * cost_reduction
+            + 0.2 * scalability
+            + 0.1 * market_impact
         )
 
         return min(importance, 1.0)
@@ -291,30 +309,30 @@ class BreakthroughScientificAI:
         similarity_scores = []
         for discovery in self.discoveries:
             similarity = self._calculate_pattern_similarity(
-                pattern, discovery.novelty_assessment.get('pattern', {})
+                pattern, discovery.novelty_assessment.get("pattern", {})
             )
             similarity_scores.append(similarity)
 
         novelty_score = 1.0 - (max(similarity_scores) if similarity_scores else 0.0)
 
         return {
-            'novelty_score': novelty_score,
-            'pattern': pattern,
-            'compared_discoveries': len(similarity_scores),
-            'max_similarity': max(similarity_scores) if similarity_scores else 0.0
+            "novelty_score": novelty_score,
+            "pattern": pattern,
+            "compared_discoveries": len(similarity_scores),
+            "max_similarity": max(similarity_scores) if similarity_scores else 0.0,
         }
 
-    def _calculate_pattern_similarity(self,
-                                    pattern1: Dict[str, Any],
-                                    pattern2: Dict[str, Any]) -> float:
+    def _calculate_pattern_similarity(
+        self, pattern1: Dict[str, Any], pattern2: Dict[str, Any]
+    ) -> float:
         """Calculate similarity between two patterns."""
 
         if not pattern1 or not pattern2:
             return 0.0
 
         # Feature overlap
-        features1 = set(pattern1.get('features', []))
-        features2 = set(pattern2.get('features', []))
+        features1 = set(pattern1.get("features", []))
+        features2 = set(pattern2.get("features", []))
 
         if not features1 or not features2:
             return 0.0
@@ -324,12 +342,12 @@ class BreakthroughScientificAI:
 
         return overlap / union if union > 0 else 0.0
 
-    def _determine_confidence(self,
-                            significance: float,
-                            novelty: Dict[str, Any]) -> DiscoveryConfidence:
+    def _determine_confidence(
+        self, significance: float, novelty: Dict[str, Any]
+    ) -> DiscoveryConfidence:
         """Determine confidence level based on significance and novelty."""
 
-        combined_score = 0.7 * significance + 0.3 * novelty['novelty_score']
+        combined_score = 0.7 * significance + 0.3 * novelty["novelty_score"]
 
         if combined_score >= 0.9:
             return DiscoveryConfidence.BREAKTHROUGH
@@ -340,9 +358,9 @@ class BreakthroughScientificAI:
         else:
             return DiscoveryConfidence.PRELIMINARY
 
-    def _generate_discovery_description(self,
-                                      pattern: Dict[str, Any],
-                                      discovery_type: DiscoveryType) -> str:
+    def _generate_discovery_description(
+        self, pattern: Dict[str, Any], discovery_type: DiscoveryType
+    ) -> str:
         """Generate human-readable description of the discovery."""
 
         templates = {
@@ -350,19 +368,22 @@ class BreakthroughScientificAI:
             DiscoveryType.SYNTHESIS_PATHWAY: "Identified optimized synthesis pathway with {efficiency}% efficiency gain through {method}",
             DiscoveryType.STRUCTURE_FUNCTION: "Found structure-function relationship: {structure} correlates with {function} (R² = {correlation})",
             DiscoveryType.OPTIMIZATION_STRATEGY: "Breakthrough optimization strategy achieves {performance}× faster convergence using {strategy}",
-            DiscoveryType.NOVEL_MECHANISM: "Novel mechanism discovered: {mechanism} explains {phenomenon} with {confidence}% confidence"
+            DiscoveryType.NOVEL_MECHANISM: "Novel mechanism discovered: {mechanism} explains {phenomenon} with {confidence}% confidence",
         }
 
-        template = templates.get(discovery_type, "Novel discovery identified in experimental data")
+        template = templates.get(
+            discovery_type, "Novel discovery identified in experimental data"
+        )
 
         # Fill template with pattern data
         try:
-            return template.format(**pattern.get('description_params', {}))
+            return template.format(**pattern.get("description_params", {}))
         except (KeyError, ValueError):
             return f"Novel {discovery_type.value} discovered with significance score {pattern.get('significance', 0.0):.3f}"
 
-    async def _cross_validate_discoveries(self,
-                                        discoveries: List[ScientificDiscovery]) -> List[ScientificDiscovery]:
+    async def _cross_validate_discoveries(
+        self, discoveries: List[ScientificDiscovery]
+    ) -> List[ScientificDiscovery]:
         """Cross-validate discoveries using multiple validation methods."""
 
         validated = []
@@ -395,50 +416,65 @@ class BreakthroughScientificAI:
     async def _statistical_validation(self, discovery: ScientificDiscovery) -> bool:
         """Perform statistical validation of discovery."""
         # Simplified statistical validation
-        return discovery.significance_score > 0.7 and len(discovery.experimental_evidence) >= 3
+        return (
+            discovery.significance_score > 0.7
+            and len(discovery.experimental_evidence) >= 3
+        )
 
     async def _reproducibility_check(self, discovery: ScientificDiscovery) -> bool:
         """Check reproducibility of discovery."""
         return discovery.reproducibility_score > 0.75
 
-    async def _literature_consistency_check(self, discovery: ScientificDiscovery) -> bool:
+    async def _literature_consistency_check(
+        self, discovery: ScientificDiscovery
+    ) -> bool:
         """Check consistency with existing literature."""
         # Simplified check - in practice would involve literature search
-        return discovery.novelty_assessment.get('novelty_score', 0.0) > 0.5
+        return discovery.novelty_assessment.get("novelty_score", 0.0) > 0.5
 
     def get_breakthrough_summary(self) -> Dict[str, Any]:
         """Get summary of breakthrough discoveries."""
 
         breakthrough_discoveries = [
-            d for d in self.discoveries
+            d
+            for d in self.discoveries
             if d.confidence == DiscoveryConfidence.BREAKTHROUGH
         ]
 
         return {
-            'total_discoveries': len(self.discoveries),
-            'breakthrough_discoveries': len(breakthrough_discoveries),
-            'discovery_types': {
-                dtype.value: len([d for d in self.discoveries if d.discovery_type == dtype])
+            "total_discoveries": len(self.discoveries),
+            "breakthrough_discoveries": len(breakthrough_discoveries),
+            "discovery_types": {
+                dtype.value: len(
+                    [d for d in self.discoveries if d.discovery_type == dtype]
+                )
                 for dtype in DiscoveryType
             },
-            'average_significance': np.mean([d.significance_score for d in self.discoveries]) if self.discoveries else 0.0,
-            'recent_discoveries': [
+            "average_significance": (
+                np.mean([d.significance_score for d in self.discoveries])
+                if self.discoveries
+                else 0.0
+            ),
+            "recent_discoveries": [
                 {
-                    'id': d.id,
-                    'text': d.discovery_text,
-                    'confidence': d.confidence.value,
-                    'significance': d.significance_score
+                    "id": d.id,
+                    "text": d.discovery_text,
+                    "confidence": d.confidence.value,
+                    "significance": d.significance_score,
                 }
-                for d in sorted(self.discoveries, key=lambda x: x.timestamp, reverse=True)[:5]
-            ]
+                for d in sorted(
+                    self.discoveries, key=lambda x: x.timestamp, reverse=True
+                )[:5]
+            ],
         }
 
 
 class AdvancedPatternRecognizer:
     """Advanced pattern recognition for scientific data."""
 
-    async def find_breakthrough_patterns(self,
-                                       experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def find_breakthrough_patterns(
+        self, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Find breakthrough patterns in experimental data."""
 
         patterns = []
@@ -460,10 +496,11 @@ class AdvancedPatternRecognizer:
         patterns.extend(temporal_patterns)
 
         # Rank patterns by significance
-        return sorted(patterns, key=lambda x: x.get('significance', 0.0), reverse=True)
+        return sorted(patterns, key=lambda x: x.get("significance", 0.0), reverse=True)
 
-    async def _find_correlation_patterns(self,
-                                       experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _find_correlation_patterns(
+        self, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Find correlation patterns in experimental data."""
 
         patterns = []
@@ -476,10 +513,10 @@ class AdvancedPatternRecognizer:
         result_names = set()
 
         for exp in experiments:
-            if 'parameters' in exp:
-                param_names.update(exp['parameters'].keys())
-            if 'results' in exp:
-                result_names.update(exp['results'].keys())
+            if "parameters" in exp:
+                param_names.update(exp["parameters"].keys())
+            if "results" in exp:
+                result_names.update(exp["results"].keys())
 
         # Analyze correlations
         for param in param_names:
@@ -488,36 +525,35 @@ class AdvancedPatternRecognizer:
 
                 if abs(correlation) > 0.7:  # Strong correlation
                     pattern = {
-                        'type': 'correlation',
-                        'parameter': param,
-                        'result': result,
-                        'correlation': correlation,
-                        'significance': abs(correlation),
-                        'supporting_experiments': experiments,
-                        'features': [param, result],
-                        'description_params': {
-                            'features': f"{param} and {result}",
-                            'improvement': int(abs(correlation) * 100),
-                            'property': result,
-                            'correlation': f"{correlation:.3f}"
-                        }
+                        "type": "correlation",
+                        "parameter": param,
+                        "result": result,
+                        "correlation": correlation,
+                        "significance": abs(correlation),
+                        "supporting_experiments": experiments,
+                        "features": [param, result],
+                        "description_params": {
+                            "features": f"{param} and {result}",
+                            "improvement": int(abs(correlation) * 100),
+                            "property": result,
+                            "correlation": f"{correlation:.3f}",
+                        },
                     }
                     patterns.append(pattern)
 
         return patterns
 
-    def _calculate_correlation(self,
-                             experiments: List[Dict[str, Any]],
-                             param: str,
-                             result: str) -> float:
+    def _calculate_correlation(
+        self, experiments: List[Dict[str, Any]], param: str, result: str
+    ) -> float:
         """Calculate correlation between parameter and result."""
 
         param_values = []
         result_values = []
 
         for exp in experiments:
-            param_val = exp.get('parameters', {}).get(param)
-            result_val = exp.get('results', {}).get(result)
+            param_val = exp.get("parameters", {}).get(param)
+            result_val = exp.get("results", {}).get(result)
 
             if param_val is not None and result_val is not None:
                 try:
@@ -532,8 +568,9 @@ class AdvancedPatternRecognizer:
         correlation_matrix = np.corrcoef(param_values, result_values)
         return correlation_matrix[0, 1] if correlation_matrix.shape == (2, 2) else 0.0
 
-    async def _find_optimization_patterns(self,
-                                        experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _find_optimization_patterns(
+        self, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Find optimization breakthrough patterns."""
 
         patterns = []
@@ -544,24 +581,26 @@ class AdvancedPatternRecognizer:
             improvements = self._find_sudden_improvements(experiments)
 
             for improvement in improvements:
-                if improvement['magnitude'] > 2.0:  # 2x improvement
+                if improvement["magnitude"] > 2.0:  # 2x improvement
                     pattern = {
-                        'type': 'optimization_breakthrough',
-                        'improvement_magnitude': improvement['magnitude'],
-                        'breakthrough_point': improvement['experiment_index'],
-                        'significance': min(improvement['magnitude'] / 5.0, 1.0),
-                        'supporting_experiments': experiments,
-                        'features': ['optimization_breakthrough'],
-                        'description_params': {
-                            'performance': f"{improvement['magnitude']:.1f}",
-                            'strategy': 'adaptive optimization'
-                        }
+                        "type": "optimization_breakthrough",
+                        "improvement_magnitude": improvement["magnitude"],
+                        "breakthrough_point": improvement["experiment_index"],
+                        "significance": min(improvement["magnitude"] / 5.0, 1.0),
+                        "supporting_experiments": experiments,
+                        "features": ["optimization_breakthrough"],
+                        "description_params": {
+                            "performance": f"{improvement['magnitude']:.1f}",
+                            "strategy": "adaptive optimization",
+                        },
                     }
                     patterns.append(pattern)
 
         return patterns
 
-    def _find_sudden_improvements(self, experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _find_sudden_improvements(
+        self, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Find sudden improvements in optimization trajectory."""
 
         improvements = []
@@ -569,9 +608,9 @@ class AdvancedPatternRecognizer:
         # Extract optimization objective values
         objective_values = []
         for exp in experiments:
-            results = exp.get('results', {})
+            results = exp.get("results", {})
             # Look for common objective function names
-            for key in ['objective', 'fitness', 'score', 'efficiency', 'performance']:
+            for key in ["objective", "fitness", "score", "efficiency", "performance"]:
                 if key in results:
                     try:
                         objective_values.append(float(results[key]))
@@ -597,17 +636,20 @@ class AdvancedPatternRecognizer:
 
             if current_val > prev_avg * 1.5:  # 50% improvement
                 improvement_magnitude = current_val / prev_avg
-                improvements.append({
-                    'experiment_index': i,
-                    'magnitude': improvement_magnitude,
-                    'previous_average': prev_avg,
-                    'new_value': current_val
-                })
+                improvements.append(
+                    {
+                        "experiment_index": i,
+                        "magnitude": improvement_magnitude,
+                        "previous_average": prev_avg,
+                        "new_value": current_val,
+                    }
+                )
 
         return improvements
 
-    async def _find_anomaly_patterns(self,
-                                   experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _find_anomaly_patterns(
+        self, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Find anomaly-based discovery patterns."""
 
         patterns = []
@@ -616,25 +658,27 @@ class AdvancedPatternRecognizer:
         outliers = self._find_positive_outliers(experiments)
 
         for outlier in outliers:
-            if outlier['deviation'] > 2.0:  # 2 standard deviations
+            if outlier["deviation"] > 2.0:  # 2 standard deviations
                 pattern = {
-                    'type': 'anomaly_breakthrough',
-                    'outlier_experiment': outlier['experiment'],
-                    'deviation_magnitude': outlier['deviation'],
-                    'significance': min(outlier['deviation'] / 3.0, 1.0),
-                    'supporting_experiments': [outlier['experiment']],
-                    'features': ['statistical_outlier'],
-                    'description_params': {
-                        'mechanism': 'anomalous behavior',
-                        'phenomenon': outlier.get('property', 'experimental outcome'),
-                        'confidence': int(min(outlier['deviation'] / 3.0, 1.0) * 100)
-                    }
+                    "type": "anomaly_breakthrough",
+                    "outlier_experiment": outlier["experiment"],
+                    "deviation_magnitude": outlier["deviation"],
+                    "significance": min(outlier["deviation"] / 3.0, 1.0),
+                    "supporting_experiments": [outlier["experiment"]],
+                    "features": ["statistical_outlier"],
+                    "description_params": {
+                        "mechanism": "anomalous behavior",
+                        "phenomenon": outlier.get("property", "experimental outcome"),
+                        "confidence": int(min(outlier["deviation"] / 3.0, 1.0) * 100),
+                    },
                 }
                 patterns.append(pattern)
 
         return patterns
 
-    def _find_positive_outliers(self, experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _find_positive_outliers(
+        self, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Find positive outliers in experimental results."""
 
         outliers = []
@@ -642,12 +686,12 @@ class AdvancedPatternRecognizer:
         # Collect all numerical results
         result_data = {}
         for exp in experiments:
-            for key, value in exp.get('results', {}).items():
+            for key, value in exp.get("results", {}).items():
                 try:
                     val = float(value)
                     if key not in result_data:
                         result_data[key] = []
-                    result_data[key].append({'value': val, 'experiment': exp})
+                    result_data[key].append({"value": val, "experiment": exp})
                 except (ValueError, TypeError):
                     continue
 
@@ -656,33 +700,35 @@ class AdvancedPatternRecognizer:
             if len(data_points) < 5:
                 continue
 
-            values = [dp['value'] for dp in data_points]
+            values = [dp["value"] for dp in data_points]
             mean_val = np.mean(values)
             std_val = np.std(values)
 
             for dp in data_points:
-                if dp['value'] > mean_val + 2 * std_val:  # Positive outlier
-                    deviation = (dp['value'] - mean_val) / std_val
-                    outliers.append({
-                        'experiment': dp['experiment'],
-                        'property': result_type,
-                        'value': dp['value'],
-                        'mean': mean_val,
-                        'deviation': deviation
-                    })
+                if dp["value"] > mean_val + 2 * std_val:  # Positive outlier
+                    deviation = (dp["value"] - mean_val) / std_val
+                    outliers.append(
+                        {
+                            "experiment": dp["experiment"],
+                            "property": result_type,
+                            "value": dp["value"],
+                            "mean": mean_val,
+                            "deviation": deviation,
+                        }
+                    )
 
         return outliers
 
-    async def _find_temporal_patterns(self,
-                                    experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _find_temporal_patterns(
+        self, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Find temporal patterns in experimental progression."""
 
         patterns = []
 
         # Sort experiments by timestamp if available
         sorted_experiments = sorted(
-            experiments,
-            key=lambda x: x.get('timestamp', datetime.now())
+            experiments, key=lambda x: x.get("timestamp", datetime.now())
         )
 
         # Look for learning patterns
@@ -691,7 +737,9 @@ class AdvancedPatternRecognizer:
 
         return patterns
 
-    def _analyze_learning_progression(self, experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _analyze_learning_progression(
+        self, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Analyze learning progression over time."""
 
         patterns = []
@@ -702,23 +750,29 @@ class AdvancedPatternRecognizer:
         # Analyze improvement over time
         window_size = min(5, len(experiments) // 3)
 
-        early_performance = self._calculate_window_performance(experiments[:window_size])
-        late_performance = self._calculate_window_performance(experiments[-window_size:])
+        early_performance = self._calculate_window_performance(
+            experiments[:window_size]
+        )
+        late_performance = self._calculate_window_performance(
+            experiments[-window_size:]
+        )
 
         if late_performance > early_performance * 1.3:  # 30% improvement
             learning_rate = (late_performance - early_performance) / len(experiments)
 
             pattern = {
-                'type': 'temporal_learning',
-                'learning_rate': learning_rate,
-                'improvement_factor': late_performance / early_performance,
-                'significance': min(learning_rate * 10, 1.0),
-                'supporting_experiments': experiments,
-                'features': ['temporal_improvement'],
-                'description_params': {
-                    'improvement': int((late_performance / early_performance - 1) * 100),
-                    'method': 'autonomous learning'
-                }
+                "type": "temporal_learning",
+                "learning_rate": learning_rate,
+                "improvement_factor": late_performance / early_performance,
+                "significance": min(learning_rate * 10, 1.0),
+                "supporting_experiments": experiments,
+                "features": ["temporal_improvement"],
+                "description_params": {
+                    "improvement": int(
+                        (late_performance / early_performance - 1) * 100
+                    ),
+                    "method": "autonomous learning",
+                },
             }
             patterns.append(pattern)
 
@@ -731,8 +785,8 @@ class AdvancedPatternRecognizer:
 
         for exp in experiments:
             # Extract performance metrics
-            results = exp.get('results', {})
-            for key in ['objective', 'fitness', 'score', 'efficiency', 'performance']:
+            results = exp.get("results", {})
+            for key in ["objective", "fitness", "score", "efficiency", "performance"]:
                 if key in results:
                     try:
                         performances.append(float(results[key]))
@@ -746,19 +800,23 @@ class AdvancedPatternRecognizer:
 class AutonomousHypothesisGenerator:
     """Generates scientific hypotheses autonomously."""
 
-    async def generate_followup_hypotheses(self,
-                                         discovery: ScientificDiscovery,
-                                         experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def generate_followup_hypotheses(
+        self, discovery: ScientificDiscovery, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Generate follow-up hypotheses based on a discovery."""
 
         hypotheses = []
 
         # Generate mechanistic hypotheses
-        mechanistic = await self._generate_mechanistic_hypotheses(discovery, experiments)
+        mechanistic = await self._generate_mechanistic_hypotheses(
+            discovery, experiments
+        )
         hypotheses.extend(mechanistic)
 
         # Generate optimization hypotheses
-        optimization = await self._generate_optimization_hypotheses(discovery, experiments)
+        optimization = await self._generate_optimization_hypotheses(
+            discovery, experiments
+        )
         hypotheses.extend(optimization)
 
         # Generate extension hypotheses
@@ -767,68 +825,68 @@ class AutonomousHypothesisGenerator:
 
         return hypotheses
 
-    async def _generate_mechanistic_hypotheses(self,
-                                             discovery: ScientificDiscovery,
-                                             experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _generate_mechanistic_hypotheses(
+        self, discovery: ScientificDiscovery, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Generate mechanistic hypotheses to explain the discovery."""
 
         hypotheses = []
 
         if discovery.discovery_type == DiscoveryType.MATERIAL_PROPERTY:
             hypothesis = {
-                'type': 'mechanistic',
-                'text': f"The observed {discovery.discovery_text} is caused by underlying structural changes that modify electron transport properties",
-                'testable_predictions': [
+                "type": "mechanistic",
+                "text": f"The observed {discovery.discovery_text} is caused by underlying structural changes that modify electron transport properties",
+                "testable_predictions": [
                     "Structural analysis should show correlation with electronic properties",
                     "Temperature dependence should follow activated transport model",
-                    "Chemical modifications should predictably alter the effect"
+                    "Chemical modifications should predictably alter the effect",
                 ],
-                'priority': 'high',
-                'estimated_experiments': 8
+                "priority": "high",
+                "estimated_experiments": 8,
             }
             hypotheses.append(hypothesis)
 
         return hypotheses
 
-    async def _generate_optimization_hypotheses(self,
-                                              discovery: ScientificDiscovery,
-                                              experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _generate_optimization_hypotheses(
+        self, discovery: ScientificDiscovery, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Generate optimization hypotheses for further improvement."""
 
         hypotheses = []
 
         hypothesis = {
-            'type': 'optimization',
-            'text': "The discovery suggests optimal parameter ranges that can be further refined for enhanced performance",
-            'testable_predictions': [
+            "type": "optimization",
+            "text": "The discovery suggests optimal parameter ranges that can be further refined for enhanced performance",
+            "testable_predictions": [
                 "Fine-tuning parameters around discovered optima will yield incremental improvements",
                 "Combination with other optimization strategies will show synergistic effects",
-                "Scaling to different material systems will follow similar optimization patterns"
+                "Scaling to different material systems will follow similar optimization patterns",
             ],
-            'priority': 'medium',
-            'estimated_experiments': 12
+            "priority": "medium",
+            "estimated_experiments": 12,
         }
         hypotheses.append(hypothesis)
 
         return hypotheses
 
-    async def _generate_extension_hypotheses(self,
-                                           discovery: ScientificDiscovery,
-                                           experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def _generate_extension_hypotheses(
+        self, discovery: ScientificDiscovery, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Generate hypotheses for extending the discovery."""
 
         hypotheses = []
 
         hypothesis = {
-            'type': 'extension',
-            'text': "The discovered principles can be extended to related material systems and applications",
-            'testable_predictions': [
+            "type": "extension",
+            "text": "The discovered principles can be extended to related material systems and applications",
+            "testable_predictions": [
                 "Similar materials will show analogous behavior patterns",
                 "The discovery can be applied to solve related optimization problems",
-                "Scaling laws will govern the application to different size regimes"
+                "Scaling laws will govern the application to different size regimes",
             ],
-            'priority': 'low',
-            'estimated_experiments': 15
+            "priority": "low",
+            "estimated_experiments": 15,
         }
         hypotheses.append(hypothesis)
 
@@ -838,9 +896,9 @@ class AutonomousHypothesisGenerator:
 class IntelligentExperimentDesigner:
     """Designs intelligent experiments for hypothesis testing."""
 
-    def design_validation_experiments(self,
-                                    discovery: ScientificDiscovery,
-                                    hypotheses: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def design_validation_experiments(
+        self, discovery: ScientificDiscovery, hypotheses: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Design experiments to validate discoveries and test hypotheses."""
 
         experiments = []
@@ -856,49 +914,52 @@ class IntelligentExperimentDesigner:
 
         return experiments
 
-    def _design_validation_experiment(self, discovery: ScientificDiscovery) -> Dict[str, Any]:
+    def _design_validation_experiment(
+        self, discovery: ScientificDiscovery
+    ) -> Dict[str, Any]:
         """Design validation experiment for a discovery."""
 
         return {
-            'type': 'validation',
-            'discovery_id': discovery.id,
-            'objective': f"Validate discovery: {discovery.discovery_text[:100]}...",
-            'experimental_design': {
-                'replication_count': 5,
-                'control_conditions': True,
-                'statistical_power': 0.8,
-                'significance_level': 0.05
+            "type": "validation",
+            "discovery_id": discovery.id,
+            "objective": f"Validate discovery: {discovery.discovery_text[:100]}...",
+            "experimental_design": {
+                "replication_count": 5,
+                "control_conditions": True,
+                "statistical_power": 0.8,
+                "significance_level": 0.05,
             },
-            'success_criteria': {
-                'reproducibility_threshold': 0.8,
-                'effect_size_threshold': 0.5,
-                'statistical_significance': True
+            "success_criteria": {
+                "reproducibility_threshold": 0.8,
+                "effect_size_threshold": 0.5,
+                "statistical_significance": True,
             },
-            'estimated_duration': '3-5 days',
-            'priority': 'high'
+            "estimated_duration": "3-5 days",
+            "priority": "high",
         }
 
     def _design_hypothesis_test(self, hypothesis: Dict[str, Any]) -> Dict[str, Any]:
         """Design experiment to test a specific hypothesis."""
 
         return {
-            'type': 'hypothesis_test',
-            'hypothesis': hypothesis['text'],
-            'objective': f"Test hypothesis: {hypothesis['text'][:100]}...",
-            'experimental_design': {
-                'factorial_design': True,
-                'randomization': True,
-                'blinding': False,  # Not applicable for materials
-                'control_groups': True
+            "type": "hypothesis_test",
+            "hypothesis": hypothesis["text"],
+            "objective": f"Test hypothesis: {hypothesis['text'][:100]}...",
+            "experimental_design": {
+                "factorial_design": True,
+                "randomization": True,
+                "blinding": False,  # Not applicable for materials
+                "control_groups": True,
             },
-            'testable_predictions': hypothesis['testable_predictions'],
-            'estimated_experiments': hypothesis.get('estimated_experiments', 10),
-            'priority': hypothesis.get('priority', 'medium')
+            "testable_predictions": hypothesis["testable_predictions"],
+            "estimated_experiments": hypothesis.get("estimated_experiments", 10),
+            "priority": hypothesis.get("priority", "medium"),
         }
 
 
 # Global instance
 _global_breakthrough_ai = None
+
 
 def get_global_breakthrough_ai() -> BreakthroughScientificAI:
     """Get global breakthrough scientific AI instance."""

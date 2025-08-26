@@ -21,7 +21,7 @@ class HealthChecker:
 
     def register_check(self, name: str, check_func: callable, timeout: float = 5.0):
         """Register a health check function.
-        
+
         Args:
             name: Check name
             check_func: Function that returns (is_healthy: bool, details: dict)
@@ -36,7 +36,7 @@ class HealthChecker:
 
     def run_checks(self) -> Dict[str, Any]:
         """Run all health checks.
-        
+
         Returns:
             Health check results
         """
@@ -88,7 +88,7 @@ health_checker = HealthChecker()
 
 def setup_health_endpoints(app: FastAPI) -> None:
     """Set up health check endpoints.
-    
+
     Args:
         app: FastAPI application
     """
@@ -119,7 +119,7 @@ def setup_health_endpoints(app: FastAPI) -> None:
         else:
             raise HTTPException(
                 status_code=503,
-                detail={"status": "not_ready", "checks": results["checks"]}
+                detail={"status": "not_ready", "checks": results["checks"]},
             )
 
     @app.get("/health/live")
@@ -150,7 +150,9 @@ def setup_health_endpoints(app: FastAPI) -> None:
         # Add health check metrics
         for name, check_info in health_checker._checks.items():
             if check_info["last_result"]:
-                status_value = 1 if check_info["last_result"]["status"] == "healthy" else 0
+                status_value = (
+                    1 if check_info["last_result"]["status"] == "healthy" else 0
+                )
                 metrics.append(
                     f'materials_orchestrator_health_check{{check="{name}"}} {status_value}'
                 )
@@ -191,7 +193,7 @@ def memory_health_check() -> tuple[bool, dict]:
         import psutil
 
         memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
+        disk = psutil.disk_usage("/")
 
         memory_healthy = memory.percent < 90
         disk_healthy = disk.percent < 90

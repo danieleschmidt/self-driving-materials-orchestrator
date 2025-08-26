@@ -18,6 +18,7 @@ try:
         ScientificDiscovery,
         get_global_breakthrough_ai,
     )
+
     BREAKTHROUGH_AI_AVAILABLE = True
 except ImportError:
     BREAKTHROUGH_AI_AVAILABLE = False
@@ -699,15 +700,20 @@ class AutonomousLab:
                                 fitness = objective.calculate_fitness(property_value)
 
                                 # Breakthrough AI analysis
-                                if self.breakthrough_ai and len(self._experiments_history) % 10 == 0:
+                                if (
+                                    self.breakthrough_ai
+                                    and len(self._experiments_history) % 10 == 0
+                                ):
                                     try:
                                         import asyncio
+
                                         # Analyze recent experiments for discoveries
                                         recent_experiments = [
                                             {
-                                                'parameters': exp.parameters,
-                                                'results': exp.results,
-                                                'timestamp': exp.timestamp or datetime.now()
+                                                "parameters": exp.parameters,
+                                                "results": exp.results,
+                                                "timestamp": exp.timestamp
+                                                or datetime.now(),
                                             }
                                             for exp in self._experiments_history[-20:]
                                             if exp.results
@@ -717,20 +723,33 @@ class AutonomousLab:
                                         loop = asyncio.new_event_loop()
                                         asyncio.set_event_loop(loop)
                                         discoveries = loop.run_until_complete(
-                                            self.breakthrough_ai.analyze_experimental_data(recent_experiments)
+                                            self.breakthrough_ai.analyze_experimental_data(
+                                                recent_experiments
+                                            )
                                         )
                                         loop.close()
 
                                         if discoveries:
-                                            self.breakthrough_discoveries.extend(discoveries)
-                                            logger.info(f"Breakthrough AI identified {len(discoveries)} potential discoveries")
+                                            self.breakthrough_discoveries.extend(
+                                                discoveries
+                                            )
+                                            logger.info(
+                                                f"Breakthrough AI identified {len(discoveries)} potential discoveries"
+                                            )
 
                                             # Log breakthrough discoveries
                                             for discovery in discoveries:
-                                                if discovery.confidence.value in ['breakthrough', 'strong']:
-                                                    logger.info(f"🚀 BREAKTHROUGH: {discovery.discovery_text}")
+                                                if discovery.confidence.value in [
+                                                    "breakthrough",
+                                                    "strong",
+                                                ]:
+                                                    logger.info(
+                                                        f"🚀 BREAKTHROUGH: {discovery.discovery_text}"
+                                                    )
                                     except Exception as e:
-                                        logger.debug(f"Breakthrough AI analysis failed: {e}")
+                                        logger.debug(
+                                            f"Breakthrough AI analysis failed: {e}"
+                                        )
 
                                 if fitness > best_fitness:
                                     best_fitness = fitness

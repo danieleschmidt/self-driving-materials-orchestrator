@@ -40,7 +40,7 @@ class PerformanceTracker:
 
     def __init__(self, max_metrics_per_series: int = 10000):
         """Initialize performance tracker.
-        
+
         Args:
             max_metrics_per_series: Maximum metrics to keep per series
         """
@@ -57,10 +57,10 @@ class PerformanceTracker:
         name: str,
         value: float,
         tags: Optional[Dict[str, str]] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Record a performance metric.
-        
+
         Args:
             name: Metric name
             value: Metric value
@@ -72,7 +72,7 @@ class PerformanceTracker:
             value=value,
             timestamp=datetime.now(),
             tags=tags or {},
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         with self._lock:
@@ -81,7 +81,7 @@ class PerformanceTracker:
 
     def _check_thresholds(self, metric: PerformanceMetric) -> None:
         """Check if metric exceeds thresholds.
-        
+
         Args:
             metric: Metric to check
         """
@@ -108,7 +108,11 @@ class PerformanceTracker:
                 "level": exceeded_level,
                 "metric_name": metric.name,
                 "metric_value": metric.value,
-                "threshold": threshold.critical_threshold if exceeded_level == "critical" else threshold.warning_threshold,
+                "threshold": (
+                    threshold.critical_threshold
+                    if exceeded_level == "critical"
+                    else threshold.warning_threshold
+                ),
                 "tags": metric.tags,
             }
 
@@ -124,10 +128,10 @@ class PerformanceTracker:
         metric_name: str,
         warning_threshold: float,
         critical_threshold: float,
-        comparison_operator: str = "gt"
+        comparison_operator: str = "gt",
     ) -> None:
         """Set performance threshold for a metric.
-        
+
         Args:
             metric_name: Name of metric
             warning_threshold: Warning threshold value
@@ -138,22 +142,22 @@ class PerformanceTracker:
             metric_name=metric_name,
             warning_threshold=warning_threshold,
             critical_threshold=critical_threshold,
-            comparison_operator=comparison_operator
+            comparison_operator=comparison_operator,
         )
 
     def get_metrics(
         self,
         metric_name: str,
         since: Optional[datetime] = None,
-        tags_filter: Optional[Dict[str, str]] = None
+        tags_filter: Optional[Dict[str, str]] = None,
     ) -> List[PerformanceMetric]:
         """Get metrics for analysis.
-        
+
         Args:
             metric_name: Metric name to retrieve
             since: Only return metrics after this time
             tags_filter: Filter by tags
-            
+
         Returns:
             List of matching metrics
         """
@@ -164,26 +168,25 @@ class PerformanceTracker:
             metrics = [m for m in metrics if m.timestamp >= since]
 
         if tags_filter:
+
             def matches_tags(metric_tags: Dict[str, str]) -> bool:
                 return all(
-                    metric_tags.get(key) == value
-                    for key, value in tags_filter.items()
+                    metric_tags.get(key) == value for key, value in tags_filter.items()
                 )
+
             metrics = [m for m in metrics if matches_tags(m.tags)]
 
         return metrics
 
     def get_statistics(
-        self,
-        metric_name: str,
-        window: Optional[timedelta] = None
+        self, metric_name: str, window: Optional[timedelta] = None
     ) -> Dict[str, float]:
         """Get statistical summary of metrics.
-        
+
         Args:
             metric_name: Metric name
             window: Time window for analysis
-            
+
         Returns:
             Statistical summary
         """
@@ -214,10 +217,10 @@ class PerformanceTracker:
 
     def get_alerts(self, since: Optional[datetime] = None) -> List[Dict[str, Any]]:
         """Get performance alerts.
-        
+
         Args:
             since: Only return alerts after this time
-            
+
         Returns:
             List of alerts
         """
@@ -225,7 +228,8 @@ class PerformanceTracker:
 
         if since:
             alerts = [
-                alert for alert in alerts
+                alert
+                for alert in alerts
                 if datetime.fromisoformat(alert["timestamp"]) >= since
             ]
 
@@ -238,7 +242,7 @@ _global_tracker: Optional[PerformanceTracker] = None
 
 def get_performance_tracker() -> PerformanceTracker:
     """Get global performance tracker.
-    
+
     Returns:
         Performance tracker instance
     """
@@ -259,19 +263,20 @@ def performance_monitor(
     metric_name: Optional[str] = None,
     tags: Optional[Dict[str, str]] = None,
     track_memory: bool = False,
-    track_cpu: bool = False
+    track_cpu: bool = False,
 ):
     """Decorator for automatic performance monitoring.
-    
+
     Args:
         metric_name: Custom metric name (defaults to function name)
         tags: Tags to attach to metrics
         track_memory: Whether to track memory usage
         track_cpu: Whether to track CPU usage
-    
+
     Returns:
         Decorated function
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -286,6 +291,7 @@ def performance_monitor(
             if track_memory:
                 try:
                     import psutil
+
                     process = psutil.Process()
                     start_memory = process.memory_info().rss / 1024 / 1024  # MB
                 except ImportError:
@@ -294,6 +300,7 @@ def performance_monitor(
             if track_cpu:
                 try:
                     import psutil
+
                     start_cpu = psutil.cpu_percent()
                 except ImportError:
                     pass
@@ -307,19 +314,18 @@ def performance_monitor(
                 tracker.record_metric(
                     f"{name}_execution_time_ms",
                     execution_time,
-                    tags={**(tags or {}), "status": "success"}
+                    tags={**(tags or {}), "status": "success"},
                 )
 
                 if track_memory and start_memory is not None:
                     try:
                         import psutil
+
                         process = psutil.Process()
                         end_memory = process.memory_info().rss / 1024 / 1024  # MB
                         memory_delta = end_memory - start_memory
                         tracker.record_metric(
-                            f"{name}_memory_delta_mb",
-                            memory_delta,
-                            tags=tags
+                            f"{name}_memory_delta_mb", memory_delta, tags=tags
                         )
                     except ImportError:
                         pass
@@ -327,12 +333,9 @@ def performance_monitor(
                 if track_cpu and start_cpu is not None:
                     try:
                         import psutil
+
                         end_cpu = psutil.cpu_percent()
-                        tracker.record_metric(
-                            f"{name}_cpu_usage",
-                            end_cpu,
-                            tags=tags
-                        )
+                        tracker.record_metric(f"{name}_cpu_usage", end_cpu, tags=tags)
                     except ImportError:
                         pass
 
@@ -344,13 +347,17 @@ def performance_monitor(
                 tracker.record_metric(
                     f"{name}_execution_time_ms",
                     execution_time,
-                    tags={**(tags or {}), "status": "error", "error_type": type(e).__name__}
+                    tags={
+                        **(tags or {}),
+                        "status": "error",
+                        "error_type": type(e).__name__,
+                    },
                 )
 
                 tracker.record_metric(
                     f"{name}_error_count",
                     1,
-                    tags={**(tags or {}), "error_type": type(e).__name__}
+                    tags={**(tags or {}), "error_type": type(e).__name__},
                 )
 
                 raise
@@ -365,7 +372,7 @@ class AsyncPerformanceMonitor:
 
     def __init__(self, tracker: Optional[PerformanceTracker] = None):
         """Initialize async performance monitor.
-        
+
         Args:
             tracker: Performance tracker to use
         """
@@ -394,7 +401,9 @@ class AsyncPerformanceMonitor:
 
         # Wait for tasks to complete
         if self._monitoring_tasks:
-            await asyncio.gather(*self._monitoring_tasks.values(), return_exceptions=True)
+            await asyncio.gather(
+                *self._monitoring_tasks.values(), return_exceptions=True
+            )
 
         logger.info("Stopped async performance monitoring")
 
@@ -413,7 +422,7 @@ class AsyncPerformanceMonitor:
                 self.tracker.record_metric(
                     "system_cpu_usage",
                     cpu_percent / 100.0,
-                    tags={"component": "system"}
+                    tags={"component": "system"},
                 )
 
                 # Memory usage
@@ -421,21 +430,21 @@ class AsyncPerformanceMonitor:
                 self.tracker.record_metric(
                     "system_memory_usage",
                     memory.percent / 100.0,
-                    tags={"component": "system"}
+                    tags={"component": "system"},
                 )
 
                 self.tracker.record_metric(
                     "system_memory_available_mb",
                     memory.available / 1024 / 1024,
-                    tags={"component": "system"}
+                    tags={"component": "system"},
                 )
 
                 # Disk usage
-                disk = psutil.disk_usage('/')
+                disk = psutil.disk_usage("/")
                 self.tracker.record_metric(
                     "system_disk_usage",
                     disk.percent / 100.0,
-                    tags={"component": "system"}
+                    tags={"component": "system"},
                 )
 
                 await asyncio.sleep(30)  # Monitor every 30 seconds
@@ -446,18 +455,18 @@ class AsyncPerformanceMonitor:
 
 
 def monitor_async_function(
-    metric_name: Optional[str] = None,
-    tags: Optional[Dict[str, str]] = None
+    metric_name: Optional[str] = None, tags: Optional[Dict[str, str]] = None
 ):
     """Decorator for async function performance monitoring.
-    
+
     Args:
         metric_name: Custom metric name
         tags: Tags to attach to metrics
-    
+
     Returns:
         Decorated async function
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
@@ -473,7 +482,7 @@ def monitor_async_function(
                 tracker.record_metric(
                     f"{name}_async_execution_time_ms",
                     execution_time,
-                    tags={**(tags or {}), "status": "success"}
+                    tags={**(tags or {}), "status": "success"},
                 )
 
                 return result
@@ -483,7 +492,11 @@ def monitor_async_function(
                 tracker.record_metric(
                     f"{name}_async_execution_time_ms",
                     execution_time,
-                    tags={**(tags or {}), "status": "error", "error_type": type(e).__name__}
+                    tags={
+                        **(tags or {}),
+                        "status": "error",
+                        "error_type": type(e).__name__,
+                    },
                 )
 
                 raise
@@ -501,10 +514,10 @@ class PerformanceContext:
         self,
         operation_name: str,
         tags: Optional[Dict[str, str]] = None,
-        tracker: Optional[PerformanceTracker] = None
+        tracker: Optional[PerformanceTracker] = None,
     ):
         """Initialize performance context.
-        
+
         Args:
             operation_name: Name of operation
             tags: Tags to attach
@@ -532,15 +545,13 @@ class PerformanceContext:
                 tags["error_type"] = exc_type.__name__
 
             self.tracker.record_metric(
-                f"{self.operation_name}_execution_time_ms",
-                execution_time,
-                tags=tags
+                f"{self.operation_name}_execution_time_ms", execution_time, tags=tags
             )
 
 
 def create_performance_dashboard_data() -> Dict[str, Any]:
     """Create data structure for performance dashboard.
-    
+
     Returns:
         Dashboard data
     """
@@ -553,7 +564,7 @@ def create_performance_dashboard_data() -> Dict[str, Any]:
         "timestamp": datetime.now().isoformat(),
         "metrics": {},
         "alerts": tracker.get_alerts(since=since),
-        "system_health": "healthy"
+        "system_health": "healthy",
     }
 
     # Key metrics to display
@@ -562,7 +573,7 @@ def create_performance_dashboard_data() -> Dict[str, Any]:
         "system_memory_usage",
         "system_disk_usage",
         "response_time_ms",
-        "error_rate"
+        "error_rate",
     ]
 
     for metric_name in key_metrics:
