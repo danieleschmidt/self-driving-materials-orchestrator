@@ -22,6 +22,7 @@ try:
     import qiskit
     from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
     from qiskit.algorithms.optimizers import QAOA, VQE
+
     QUANTUM_AVAILABLE = True
 except ImportError:
     QUANTUM_AVAILABLE = False
@@ -31,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 class OptimizationStrategy(Enum):
     """Available quantum-hybrid optimization strategies."""
+
     QUANTUM_ANNEALING = "quantum_annealing"
     VARIATIONAL_QUANTUM_EIGENSOLVER = "vqe"
     QUANTUM_APPROXIMATE_OPTIMIZATION = "qaoa"
@@ -41,6 +43,7 @@ class OptimizationStrategy(Enum):
 
 class QuantumBackend(Enum):
     """Quantum computing backends."""
+
     SIMULATOR = "simulator"
     IBM_QUANTUM = "ibm_quantum"
     GOOGLE_QUANTUM = "google_quantum"
@@ -59,7 +62,9 @@ class QuantumOptimizationProblem:
     constraints: List[Dict[str, Any]] = field(default_factory=list)
     quantum_encoding: str = "binary"  # binary, amplitude, angle
     num_qubits: int = 8
-    optimization_strategy: OptimizationStrategy = OptimizationStrategy.HYBRID_CLASSICAL_QUANTUM
+    optimization_strategy: OptimizationStrategy = (
+        OptimizationStrategy.HYBRID_CLASSICAL_QUANTUM
+    )
     max_iterations: int = 1000
     convergence_threshold: float = 1e-6
     target_properties: List[str] = field(default_factory=list)
@@ -77,7 +82,7 @@ class QuantumOptimizationProblem:
             "max_iterations": self.max_iterations,
             "convergence_threshold": self.convergence_threshold,
             "target_properties": self.target_properties,
-            "created_at": self.created_at.isoformat()
+            "created_at": self.created_at.isoformat(),
         }
 
 
@@ -114,7 +119,7 @@ class QuantumOptimizationResult:
             "success_probability": self.success_probability,
             "backend_used": self.backend_used.value,
             "optimization_strategy": self.optimization_strategy.value,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
 
@@ -122,17 +127,23 @@ class QuantumOptimizer(ABC):
     """Abstract base class for quantum optimizers."""
 
     @abstractmethod
-    async def optimize(self, problem: QuantumOptimizationProblem) -> QuantumOptimizationResult:
+    async def optimize(
+        self, problem: QuantumOptimizationProblem
+    ) -> QuantumOptimizationResult:
         """Optimize the given problem using quantum algorithms."""
         pass
 
     @abstractmethod
-    def encode_parameters(self, parameters: Dict[str, float], problem: QuantumOptimizationProblem) -> np.ndarray:
+    def encode_parameters(
+        self, parameters: Dict[str, float], problem: QuantumOptimizationProblem
+    ) -> np.ndarray:
         """Encode classical parameters for quantum processing."""
         pass
 
     @abstractmethod
-    def decode_quantum_state(self, quantum_state: np.ndarray, problem: QuantumOptimizationProblem) -> Dict[str, float]:
+    def decode_quantum_state(
+        self, quantum_state: np.ndarray, problem: QuantumOptimizationProblem
+    ) -> Dict[str, float]:
         """Decode quantum state back to classical parameters."""
         pass
 
@@ -151,7 +162,9 @@ class QuantumAnnealingOptimizer(QuantumOptimizer):
         temperatures = np.exp(-5 * times)
         return list(zip(times, temperatures))
 
-    async def optimize(self, problem: QuantumOptimizationProblem) -> QuantumOptimizationResult:
+    async def optimize(
+        self, problem: QuantumOptimizationProblem
+    ) -> QuantumOptimizationResult:
         """Optimize using quantum annealing simulation."""
         start_time = datetime.now()
 
@@ -184,7 +197,9 @@ class QuantumAnnealingOptimizer(QuantumOptimizer):
             )
 
             # Evaluate neighbor
-            neighbor_value = await self._evaluate_async(objective_function, neighbor_parameters)
+            neighbor_value = await self._evaluate_async(
+                objective_function, neighbor_parameters
+            )
 
             # Quantum acceptance probability (enhanced with tunneling)
             delta = neighbor_value - best_value
@@ -215,12 +230,16 @@ class QuantumAnnealingOptimizer(QuantumOptimizer):
         runtime = (datetime.now() - start_time).total_seconds()
 
         # Estimate quantum advantage (simulation)
-        classical_runtime_estimate = len(convergence_history) * 0.1  # Assume classical is slower
+        classical_runtime_estimate = (
+            len(convergence_history) * 0.1
+        )  # Assume classical is slower
         quantum_advantage = classical_runtime_estimate / runtime if runtime > 0 else 1.0
 
         # Simulate fidelity and success probability
         fidelity = max(0.8, 1.0 - iteration / problem.max_iterations * 0.3)
-        success_probability = max(0.7, 1.0 - len(convergence_history) / problem.max_iterations * 0.4)
+        success_probability = max(
+            0.7, 1.0 - len(convergence_history) / problem.max_iterations * 0.4
+        )
 
         return QuantumOptimizationResult(
             problem_id=problem.id,
@@ -238,14 +257,16 @@ class QuantumAnnealingOptimizer(QuantumOptimizer):
             metadata={
                 "annealing_schedule_length": len(self.annealing_schedule),
                 "final_temperature": self.annealing_schedule[-1][1],
-                "convergence_iteration": len(convergence_history)
-            }
+                "convergence_iteration": len(convergence_history),
+            },
         )
 
-    def _generate_quantum_neighbor(self,
-                                 parameters: Dict[str, float],
-                                 problem: QuantumOptimizationProblem,
-                                 temperature: float) -> Dict[str, float]:
+    def _generate_quantum_neighbor(
+        self,
+        parameters: Dict[str, float],
+        problem: QuantumOptimizationProblem,
+        temperature: float,
+    ) -> Dict[str, float]:
         """Generate neighbor solution with quantum tunneling effects."""
         neighbor = parameters.copy()
 
@@ -264,6 +285,7 @@ class QuantumAnnealingOptimizer(QuantumOptimizer):
 
     def _create_materials_objective(self) -> Callable:
         """Create a simulated materials objective function."""
+
         async def materials_objective(params: Dict[str, float]) -> float:
             # Simulate complex materials property calculation
             # Based on realistic perovskite band gap optimization
@@ -280,10 +302,12 @@ class QuantumAnnealingOptimizer(QuantumOptimizer):
             temp_effect = -0.0002 * (temp - 150)  # Band gap narrows with temperature
 
             # Concentration effects (quantum confinement)
-            conc_effect = 0.1 * math.exp(-abs(conc_a - 1.2)) * math.exp(-abs(conc_b - 0.8))
+            conc_effect = (
+                0.1 * math.exp(-abs(conc_a - 1.2)) * math.exp(-abs(conc_b - 0.8))
+            )
 
             # Time effects (crystallinity)
-            time_effect = 0.05 * math.log(max(0.1, time)) * (1 - math.exp(-time/5))
+            time_effect = 0.05 * math.log(max(0.1, time)) * (1 - math.exp(-time / 5))
 
             # Add noise to simulate experimental uncertainty
             noise = np.random.normal(0, 0.02)
@@ -295,14 +319,18 @@ class QuantumAnnealingOptimizer(QuantumOptimizer):
 
         return materials_objective
 
-    async def _evaluate_async(self, objective_function: Callable, parameters: Dict[str, float]) -> float:
+    async def _evaluate_async(
+        self, objective_function: Callable, parameters: Dict[str, float]
+    ) -> float:
         """Evaluate objective function asynchronously."""
         if asyncio.iscoroutinefunction(objective_function):
             return await objective_function(parameters)
         else:
             return objective_function(parameters)
 
-    def encode_parameters(self, parameters: Dict[str, float], problem: QuantumOptimizationProblem) -> np.ndarray:
+    def encode_parameters(
+        self, parameters: Dict[str, float], problem: QuantumOptimizationProblem
+    ) -> np.ndarray:
         """Encode parameters as quantum state amplitudes."""
         # Simple amplitude encoding
         values = []
@@ -315,7 +343,9 @@ class QuantumAnnealingOptimizer(QuantumOptimizer):
         values = np.array(values)
         return values / np.linalg.norm(values)
 
-    def decode_quantum_state(self, quantum_state: np.ndarray, problem: QuantumOptimizationProblem) -> Dict[str, float]:
+    def decode_quantum_state(
+        self, quantum_state: np.ndarray, problem: QuantumOptimizationProblem
+    ) -> Dict[str, float]:
         """Decode quantum state back to parameter values."""
         parameters = {}
         param_names = sorted(problem.parameter_space.keys())
@@ -332,29 +362,37 @@ class QuantumAnnealingOptimizer(QuantumOptimizer):
 class VariationalQuantumEigensolver(QuantumOptimizer):
     """VQE-based optimizer for materials discovery."""
 
-    def __init__(self,
-                 backend: QuantumBackend = QuantumBackend.LOCAL_SIMULATION,
-                 num_layers: int = 3):
+    def __init__(
+        self,
+        backend: QuantumBackend = QuantumBackend.LOCAL_SIMULATION,
+        num_layers: int = 3,
+    ):
         self.backend = backend
         self.num_layers = num_layers
         self.theta_parameters = None
 
-    async def optimize(self, problem: QuantumOptimizationProblem) -> QuantumOptimizationResult:
+    async def optimize(
+        self, problem: QuantumOptimizationProblem
+    ) -> QuantumOptimizationResult:
         """Optimize using Variational Quantum Eigensolver."""
         start_time = datetime.now()
 
         # Initialize variational parameters
-        num_params = problem.num_qubits * self.num_layers * 2  # RY and RZ rotations per layer
-        self.theta_parameters = np.random.uniform(0, 2*np.pi, num_params)
+        num_params = (
+            problem.num_qubits * self.num_layers * 2
+        )  # RY and RZ rotations per layer
+        self.theta_parameters = np.random.uniform(0, 2 * np.pi, num_params)
 
         convergence_history = []
         best_parameters = None
-        best_value = float('inf')
+        best_value = float("inf")
 
         # VQE optimization loop
         for iteration in range(problem.max_iterations):
             # Create variational quantum circuit
-            circuit = self._create_variational_circuit(problem.num_qubits, self.theta_parameters)
+            circuit = self._create_variational_circuit(
+                problem.num_qubits, self.theta_parameters
+            )
 
             # Simulate quantum state evolution
             quantum_state = self._simulate_quantum_circuit(circuit)
@@ -364,9 +402,13 @@ class VariationalQuantumEigensolver(QuantumOptimizer):
 
             # Evaluate objective function
             if problem.objective_function:
-                value = await self._evaluate_async(problem.objective_function, classical_params)
+                value = await self._evaluate_async(
+                    problem.objective_function, classical_params
+                )
             else:
-                value = await self._evaluate_async(self._create_materials_objective(), classical_params)
+                value = await self._evaluate_async(
+                    self._create_materials_objective(), classical_params
+                )
 
             convergence_history.append(value)
 
@@ -390,7 +432,9 @@ class VariationalQuantumEigensolver(QuantumOptimizer):
         # Calculate quantum metrics
         quantum_advantage = 2.5  # VQE typically provides moderate advantage
         fidelity = max(0.85, 1.0 - iteration / problem.max_iterations * 0.2)
-        success_probability = max(0.8, 1.0 - len(convergence_history) / problem.max_iterations * 0.3)
+        success_probability = max(
+            0.8, 1.0 - len(convergence_history) / problem.max_iterations * 0.3
+        )
 
         return QuantumOptimizationResult(
             problem_id=problem.id,
@@ -408,11 +452,13 @@ class VariationalQuantumEigensolver(QuantumOptimizer):
             metadata={
                 "num_layers": self.num_layers,
                 "final_theta_params": self.theta_parameters.tolist(),
-                "convergence_iteration": len(convergence_history)
-            }
+                "convergence_iteration": len(convergence_history),
+            },
         )
 
-    def _create_variational_circuit(self, num_qubits: int, theta_params: np.ndarray) -> np.ndarray:
+    def _create_variational_circuit(
+        self, num_qubits: int, theta_params: np.ndarray
+    ) -> np.ndarray:
         """Create parameterized quantum circuit for VQE."""
         # Simulate quantum circuit with rotation gates
         # This is a simplified classical simulation
@@ -440,23 +486,31 @@ class VariationalQuantumEigensolver(QuantumOptimizer):
 
             # Entangling gates (CNOT ladder)
             for qubit in range(num_qubits - 1):
-                circuit_state = self._apply_cnot(circuit_state, qubit, qubit + 1, num_qubits)
+                circuit_state = self._apply_cnot(
+                    circuit_state, qubit, qubit + 1, num_qubits
+                )
 
         return circuit_state
 
-    def _apply_ry_rotation(self, state: np.ndarray, qubit: int, angle: float) -> np.ndarray:
+    def _apply_ry_rotation(
+        self, state: np.ndarray, qubit: int, angle: float
+    ) -> np.ndarray:
         """Apply RY rotation to quantum state (simplified simulation)."""
         # This is a simplified implementation
         # In practice, would use proper quantum state manipulation
-        rotation_factor = math.cos(angle/2) + 1j * math.sin(angle/2)
+        rotation_factor = math.cos(angle / 2) + 1j * math.sin(angle / 2)
         return state * rotation_factor
 
-    def _apply_rz_rotation(self, state: np.ndarray, qubit: int, angle: float) -> np.ndarray:
+    def _apply_rz_rotation(
+        self, state: np.ndarray, qubit: int, angle: float
+    ) -> np.ndarray:
         """Apply RZ rotation to quantum state (simplified simulation)."""
         phase_factor = math.exp(1j * angle / 2)
         return state * phase_factor
 
-    def _apply_cnot(self, state: np.ndarray, control: int, target: int, num_qubits: int) -> np.ndarray:
+    def _apply_cnot(
+        self, state: np.ndarray, control: int, target: int, num_qubits: int
+    ) -> np.ndarray:
         """Apply CNOT gate (simplified simulation)."""
         # Simplified entanglement simulation
         entanglement_factor = 1.0 + 0.1j  # Small entanglement effect
@@ -467,9 +521,9 @@ class VariationalQuantumEigensolver(QuantumOptimizer):
         # Return normalized state vector
         return circuit_params / np.linalg.norm(circuit_params)
 
-    def _compute_parameter_gradient(self,
-                                  problem: QuantumOptimizationProblem,
-                                  current_params: Dict[str, float]) -> np.ndarray:
+    def _compute_parameter_gradient(
+        self, problem: QuantumOptimizationProblem, current_params: Dict[str, float]
+    ) -> np.ndarray:
         """Compute gradient for parameter update."""
         # Simplified gradient computation
         gradient = np.random.normal(0, 0.1, len(self.theta_parameters))
@@ -477,12 +531,13 @@ class VariationalQuantumEigensolver(QuantumOptimizer):
         # Add some structure based on current performance
         for i in range(len(gradient)):
             # Bias gradient toward parameter ranges that might improve performance
-            gradient[i] *= (1 + 0.1 * math.sin(i))
+            gradient[i] *= 1 + 0.1 * math.sin(i)
 
         return gradient
 
     def _create_materials_objective(self) -> Callable:
         """Create materials-specific objective function for VQE."""
+
         async def vqe_materials_objective(params: Dict[str, float]) -> float:
             # Multi-objective optimization for materials properties
             band_gap_target = 1.4
@@ -502,24 +557,32 @@ class VariationalQuantumEigensolver(QuantumOptimizer):
             efficiency_error = abs(efficiency - efficiency_target)
 
             # Stability calculation
-            stability = 0.8 + 0.2 * math.exp(-0.1 * temp) + 0.1 * math.exp(-abs(conc - 1.0))
+            stability = (
+                0.8 + 0.2 * math.exp(-0.1 * temp) + 0.1 * math.exp(-abs(conc - 1.0))
+            )
             stability_error = abs(stability - stability_target)
 
             # Combined objective (weighted sum)
-            total_error = 0.5 * band_gap_error + 0.3 * efficiency_error + 0.2 * stability_error
+            total_error = (
+                0.5 * band_gap_error + 0.3 * efficiency_error + 0.2 * stability_error
+            )
 
             return total_error
 
         return vqe_materials_objective
 
-    async def _evaluate_async(self, objective_function: Callable, parameters: Dict[str, float]) -> float:
+    async def _evaluate_async(
+        self, objective_function: Callable, parameters: Dict[str, float]
+    ) -> float:
         """Evaluate objective function asynchronously."""
         if asyncio.iscoroutinefunction(objective_function):
             return await objective_function(parameters)
         else:
             return objective_function(parameters)
 
-    def encode_parameters(self, parameters: Dict[str, float], problem: QuantumOptimizationProblem) -> np.ndarray:
+    def encode_parameters(
+        self, parameters: Dict[str, float], problem: QuantumOptimizationProblem
+    ) -> np.ndarray:
         """Encode parameters for VQE circuit."""
         # Convert to angles for quantum rotations
         angles = []
@@ -532,7 +595,9 @@ class VariationalQuantumEigensolver(QuantumOptimizer):
 
         return np.array(angles)
 
-    def decode_quantum_state(self, quantum_state: np.ndarray, problem: QuantumOptimizationProblem) -> Dict[str, float]:
+    def decode_quantum_state(
+        self, quantum_state: np.ndarray, problem: QuantumOptimizationProblem
+    ) -> Dict[str, float]:
         """Decode quantum state to classical parameters."""
         parameters = {}
         param_names = sorted(problem.parameter_space.keys())
@@ -558,9 +623,11 @@ class VariationalQuantumEigensolver(QuantumOptimizer):
 class QuantumHybridOptimizer:
     """Main interface for quantum-hybrid optimization in materials discovery."""
 
-    def __init__(self,
-                 default_strategy: OptimizationStrategy = OptimizationStrategy.HYBRID_CLASSICAL_QUANTUM,
-                 backend: QuantumBackend = QuantumBackend.LOCAL_SIMULATION):
+    def __init__(
+        self,
+        default_strategy: OptimizationStrategy = OptimizationStrategy.HYBRID_CLASSICAL_QUANTUM,
+        backend: QuantumBackend = QuantumBackend.LOCAL_SIMULATION,
+    ):
         self.default_strategy = default_strategy
         self.backend = backend
         self.optimizers = self._initialize_optimizers()
@@ -570,20 +637,26 @@ class QuantumHybridOptimizer:
         """Initialize quantum optimizers for different strategies."""
         optimizers = {}
 
-        optimizers[OptimizationStrategy.QUANTUM_ANNEALING] = QuantumAnnealingOptimizer(self.backend)
-        optimizers[OptimizationStrategy.VARIATIONAL_QUANTUM_EIGENSOLVER] = VariationalQuantumEigensolver(self.backend)
+        optimizers[OptimizationStrategy.QUANTUM_ANNEALING] = QuantumAnnealingOptimizer(
+            self.backend
+        )
+        optimizers[OptimizationStrategy.VARIATIONAL_QUANTUM_EIGENSOLVER] = (
+            VariationalQuantumEigensolver(self.backend)
+        )
 
         return optimizers
 
-    async def optimize_materials_parameters(self,
-                                          parameter_space: Dict[str, Tuple[float, float]],
-                                          objective_function: Optional[Callable] = None,
-                                          target_properties: List[str] = None,
-                                          strategy: OptimizationStrategy = None,
-                                          num_qubits: int = 8,
-                                          max_iterations: int = 500) -> QuantumOptimizationResult:
+    async def optimize_materials_parameters(
+        self,
+        parameter_space: Dict[str, Tuple[float, float]],
+        objective_function: Optional[Callable] = None,
+        target_properties: List[str] = None,
+        strategy: OptimizationStrategy = None,
+        num_qubits: int = 8,
+        max_iterations: int = 500,
+    ) -> QuantumOptimizationResult:
         """Optimize materials parameters using quantum-hybrid algorithms.
-        
+
         Args:
             parameter_space: Dictionary of parameter ranges
             objective_function: Function to optimize (optional)
@@ -591,7 +664,7 @@ class QuantumHybridOptimizer:
             strategy: Optimization strategy to use
             num_qubits: Number of qubits for quantum algorithms
             max_iterations: Maximum optimization iterations
-            
+
         Returns:
             Quantum optimization results
         """
@@ -608,41 +681,47 @@ class QuantumHybridOptimizer:
             target_properties=target_properties,
             optimization_strategy=strategy,
             num_qubits=num_qubits,
-            max_iterations=max_iterations
+            max_iterations=max_iterations,
         )
 
         # Select and run optimizer
         if strategy in self.optimizers:
             optimizer = self.optimizers[strategy]
-            logger.info(f"Starting quantum optimization with strategy: {strategy.value}")
+            logger.info(
+                f"Starting quantum optimization with strategy: {strategy.value}"
+            )
 
             result = await optimizer.optimize(problem)
             self.optimization_history.append(result)
 
-            logger.info(f"Quantum optimization completed. Best value: {result.optimal_value:.6f}")
+            logger.info(
+                f"Quantum optimization completed. Best value: {result.optimal_value:.6f}"
+            )
             logger.info(f"Quantum advantage: {result.quantum_advantage:.2f}x")
 
             return result
         else:
             raise ValueError(f"Unsupported optimization strategy: {strategy}")
 
-    async def benchmark_quantum_strategies(self,
-                                         parameter_space: Dict[str, Tuple[float, float]],
-                                         objective_function: Optional[Callable] = None,
-                                         num_runs: int = 5) -> Dict[str, List[QuantumOptimizationResult]]:
+    async def benchmark_quantum_strategies(
+        self,
+        parameter_space: Dict[str, Tuple[float, float]],
+        objective_function: Optional[Callable] = None,
+        num_runs: int = 5,
+    ) -> Dict[str, List[QuantumOptimizationResult]]:
         """Benchmark different quantum optimization strategies.
-        
+
         Args:
             parameter_space: Parameter space to optimize
             objective_function: Objective function
             num_runs: Number of runs per strategy
-            
+
         Returns:
             Dictionary of results for each strategy
         """
         strategies = [
             OptimizationStrategy.QUANTUM_ANNEALING,
-            OptimizationStrategy.VARIATIONAL_QUANTUM_EIGENSOLVER
+            OptimizationStrategy.VARIATIONAL_QUANTUM_EIGENSOLVER,
         ]
 
         benchmark_results = {}
@@ -657,7 +736,7 @@ class QuantumHybridOptimizer:
                         parameter_space=parameter_space,
                         objective_function=objective_function,
                         strategy=strategy,
-                        max_iterations=100  # Shorter runs for benchmarking
+                        max_iterations=100,  # Shorter runs for benchmarking
                     )
                     strategy_results.append(result)
 
@@ -671,7 +750,9 @@ class QuantumHybridOptimizer:
 
         return benchmark_results
 
-    def _analyze_benchmark_results(self, results: Dict[str, List[QuantumOptimizationResult]]) -> None:
+    def _analyze_benchmark_results(
+        self, results: Dict[str, List[QuantumOptimizationResult]]
+    ) -> None:
         """Analyze and log benchmark results."""
         logger.info("Quantum Strategy Benchmark Results:")
         logger.info("=" * 50)
@@ -700,7 +781,10 @@ class QuantumHybridOptimizer:
     def get_optimization_summary(self) -> Dict[str, Any]:
         """Get summary of all quantum optimizations performed."""
         if not self.optimization_history:
-            return {"total_optimizations": 0, "summary": "No optimizations performed yet."}
+            return {
+                "total_optimizations": 0,
+                "summary": "No optimizations performed yet.",
+            }
 
         # Group by strategy
         by_strategy = {}
@@ -722,7 +806,9 @@ class QuantumHybridOptimizer:
         # Calculate average metrics
         avg_quantum_advantage = total_quantum_advantage / len(self.optimization_history)
         avg_fidelity = np.mean([r.fidelity for r in self.optimization_history])
-        avg_success_probability = np.mean([r.success_probability for r in self.optimization_history])
+        avg_success_probability = np.mean(
+            [r.success_probability for r in self.optimization_history]
+        )
 
         return {
             "total_optimizations": len(self.optimization_history),
@@ -735,20 +821,22 @@ class QuantumHybridOptimizer:
             "average_fidelity": avg_fidelity,
             "average_success_probability": avg_success_probability,
             "total_runtime": total_runtime,
-            "summary": f"Completed {len(self.optimization_history)} quantum optimizations with {avg_quantum_advantage:.1f}x average speedup"
+            "summary": f"Completed {len(self.optimization_history)} quantum optimizations with {avg_quantum_advantage:.1f}x average speedup",
         }
 
-    async def adaptive_strategy_selection(self,
-                                        parameter_space: Dict[str, Tuple[float, float]],
-                                        objective_function: Optional[Callable] = None,
-                                        problem_characteristics: Dict[str, Any] = None) -> OptimizationStrategy:
+    async def adaptive_strategy_selection(
+        self,
+        parameter_space: Dict[str, Tuple[float, float]],
+        objective_function: Optional[Callable] = None,
+        problem_characteristics: Dict[str, Any] = None,
+    ) -> OptimizationStrategy:
         """Automatically select best quantum strategy based on problem characteristics.
-        
+
         Args:
             parameter_space: Parameter space information
             objective_function: Objective function
             problem_characteristics: Problem-specific characteristics
-            
+
         Returns:
             Recommended optimization strategy
         """
@@ -757,7 +845,9 @@ class QuantumHybridOptimizer:
 
         # Analyze problem characteristics
         num_parameters = len(parameter_space)
-        parameter_ranges = [max_val - min_val for min_val, max_val in parameter_space.values()]
+        parameter_ranges = [
+            max_val - min_val for min_val, max_val in parameter_space.values()
+        ]
         avg_range = np.mean(parameter_ranges)
         range_variance = np.var(parameter_ranges)
 
@@ -775,7 +865,9 @@ class QuantumHybridOptimizer:
             recommended_strategy = OptimizationStrategy.HYBRID_CLASSICAL_QUANTUM
 
         logger.info(f"Adaptive strategy selection: {recommended_strategy.value}")
-        logger.info(f"Problem characteristics: {num_parameters} parameters, avg_range={avg_range:.2f}")
+        logger.info(
+            f"Problem characteristics: {num_parameters} parameters, avg_range={avg_range:.2f}"
+        )
 
         return recommended_strategy
 
@@ -792,26 +884,30 @@ def get_global_quantum_optimizer() -> QuantumHybridOptimizer:
     return _global_quantum_optimizer
 
 
-async def optimize_with_quantum_hybrid(parameter_space: Dict[str, Tuple[float, float]],
-                                      objective_function: Optional[Callable] = None,
-                                      strategy: OptimizationStrategy = None) -> QuantumOptimizationResult:
+async def optimize_with_quantum_hybrid(
+    parameter_space: Dict[str, Tuple[float, float]],
+    objective_function: Optional[Callable] = None,
+    strategy: OptimizationStrategy = None,
+) -> QuantumOptimizationResult:
     """Convenience function for quantum-hybrid optimization.
-    
+
     Args:
         parameter_space: Dictionary of parameter ranges
         objective_function: Function to optimize
         strategy: Optimization strategy (auto-selected if None)
-        
+
     Returns:
         Quantum optimization results
     """
     optimizer = get_global_quantum_optimizer()
 
     if strategy is None:
-        strategy = await optimizer.adaptive_strategy_selection(parameter_space, objective_function)
+        strategy = await optimizer.adaptive_strategy_selection(
+            parameter_space, objective_function
+        )
 
     return await optimizer.optimize_materials_parameters(
         parameter_space=parameter_space,
         objective_function=objective_function,
-        strategy=strategy
+        strategy=strategy,
     )

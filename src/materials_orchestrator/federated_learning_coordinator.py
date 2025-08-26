@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 class LabRole(Enum):
     """Roles in federated learning network."""
+
     COORDINATOR = "coordinator"
     PARTICIPANT = "participant"
     VALIDATOR = "validator"
@@ -35,6 +36,7 @@ class LabRole(Enum):
 
 class FederationStatus(Enum):
     """Status of federated learning process."""
+
     IDLE = "idle"
     RECRUITING = "recruiting"
     TRAINING = "training"
@@ -46,6 +48,7 @@ class FederationStatus(Enum):
 
 class PrivacyLevel(Enum):
     """Privacy protection levels."""
+
     NONE = "none"
     DIFFERENTIAL_PRIVACY = "differential_privacy"
     HOMOMORPHIC_ENCRYPTION = "homomorphic_encryption"
@@ -86,7 +89,7 @@ class LabNode:
             "last_seen": self.last_seen.isoformat(),
             "experiments_contributed": self.experiments_contributed,
             "model_updates_contributed": self.model_updates_contributed,
-            "reputation_score": self.reputation_score
+            "reputation_score": self.reputation_score,
         }
 
 
@@ -115,13 +118,15 @@ class FederatedModel:
             "model_type": self.model_type,
             "target_properties": self.target_properties,
             "architecture": self.architecture,
-            "parameters": self.parameters.tolist() if self.parameters is not None else None,
+            "parameters": (
+                self.parameters.tolist() if self.parameters is not None else None
+            ),
             "performance_metrics": self.performance_metrics,
             "training_rounds": self.training_rounds,
             "participating_labs": self.participating_labs,
             "created_at": self.created_at.isoformat(),
             "last_updated": self.last_updated.isoformat(),
-            "privacy_level": self.privacy_level.value
+            "privacy_level": self.privacy_level.value,
         }
 
 
@@ -149,14 +154,16 @@ class ModelUpdate:
             "lab_id": self.lab_id,
             "model_id": self.model_id,
             "round_number": self.round_number,
-            "parameters": self.parameters.tolist() if self.parameters is not None else None,
+            "parameters": (
+                self.parameters.tolist() if self.parameters is not None else None
+            ),
             "gradient": self.gradient.tolist() if self.gradient is not None else None,
             "local_performance": self.local_performance,
             "data_size": self.data_size,
             "computation_time": self.computation_time,
             "privacy_budget_used": self.privacy_budget_used,
             "timestamp": self.timestamp.isoformat(),
-            "signature": self.signature
+            "signature": self.signature,
         }
 
 
@@ -166,7 +173,7 @@ class PrivacyManager:
     def __init__(self, privacy_level: PrivacyLevel = PrivacyLevel.DIFFERENTIAL_PRIVACY):
         self.privacy_level = privacy_level
         self.epsilon = 1.0  # Differential privacy parameter
-        self.delta = 1e-5   # Differential privacy parameter
+        self.delta = 1e-5  # Differential privacy parameter
         self.noise_multiplier = 1.0
         self.encryption_key = self._generate_encryption_key()
 
@@ -183,9 +190,9 @@ class PrivacyManager:
         key = base64.urlsafe_b64encode(kdf.derive(password))
         return Fernet(key)
 
-    def add_differential_privacy_noise(self,
-                                     parameters: np.ndarray,
-                                     sensitivity: float = 1.0) -> np.ndarray:
+    def add_differential_privacy_noise(
+        self, parameters: np.ndarray, sensitivity: float = 1.0
+    ) -> np.ndarray:
         """Add differential privacy noise to model parameters."""
         if self.privacy_level != PrivacyLevel.DIFFERENTIAL_PRIVACY:
             return parameters
@@ -293,9 +300,9 @@ class FederatedAggregator:
 
         return aggregated
 
-    def reputation_weighted_aggregation(self,
-                                      updates: List[ModelUpdate],
-                                      lab_reputations: Dict[str, float]) -> np.ndarray:
+    def reputation_weighted_aggregation(
+        self, updates: List[ModelUpdate], lab_reputations: Dict[str, float]
+    ) -> np.ndarray:
         """Aggregate updates weighted by laboratory reputation scores."""
         if not updates:
             raise ValueError("No updates to aggregate")
@@ -327,16 +334,18 @@ class FederatedAggregator:
 
         return aggregated_params
 
-    def aggregate_updates(self,
-                         updates: List[ModelUpdate],
-                         lab_nodes: Dict[str, LabNode] = None) -> np.ndarray:
+    def aggregate_updates(
+        self, updates: List[ModelUpdate], lab_nodes: Dict[str, LabNode] = None
+    ) -> np.ndarray:
         """Aggregate model updates using the configured strategy."""
         if self.aggregation_strategy == "fedavg":
             return self.federated_averaging(updates)
         elif self.aggregation_strategy == "secure":
             return self.secure_aggregation(updates)
         elif self.aggregation_strategy == "reputation" and lab_nodes:
-            reputations = {lab_id: lab.reputation_score for lab_id, lab in lab_nodes.items()}
+            reputations = {
+                lab_id: lab.reputation_score for lab_id, lab in lab_nodes.items()
+            }
             return self.reputation_weighted_aggregation(updates, reputations)
         else:
             # Default to federated averaging
@@ -346,10 +355,9 @@ class FederatedAggregator:
 class FederatedLearningCoordinator:
     """Main coordinator for federated learning across multiple laboratories."""
 
-    def __init__(self,
-                 lab_name: str,
-                 institution: str = "",
-                 role: LabRole = LabRole.COORDINATOR):
+    def __init__(
+        self, lab_name: str, institution: str = "", role: LabRole = LabRole.COORDINATOR
+    ):
         self.lab_id = str(uuid.uuid4())
         self.lab_name = lab_name
         self.institution = institution
@@ -375,10 +383,10 @@ class FederatedLearningCoordinator:
 
     async def register_lab(self, lab_info: Dict[str, Any]) -> LabNode:
         """Register a new laboratory in the federation.
-        
+
         Args:
             lab_info: Laboratory information dictionary
-            
+
         Returns:
             Created LabNode instance
         """
@@ -387,7 +395,7 @@ class FederatedLearningCoordinator:
             institution=lab_info.get("institution", ""),
             role=LabRole(lab_info.get("role", "participant")),
             endpoint=lab_info.get("endpoint", ""),
-            capabilities=lab_info.get("capabilities", [])
+            capabilities=lab_info.get("capabilities", []),
         )
 
         # Validate lab credentials
@@ -407,7 +415,10 @@ class FederatedLearningCoordinator:
     async def _validate_lab_credentials(self, lab_node: LabNode) -> bool:
         """Validate laboratory credentials and authorization."""
         # Check institution whitelist
-        if self.trusted_institutions and lab_node.institution not in self.trusted_institutions:
+        if (
+            self.trusted_institutions
+            and lab_node.institution not in self.trusted_institutions
+        ):
             logger.warning(f"Institution not in trusted list: {lab_node.institution}")
             return False
 
@@ -434,7 +445,7 @@ class FederatedLearningCoordinator:
             "Stanford": 0.2,
             "UC Berkeley": 0.15,
             "Cambridge": 0.15,
-            "ETH Zurich": 0.1
+            "ETH Zurich": 0.1,
         }
 
         trust_score += institution_bonuses.get(lab_node.institution, 0.0)
@@ -447,13 +458,14 @@ class FederatedLearningCoordinator:
 
         return min(2.0, trust_score)  # Cap at 2.0
 
-    async def create_federated_model(self,
-                                   model_config: Dict[str, Any]) -> FederatedModel:
+    async def create_federated_model(
+        self, model_config: Dict[str, Any]
+    ) -> FederatedModel:
         """Create a new federated learning model.
-        
+
         Args:
             model_config: Model configuration dictionary
-            
+
         Returns:
             Created FederatedModel instance
         """
@@ -462,7 +474,9 @@ class FederatedLearningCoordinator:
             model_type=model_config.get("model_type", "neural_network"),
             target_properties=model_config.get("target_properties", ["band_gap"]),
             architecture=model_config.get("architecture", {}),
-            privacy_level=PrivacyLevel(model_config.get("privacy_level", "differential_privacy"))
+            privacy_level=PrivacyLevel(
+                model_config.get("privacy_level", "differential_privacy")
+            ),
         )
 
         # Initialize model parameters
@@ -480,10 +494,10 @@ class FederatedLearningCoordinator:
 
     async def start_training_round(self, model_id: str) -> Dict[str, Any]:
         """Start a new federated training round.
-        
+
         Args:
             model_id: ID of the model to train
-            
+
         Returns:
             Training round information
         """
@@ -503,13 +517,17 @@ class FederatedLearningCoordinator:
             "model_id": model_id,
             "round_number": self.current_round,
             "participating_labs": len(participating_labs),
-            "global_parameters": model.parameters.tolist() if model.parameters is not None else None,
+            "global_parameters": (
+                model.parameters.tolist() if model.parameters is not None else None
+            ),
             "target_properties": model.target_properties,
             "privacy_level": model.privacy_level.value,
-            "deadline": (datetime.now() + timedelta(hours=24)).isoformat()
+            "deadline": (datetime.now() + timedelta(hours=24)).isoformat(),
         }
 
-        logger.info(f"Started training round {self.current_round} for model {model.name}")
+        logger.info(
+            f"Started training round {self.current_round} for model {model.name}"
+        )
         logger.info(f"Participating labs: {len(participating_labs)}")
 
         # Notify participating labs (simulated)
@@ -531,18 +549,26 @@ class FederatedLearningCoordinator:
 
         # Select top labs by combined score
         def selection_score(lab: LabNode) -> float:
-            return lab.trust_score * lab.reputation_score * (1 + lab.experiments_contributed / 100)
+            return (
+                lab.trust_score
+                * lab.reputation_score
+                * (1 + lab.experiments_contributed / 100)
+            )
 
         eligible_labs.sort(key=selection_score, reverse=True)
 
         # Select up to 10 labs for training round
         selected_labs = eligible_labs[:10]
 
-        logger.info(f"Selected {len(selected_labs)} labs from {len(eligible_labs)} eligible")
+        logger.info(
+            f"Selected {len(selected_labs)} labs from {len(eligible_labs)} eligible"
+        )
 
         return selected_labs
 
-    def _lab_can_handle_properties(self, lab: LabNode, target_properties: List[str]) -> bool:
+    def _lab_can_handle_properties(
+        self, lab: LabNode, target_properties: List[str]
+    ) -> bool:
         """Check if lab can measure/optimize target properties."""
         lab_capabilities = set(lab.capabilities)
 
@@ -551,7 +577,7 @@ class FederatedLearningCoordinator:
             "band_gap": {"uv_vis_spectroscopy", "characterization"},
             "efficiency": {"solar_cell_testing", "characterization"},
             "stability": {"long_term_testing", "characterization"},
-            "conductivity": {"electrical_testing", "characterization"}
+            "conductivity": {"electrical_testing", "characterization"},
         }
 
         for prop in target_properties:
@@ -561,22 +587,24 @@ class FederatedLearningCoordinator:
 
         return True
 
-    async def _notify_participating_labs(self,
-                                       labs: List[LabNode],
-                                       round_info: Dict[str, Any]) -> None:
+    async def _notify_participating_labs(
+        self, labs: List[LabNode], round_info: Dict[str, Any]
+    ) -> None:
         """Notify participating labs about new training round."""
         # In real implementation, this would send network requests
         for lab in labs:
-            logger.debug(f"Notifying lab {lab.name} about training round {round_info['round_number']}")
+            logger.debug(
+                f"Notifying lab {lab.name} about training round {round_info['round_number']}"
+            )
             # Simulate network communication delay
             await asyncio.sleep(0.1)
 
     async def receive_model_update(self, update_data: Dict[str, Any]) -> bool:
         """Receive and validate a model update from a participating lab.
-        
+
         Args:
             update_data: Model update data
-            
+
         Returns:
             True if update was accepted, False otherwise
         """
@@ -601,7 +629,7 @@ class FederatedLearningCoordinator:
                 parameters=np.array(update_data["parameters"]),
                 local_performance=update_data.get("local_performance", {}),
                 data_size=update_data.get("data_size", 0),
-                computation_time=update_data.get("computation_time", 0.0)
+                computation_time=update_data.get("computation_time", 0.0),
             )
 
             # Validate update integrity
@@ -610,8 +638,10 @@ class FederatedLearningCoordinator:
 
             # Apply privacy protection
             if self.privacy_manager.privacy_level != PrivacyLevel.NONE:
-                model_update.parameters = self.privacy_manager.add_differential_privacy_noise(
-                    model_update.parameters
+                model_update.parameters = (
+                    self.privacy_manager.add_differential_privacy_noise(
+                        model_update.parameters
+                    )
                 )
 
             # Store update
@@ -626,7 +656,9 @@ class FederatedLearningCoordinator:
             lab.model_updates_contributed += 1
             lab.last_seen = datetime.now()
 
-            logger.info(f"Received model update from {lab.name} for round {model_update.round_number}")
+            logger.info(
+                f"Received model update from {lab.name} for round {model_update.round_number}"
+            )
 
             return True
 
@@ -651,22 +683,26 @@ class FederatedLearningCoordinator:
         # Check parameter magnitude (potential attack detection)
         param_norm = np.linalg.norm(update.parameters)
         if param_norm > 100:  # Threshold for suspiciously large updates
-            logger.warning(f"Model update has suspiciously large parameters: {param_norm}")
+            logger.warning(
+                f"Model update has suspiciously large parameters: {param_norm}"
+            )
             return False
 
         # Check round number consistency
         if update.round_number != self.current_round:
-            logger.warning(f"Model update for incorrect round: {update.round_number} vs {self.current_round}")
+            logger.warning(
+                f"Model update for incorrect round: {update.round_number} vs {self.current_round}"
+            )
             return False
 
         return True
 
     async def aggregate_model_updates(self, model_id: str) -> bool:
         """Aggregate received model updates and update global model.
-        
+
         Args:
             model_id: ID of the model to aggregate
-            
+
         Returns:
             True if aggregation was successful
         """
@@ -675,21 +711,26 @@ class FederatedLearningCoordinator:
             return False
 
         updates = self.model_updates.get(model_id, [])
-        current_round_updates = [u for u in updates if u.round_number == self.current_round]
+        current_round_updates = [
+            u for u in updates if u.round_number == self.current_round
+        ]
 
         if not current_round_updates:
-            logger.warning(f"No updates received for model {model_id} in round {self.current_round}")
+            logger.warning(
+                f"No updates received for model {model_id} in round {self.current_round}"
+            )
             return False
 
-        logger.info(f"Aggregating {len(current_round_updates)} updates for model {model_id}")
+        logger.info(
+            f"Aggregating {len(current_round_updates)} updates for model {model_id}"
+        )
 
         self.federation_status = FederationStatus.AGGREGATING
 
         try:
             # Aggregate updates
             aggregated_params = self.aggregator.aggregate_updates(
-                current_round_updates,
-                self.connected_labs
+                current_round_updates, self.connected_labs
             )
 
             # Update global model
@@ -699,11 +740,15 @@ class FederatedLearningCoordinator:
             model.last_updated = datetime.now()
 
             # Calculate aggregated performance metrics
-            performance_metrics = self._calculate_aggregated_performance(current_round_updates)
+            performance_metrics = self._calculate_aggregated_performance(
+                current_round_updates
+            )
             model.performance_metrics.update(performance_metrics)
 
             # Update lab reputations based on contribution quality
-            await self._update_lab_reputations(current_round_updates, performance_metrics)
+            await self._update_lab_reputations(
+                current_round_updates, performance_metrics
+            )
 
             # Store training history
             round_summary = {
@@ -711,7 +756,7 @@ class FederatedLearningCoordinator:
                 "timestamp": datetime.now().isoformat(),
                 "participating_labs": len(current_round_updates),
                 "performance_metrics": performance_metrics,
-                "aggregation_strategy": self.aggregator.aggregation_strategy
+                "aggregation_strategy": self.aggregator.aggregation_strategy,
             }
             self.training_history.append(round_summary)
 
@@ -726,7 +771,9 @@ class FederatedLearningCoordinator:
             self.federation_status = FederationStatus.ERROR
             return False
 
-    def _calculate_aggregated_performance(self, updates: List[ModelUpdate]) -> Dict[str, float]:
+    def _calculate_aggregated_performance(
+        self, updates: List[ModelUpdate]
+    ) -> Dict[str, float]:
         """Calculate aggregated performance metrics from local updates."""
         metrics = {}
 
@@ -760,9 +807,9 @@ class FederatedLearningCoordinator:
 
         return metrics
 
-    async def _update_lab_reputations(self,
-                                    updates: List[ModelUpdate],
-                                    performance_metrics: Dict[str, float]) -> None:
+    async def _update_lab_reputations(
+        self, updates: List[ModelUpdate], performance_metrics: Dict[str, float]
+    ) -> None:
         """Update laboratory reputation scores based on contribution quality."""
         avg_performance = performance_metrics.get("avg_accuracy", 0.5)
 
@@ -772,39 +819,51 @@ class FederatedLearningCoordinator:
                 continue
 
             # Calculate contribution quality score
-            local_performance = update.local_performance.get("accuracy", avg_performance)
-            performance_ratio = local_performance / avg_performance if avg_performance > 0 else 1.0
+            local_performance = update.local_performance.get(
+                "accuracy", avg_performance
+            )
+            performance_ratio = (
+                local_performance / avg_performance if avg_performance > 0 else 1.0
+            )
 
             # Factor in data contribution size
             data_contribution = update.data_size / 100  # Normalize
             data_bonus = min(0.2, data_contribution * 0.01)
 
             # Factor in computation time (faster is better, up to a point)
-            time_factor = max(0.5, 1.0 - update.computation_time / 3600)  # Penalize > 1 hour
+            time_factor = max(
+                0.5, 1.0 - update.computation_time / 3600
+            )  # Penalize > 1 hour
 
             # Calculate reputation update
-            reputation_delta = (performance_ratio - 1.0) * 0.1 + data_bonus + (time_factor - 1.0) * 0.05
+            reputation_delta = (
+                (performance_ratio - 1.0) * 0.1
+                + data_bonus
+                + (time_factor - 1.0) * 0.05
+            )
 
             # Apply update with decay
             lab.reputation_score = (
-                lab.reputation_score * self.reputation_decay_rate +
-                max(0.1, lab.reputation_score + reputation_delta)
+                lab.reputation_score * self.reputation_decay_rate
+                + max(0.1, lab.reputation_score + reputation_delta)
             )
 
             # Clamp reputation score
             lab.reputation_score = np.clip(lab.reputation_score, 0.1, 2.0)
 
-            logger.debug(f"Updated reputation for {lab.name}: {lab.reputation_score:.3f}")
+            logger.debug(
+                f"Updated reputation for {lab.name}: {lab.reputation_score:.3f}"
+            )
 
-    async def evaluate_federated_model(self,
-                                     model_id: str,
-                                     test_data: List[Dict[str, Any]]) -> Dict[str, float]:
+    async def evaluate_federated_model(
+        self, model_id: str, test_data: List[Dict[str, Any]]
+    ) -> Dict[str, float]:
         """Evaluate federated model performance on test data.
-        
+
         Args:
             model_id: ID of the model to evaluate
             test_data: Test dataset
-            
+
         Returns:
             Evaluation metrics
         """
@@ -822,16 +881,18 @@ class FederatedLearningCoordinator:
             "recall": np.random.uniform(0.7, 0.9),
             "f1_score": np.random.uniform(0.7, 0.9),
             "mse": np.random.uniform(0.01, 0.1),
-            "mae": np.random.uniform(0.05, 0.15)
+            "mae": np.random.uniform(0.05, 0.15),
         }
 
         # Add federation-specific metrics
-        evaluation_metrics.update({
-            "total_training_rounds": model.training_rounds,
-            "participating_labs": len(model.participating_labs),
-            "data_privacy_level": model.privacy_level.value,
-            "model_convergence": np.random.uniform(0.8, 0.95)
-        })
+        evaluation_metrics.update(
+            {
+                "total_training_rounds": model.training_rounds,
+                "participating_labs": len(model.participating_labs),
+                "data_privacy_level": model.privacy_level.value,
+                "model_convergence": np.random.uniform(0.8, 0.95),
+            }
+        )
 
         # Update model performance
         model.performance_metrics.update(evaluation_metrics)
@@ -847,14 +908,27 @@ class FederatedLearningCoordinator:
         """Get summary of federated learning status and metrics."""
         # Calculate summary statistics
         total_labs = len(self.connected_labs)
-        active_labs = len([lab for lab in self.connected_labs.values()
-                          if (datetime.now() - lab.last_seen).days < 7])
+        active_labs = len(
+            [
+                lab
+                for lab in self.connected_labs.values()
+                if (datetime.now() - lab.last_seen).days < 7
+            ]
+        )
 
         total_models = len(self.federated_models)
         total_updates = sum(len(updates) for updates in self.model_updates.values())
 
-        avg_trust = np.mean([lab.trust_score for lab in self.connected_labs.values()]) if self.connected_labs else 0
-        avg_reputation = np.mean([lab.reputation_score for lab in self.connected_labs.values()]) if self.connected_labs else 0
+        avg_trust = (
+            np.mean([lab.trust_score for lab in self.connected_labs.values()])
+            if self.connected_labs
+            else 0
+        )
+        avg_reputation = (
+            np.mean([lab.reputation_score for lab in self.connected_labs.values()])
+            if self.connected_labs
+            else 0
+        )
 
         # Model performance summary
         model_performances = []
@@ -870,23 +944,25 @@ class FederatedLearningCoordinator:
             "total_labs": total_labs,
             "active_labs": active_labs,
             "total_models": total_models,
-            "total_training_rounds": sum(model.training_rounds for model in self.federated_models.values()),
+            "total_training_rounds": sum(
+                model.training_rounds for model in self.federated_models.values()
+            ),
             "total_model_updates": total_updates,
             "average_trust_score": avg_trust,
             "average_reputation_score": avg_reputation,
             "average_model_performance": avg_model_performance,
             "privacy_level": self.privacy_manager.privacy_level.value,
             "aggregation_strategy": self.aggregator.aggregation_strategy,
-            "training_history_length": len(self.training_history)
+            "training_history_length": len(self.training_history),
         }
 
     async def export_model(self, model_id: str, export_path: str) -> bool:
         """Export a federated model for deployment.
-        
+
         Args:
             model_id: ID of the model to export
             export_path: Path to save the exported model
-            
+
         Returns:
             True if export was successful
         """
@@ -905,7 +981,7 @@ class FederatedLearningCoordinator:
                     "id": lab.id,
                     "name": lab.name,
                     "institution": lab.institution,
-                    "contributions": lab.model_updates_contributed
+                    "contributions": lab.model_updates_contributed,
                 }
                 for lab in self.connected_labs.values()
                 if lab.id in model.participating_labs
@@ -914,8 +990,8 @@ class FederatedLearningCoordinator:
                 "coordinator": self.lab_name,
                 "export_timestamp": datetime.now().isoformat(),
                 "total_training_rounds": model.training_rounds,
-                "privacy_level": model.privacy_level.value
-            }
+                "privacy_level": model.privacy_level.value,
+            },
         }
 
         try:
@@ -923,7 +999,7 @@ class FederatedLearningCoordinator:
             export_path_obj = Path(export_path)
             export_path_obj.parent.mkdir(parents=True, exist_ok=True)
 
-            with open(export_path_obj, 'w') as f:
+            with open(export_path_obj, "w") as f:
                 json.dump(export_data, f, indent=2, default=str)
 
             logger.info(f"Exported model {model.name} to {export_path}")
@@ -938,7 +1014,9 @@ class FederatedLearningCoordinator:
 _global_federation_coordinator: Optional[FederatedLearningCoordinator] = None
 
 
-def get_global_federation_coordinator(lab_name: str = "Global Lab") -> FederatedLearningCoordinator:
+def get_global_federation_coordinator(
+    lab_name: str = "Global Lab",
+) -> FederatedLearningCoordinator:
     """Get the global federated learning coordinator instance."""
     global _global_federation_coordinator
     if _global_federation_coordinator is None:
@@ -946,23 +1024,27 @@ def get_global_federation_coordinator(lab_name: str = "Global Lab") -> Federated
     return _global_federation_coordinator
 
 
-async def create_federated_materials_network(coordinator_config: Dict[str, Any]) -> FederatedLearningCoordinator:
+async def create_federated_materials_network(
+    coordinator_config: Dict[str, Any],
+) -> FederatedLearningCoordinator:
     """Create a federated materials discovery network.
-    
+
     Args:
         coordinator_config: Configuration for the federation coordinator
-        
+
     Returns:
         Configured FederatedLearningCoordinator instance
     """
     coordinator = FederatedLearningCoordinator(
         lab_name=coordinator_config.get("lab_name", "Federation Coordinator"),
         institution=coordinator_config.get("institution", ""),
-        role=LabRole.COORDINATOR
+        role=LabRole.COORDINATOR,
     )
 
     # Set up privacy configuration
-    privacy_level = PrivacyLevel(coordinator_config.get("privacy_level", "differential_privacy"))
+    privacy_level = PrivacyLevel(
+        coordinator_config.get("privacy_level", "differential_privacy")
+    )
     coordinator.privacy_manager = PrivacyManager(privacy_level)
 
     # Set up aggregation strategy

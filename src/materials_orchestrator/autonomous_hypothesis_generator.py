@@ -14,9 +14,11 @@ from typing import Any, Dict, List, Optional
 # Graceful dependency handling
 try:
     import numpy as np
+
     NUMPY_AVAILABLE = True
 except ImportError:
     NUMPY_AVAILABLE = False
+
     # Minimal numpy-like implementation
     class np:
         @staticmethod
@@ -33,43 +35,53 @@ except ImportError:
                 return 0
             mean_val = sum(data) / len(data)
             variance = sum((x - mean_val) ** 2 for x in data) / len(data)
-            return variance ** 0.5
+            return variance**0.5
+
 
 try:
     from scipy import stats
+
     SCIPY_AVAILABLE = True
 except ImportError:
     SCIPY_AVAILABLE = False
+
     # Basic stats fallback
     class stats:
         @staticmethod
         def pearsonr(x, y):
             return (0.5, 0.1)  # Fallback correlation
 
+
 try:
     from sklearn.cluster import DBSCAN
     from sklearn.preprocessing import StandardScaler
+
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
+
     # Basic clustering fallback
     class DBSCAN:
         def __init__(self, eps=0.5, min_samples=5):
             pass
+
         def fit(self, data):
             return self
+
         def labels_():
-            return [0] * len(data) if hasattr(self, 'data') else [0]
+            return [0] * len(data) if hasattr(self, "data") else [0]
 
     class StandardScaler:
         def fit_transform(self, data):
             return data
+
 
 logger = logging.getLogger(__name__)
 
 
 class HypothesisConfidence(Enum):
     """Confidence levels for generated hypotheses."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -78,6 +90,7 @@ class HypothesisConfidence(Enum):
 
 class HypothesisType(Enum):
     """Types of scientific hypotheses."""
+
     CAUSAL = "causal"
     CORRELATIONAL = "correlational"
     PREDICTIVE = "predictive"
@@ -116,19 +129,21 @@ class ScientificHypothesis:
             "created_at": self.created_at.isoformat(),
             "last_updated": self.last_updated.isoformat(),
             "validation_score": self.validation_score,
-            "statistical_significance": self.statistical_significance
+            "statistical_significance": self.statistical_significance,
         }
 
 
 class AutonomousHypothesisGenerator:
     """AI-powered hypothesis generation for autonomous scientific discovery."""
 
-    def __init__(self,
-                 min_confidence_threshold: float = 0.7,
-                 statistical_significance_threshold: float = 0.05,
-                 max_hypotheses_per_session: int = 10):
+    def __init__(
+        self,
+        min_confidence_threshold: float = 0.7,
+        statistical_significance_threshold: float = 0.05,
+        max_hypotheses_per_session: int = 10,
+    ):
         """Initialize the hypothesis generator.
-        
+
         Args:
             min_confidence_threshold: Minimum confidence for hypothesis acceptance
             statistical_significance_threshold: P-value threshold for statistical tests
@@ -141,13 +156,14 @@ class AutonomousHypothesisGenerator:
         self.experimental_history: List[Dict[str, Any]] = []
         self.pattern_database: Dict[str, Any] = {}
 
-    def analyze_experimental_patterns(self,
-                                    experiments: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def analyze_experimental_patterns(
+        self, experiments: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Analyze experimental data to identify patterns and relationships.
-        
+
         Args:
             experiments: List of experimental results
-            
+
         Returns:
             Dictionary containing identified patterns
         """
@@ -161,12 +177,14 @@ class AutonomousHypothesisGenerator:
             "clusters": self._identify_clusters(experiments),
             "outliers": self._identify_outliers(experiments),
             "trends": self._identify_trends(experiments),
-            "phase_spaces": self._identify_phase_spaces(experiments)
+            "phase_spaces": self._identify_phase_spaces(experiments),
         }
 
         return patterns
 
-    def _identify_correlations(self, experiments: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _identify_correlations(
+        self, experiments: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Identify correlations between parameters and properties."""
         correlations = {}
 
@@ -197,7 +215,9 @@ class AutonomousHypothesisGenerator:
                         correlations[f"{param_name}_{prop_name}"] = {
                             "correlation": correlation,
                             "p_value": p_value,
-                            "strength": "strong" if abs(correlation) > 0.7 else "moderate"
+                            "strength": (
+                                "strong" if abs(correlation) > 0.7 else "moderate"
+                            ),
                         }
 
         return correlations
@@ -261,12 +281,14 @@ class AutonomousHypothesisGenerator:
                 "size": len(cluster_points),
                 "mean_values": dict(zip(feature_names, cluster_mean)),
                 "std_values": dict(zip(feature_names, cluster_std)),
-                "member_experiments": cluster_points
+                "member_experiments": cluster_points,
             }
 
         return clusters
 
-    def _identify_outliers(self, experiments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _identify_outliers(
+        self, experiments: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Identify outlier experiments that may indicate novel behavior."""
         outliers = []
 
@@ -293,13 +315,15 @@ class AutonomousHypothesisGenerator:
             for i, value in enumerate(values):
                 if value < lower_bound or value > upper_bound:
                     exp_idx = exp_indices[i]
-                    outliers.append({
-                        "experiment_index": exp_idx,
-                        "property": prop_name,
-                        "value": value,
-                        "bounds": (lower_bound, upper_bound),
-                        "outlier_type": "high" if value > upper_bound else "low"
-                    })
+                    outliers.append(
+                        {
+                            "experiment_index": exp_idx,
+                            "property": prop_name,
+                            "value": value,
+                            "bounds": (lower_bound, upper_bound),
+                            "outlier_type": "high" if value > upper_bound else "low",
+                        }
+                    )
 
         return outliers
 
@@ -309,8 +333,7 @@ class AutonomousHypothesisGenerator:
 
         # Sort experiments by timestamp if available
         sorted_experiments = sorted(
-            experiments,
-            key=lambda x: x.get("timestamp", datetime.now())
+            experiments, key=lambda x: x.get("timestamp", datetime.now())
         )
 
         # Analyze trends for each property
@@ -328,20 +351,26 @@ class AutonomousHypothesisGenerator:
                 continue
 
             # Calculate trend slope
-            slope, intercept, r_value, p_value, std_err = stats.linregress(timestamps, values)
+            slope, intercept, r_value, p_value, std_err = stats.linregress(
+                timestamps, values
+            )
 
             if abs(r_value) > 0.3 and p_value < 0.1:
                 trends[prop_name] = {
                     "slope": slope,
-                    "r_squared": r_value ** 2,
+                    "r_squared": r_value**2,
                     "p_value": p_value,
                     "trend_direction": "increasing" if slope > 0 else "decreasing",
-                    "significance": "significant" if p_value < 0.05 else "marginally_significant"
+                    "significance": (
+                        "significant" if p_value < 0.05 else "marginally_significant"
+                    ),
                 }
 
         return trends
 
-    def _identify_phase_spaces(self, experiments: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _identify_phase_spaces(
+        self, experiments: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Identify distinct regions in parameter space with different behaviors."""
         phase_spaces = {}
 
@@ -354,9 +383,13 @@ class AutonomousHypothesisGenerator:
 
             for exp in experiments:
                 param_val = exp.get("parameters", {}).get(param)
-                prop_val = exp.get("results", {}).get("band_gap")  # Use band_gap as reference
+                prop_val = exp.get("results", {}).get(
+                    "band_gap"
+                )  # Use band_gap as reference
 
-                if isinstance(param_val, (int, float)) and isinstance(prop_val, (int, float)):
+                if isinstance(param_val, (int, float)) and isinstance(
+                    prop_val, (int, float)
+                ):
                     param_values.append(param_val)
                     property_values.append(prop_val)
 
@@ -389,7 +422,7 @@ class AutonomousHypothesisGenerator:
             if len(derivatives) > 2:
                 derivative_changes = []
                 for i in range(1, len(derivatives)):
-                    change = abs(derivatives[i] - derivatives[i-1])
+                    change = abs(derivatives[i] - derivatives[i - 1])
                     derivative_changes.append((param_points[i], change))
 
                 # Identify significant phase boundaries
@@ -397,26 +430,28 @@ class AutonomousHypothesisGenerator:
                 std_change = np.std([x[1] for x in derivative_changes])
                 threshold = mean_change + 2 * std_change
 
-                phase_boundaries = [x[0] for x in derivative_changes if x[1] > threshold]
+                phase_boundaries = [
+                    x[0] for x in derivative_changes if x[1] > threshold
+                ]
 
                 if phase_boundaries:
                     phase_spaces[param] = {
                         "boundaries": phase_boundaries,
                         "num_phases": len(phase_boundaries) + 1,
-                        "parameter_range": (min(param_values), max(param_values))
+                        "parameter_range": (min(param_values), max(param_values)),
                     }
 
         return phase_spaces
 
-    async def generate_hypotheses(self,
-                                 experiments: List[Dict[str, Any]],
-                                 target_properties: List[str]) -> List[ScientificHypothesis]:
+    async def generate_hypotheses(
+        self, experiments: List[Dict[str, Any]], target_properties: List[str]
+    ) -> List[ScientificHypothesis]:
         """Generate scientific hypotheses based on experimental data.
-        
+
         Args:
             experiments: Historical experimental data
             target_properties: Properties of interest for hypothesis generation
-            
+
         Returns:
             List of generated hypotheses
         """
@@ -428,15 +463,21 @@ class AutonomousHypothesisGenerator:
         generated_hypotheses = []
 
         # Generate correlation-based hypotheses
-        hypotheses = await self._generate_correlation_hypotheses(patterns, target_properties)
+        hypotheses = await self._generate_correlation_hypotheses(
+            patterns, target_properties
+        )
         generated_hypotheses.extend(hypotheses)
 
         # Generate cluster-based hypotheses
-        hypotheses = await self._generate_cluster_hypotheses(patterns, target_properties)
+        hypotheses = await self._generate_cluster_hypotheses(
+            patterns, target_properties
+        )
         generated_hypotheses.extend(hypotheses)
 
         # Generate outlier-based hypotheses
-        hypotheses = await self._generate_outlier_hypotheses(patterns, experiments, target_properties)
+        hypotheses = await self._generate_outlier_hypotheses(
+            patterns, experiments, target_properties
+        )
         generated_hypotheses.extend(hypotheses)
 
         # Generate trend-based hypotheses
@@ -444,7 +485,9 @@ class AutonomousHypothesisGenerator:
         generated_hypotheses.extend(hypotheses)
 
         # Generate mechanistic hypotheses
-        hypotheses = await self._generate_mechanistic_hypotheses(patterns, target_properties)
+        hypotheses = await self._generate_mechanistic_hypotheses(
+            patterns, target_properties
+        )
         generated_hypotheses.extend(hypotheses)
 
         # Filter and rank hypotheses
@@ -455,9 +498,9 @@ class AutonomousHypothesisGenerator:
 
         return filtered_hypotheses
 
-    async def _generate_correlation_hypotheses(self,
-                                             patterns: Dict[str, Any],
-                                             target_properties: List[str]) -> List[ScientificHypothesis]:
+    async def _generate_correlation_hypotheses(
+        self, patterns: Dict[str, Any], target_properties: List[str]
+    ) -> List[ScientificHypothesis]:
         """Generate hypotheses based on identified correlations."""
         hypotheses = []
         correlations = patterns.get("correlations", {})
@@ -494,20 +537,22 @@ class AutonomousHypothesisGenerator:
                 hypothesis_text=hypothesis_text,
                 hypothesis_type=HypothesisType.CORRELATIONAL,
                 confidence=confidence,
-                supporting_evidence=[{
-                    "type": "correlation_analysis",
-                    "correlation_coefficient": correlation,
-                    "p_value": p_value,
-                    "parameter": param_name,
-                    "property": prop_name
-                }],
+                supporting_evidence=[
+                    {
+                        "type": "correlation_analysis",
+                        "correlation_coefficient": correlation,
+                        "p_value": p_value,
+                        "parameter": param_name,
+                        "property": prop_name,
+                    }
+                ],
                 falsifiable_predictions=[
                     f"Systematically varying {param_name} should produce predictable changes in {prop_name}",
-                    "The relationship should hold across different material compositions"
+                    "The relationship should hold across different material compositions",
                 ],
                 parameters_of_interest=[param_name],
                 statistical_significance=p_value,
-                validation_score=abs(correlation)
+                validation_score=abs(correlation),
             )
 
             # Generate experimental tests
@@ -518,19 +563,21 @@ class AutonomousHypothesisGenerator:
                 test_direction = "decreased"
                 expected_outcome = "lower"
 
-            hypothesis.experimental_tests = [{
-                "test_description": f"Controlled experiment with {test_direction} {param_name}",
-                "expected_outcome": f"Should result in {expected_outcome} {prop_name}",
-                "statistical_power": min(0.9, abs(correlation) * 1.2)
-            }]
+            hypothesis.experimental_tests = [
+                {
+                    "test_description": f"Controlled experiment with {test_direction} {param_name}",
+                    "expected_outcome": f"Should result in {expected_outcome} {prop_name}",
+                    "statistical_power": min(0.9, abs(correlation) * 1.2),
+                }
+            ]
 
             hypotheses.append(hypothesis)
 
         return hypotheses
 
-    async def _generate_cluster_hypotheses(self,
-                                         patterns: Dict[str, Any],
-                                         target_properties: List[str]) -> List[ScientificHypothesis]:
+    async def _generate_cluster_hypotheses(
+        self, patterns: Dict[str, Any], target_properties: List[str]
+    ) -> List[ScientificHypothesis]:
         """Generate hypotheses based on identified clusters."""
         hypotheses = []
         clusters = patterns.get("clusters", {})
@@ -542,7 +589,7 @@ class AutonomousHypothesisGenerator:
         cluster_names = list(clusters.keys())
 
         for i, cluster1_name in enumerate(cluster_names):
-            for cluster2_name in cluster_names[i+1:]:
+            for cluster2_name in cluster_names[i + 1 :]:
                 cluster1 = clusters[cluster1_name]
                 cluster2 = clusters[cluster2_name]
 
@@ -566,12 +613,14 @@ class AutonomousHypothesisGenerator:
                             effect_size = abs(mean1 - mean2) / pooled_std
 
                             if effect_size > 0.5:  # Medium to large effect
-                                significant_diffs.append({
-                                    "property": prop_name,
-                                    "cluster1_mean": mean1,
-                                    "cluster2_mean": mean2,
-                                    "effect_size": effect_size
-                                })
+                                significant_diffs.append(
+                                    {
+                                        "property": prop_name,
+                                        "cluster1_mean": mean1,
+                                        "cluster2_mean": mean2,
+                                        "effect_size": effect_size,
+                                    }
+                                )
 
                 # Generate hypotheses for significant differences
                 for diff in significant_diffs:
@@ -585,34 +634,42 @@ class AutonomousHypothesisGenerator:
                         f"(effect size: {effect_size:.2f})."
                     )
 
-                    confidence = HypothesisConfidence.HIGH if effect_size > 0.8 else HypothesisConfidence.MEDIUM
+                    confidence = (
+                        HypothesisConfidence.HIGH
+                        if effect_size > 0.8
+                        else HypothesisConfidence.MEDIUM
+                    )
 
                     hypothesis = ScientificHypothesis(
                         hypothesis_text=hypothesis_text,
                         hypothesis_type=HypothesisType.COMPOSITIONAL,
                         confidence=confidence,
-                        supporting_evidence=[{
-                            "type": "cluster_analysis",
-                            "num_clusters": len(clusters),
-                            "effect_size": effect_size,
-                            "property": prop_name
-                        }],
+                        supporting_evidence=[
+                            {
+                                "type": "cluster_analysis",
+                                "num_clusters": len(clusters),
+                                "effect_size": effect_size,
+                                "property": prop_name,
+                            }
+                        ],
                         falsifiable_predictions=[
                             f"New experiments in each regime should show consistent {prop_name} behavior",
-                            "Intermediate parameter values should show transitional behavior"
+                            "Intermediate parameter values should show transitional behavior",
                         ],
                         parameters_of_interest=["all_parameters"],
-                        validation_score=effect_size / 2.0  # Normalize to 0-1 range
+                        validation_score=effect_size / 2.0,  # Normalize to 0-1 range
                     )
 
                     hypotheses.append(hypothesis)
 
         return hypotheses
 
-    async def _generate_outlier_hypotheses(self,
-                                         patterns: Dict[str, Any],
-                                         experiments: List[Dict[str, Any]],
-                                         target_properties: List[str]) -> List[ScientificHypothesis]:
+    async def _generate_outlier_hypotheses(
+        self,
+        patterns: Dict[str, Any],
+        experiments: List[Dict[str, Any]],
+        target_properties: List[str],
+    ) -> List[ScientificHypothesis]:
         """Generate hypotheses based on identified outliers."""
         hypotheses = []
         outliers = patterns.get("outliers", [])
@@ -638,7 +695,9 @@ class AutonomousHypothesisGenerator:
 
             if high_outliers:
                 # Analyze common characteristics of high-performing outliers
-                outlier_experiments = [experiments[o["experiment_index"]] for o in high_outliers]
+                outlier_experiments = [
+                    experiments[o["experiment_index"]] for o in high_outliers
+                ]
                 common_params = self._find_common_parameters(outlier_experiments)
 
                 if common_params:
@@ -652,25 +711,30 @@ class AutonomousHypothesisGenerator:
                         hypothesis_text=hypothesis_text,
                         hypothesis_type=HypothesisType.PREDICTIVE,
                         confidence=HypothesisConfidence.MEDIUM,
-                        supporting_evidence=[{
-                            "type": "outlier_analysis",
-                            "num_outliers": len(high_outliers),
-                            "property": prop_name,
-                            "common_parameters": common_params
-                        }],
+                        supporting_evidence=[
+                            {
+                                "type": "outlier_analysis",
+                                "num_outliers": len(high_outliers),
+                                "property": prop_name,
+                                "common_parameters": common_params,
+                            }
+                        ],
                         falsifiable_predictions=[
                             f"Experiments with identified parameter combinations should consistently yield high {prop_name}",
-                            "Small variations around these conditions should maintain performance"
+                            "Small variations around these conditions should maintain performance",
                         ],
                         parameters_of_interest=list(common_params.keys()),
-                        validation_score=len(high_outliers) / len(experiments)  # Frequency of outliers
+                        validation_score=len(high_outliers)
+                        / len(experiments),  # Frequency of outliers
                     )
 
                     hypotheses.append(hypothesis)
 
         return hypotheses
 
-    def _find_common_parameters(self, experiments: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _find_common_parameters(
+        self, experiments: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Find common parameter characteristics among experiments."""
         if not experiments:
             return {}
@@ -689,7 +753,9 @@ class AutonomousHypothesisGenerator:
                 if isinstance(value, (int, float)):
                     values.append(value)
 
-            if len(values) >= len(experiments) * 0.8:  # At least 80% have this parameter
+            if (
+                len(values) >= len(experiments) * 0.8
+            ):  # At least 80% have this parameter
                 mean_val = np.mean(values)
                 std_val = np.std(values)
 
@@ -698,14 +764,14 @@ class AutonomousHypothesisGenerator:
                     common_params[param] = {
                         "mean": mean_val,
                         "std": std_val,
-                        "range": (min(values), max(values))
+                        "range": (min(values), max(values)),
                     }
 
         return common_params
 
-    async def _generate_trend_hypotheses(self,
-                                       patterns: Dict[str, Any],
-                                       target_properties: List[str]) -> List[ScientificHypothesis]:
+    async def _generate_trend_hypotheses(
+        self, patterns: Dict[str, Any], target_properties: List[str]
+    ) -> List[ScientificHypothesis]:
         """Generate hypotheses based on identified trends."""
         hypotheses = []
         trends = patterns.get("trends", {})
@@ -726,35 +792,41 @@ class AutonomousHypothesisGenerator:
                 f"or underlying parameter space exploration effects."
             )
 
-            confidence = HypothesisConfidence.HIGH if r_squared > 0.6 and p_value < 0.01 else HypothesisConfidence.MEDIUM
+            confidence = (
+                HypothesisConfidence.HIGH
+                if r_squared > 0.6 and p_value < 0.01
+                else HypothesisConfidence.MEDIUM
+            )
 
             hypothesis = ScientificHypothesis(
                 hypothesis_text=hypothesis_text,
                 hypothesis_type=HypothesisType.PREDICTIVE,
                 confidence=confidence,
-                supporting_evidence=[{
-                    "type": "trend_analysis",
-                    "slope": slope,
-                    "r_squared": r_squared,
-                    "p_value": p_value,
-                    "property": prop_name
-                }],
+                supporting_evidence=[
+                    {
+                        "type": "trend_analysis",
+                        "slope": slope,
+                        "r_squared": r_squared,
+                        "p_value": p_value,
+                        "property": prop_name,
+                    }
+                ],
                 falsifiable_predictions=[
                     f"Future experiments should continue the {direction} trend",
-                    "Controlling for temporal factors should reduce trend significance"
+                    "Controlling for temporal factors should reduce trend significance",
                 ],
                 parameters_of_interest=["temporal_factors"],
                 statistical_significance=p_value,
-                validation_score=r_squared
+                validation_score=r_squared,
             )
 
             hypotheses.append(hypothesis)
 
         return hypotheses
 
-    async def _generate_mechanistic_hypotheses(self,
-                                             patterns: Dict[str, Any],
-                                             target_properties: List[str]) -> List[ScientificHypothesis]:
+    async def _generate_mechanistic_hypotheses(
+        self, patterns: Dict[str, Any], target_properties: List[str]
+    ) -> List[ScientificHypothesis]:
         """Generate mechanistic hypotheses based on scientific principles."""
         hypotheses = []
         correlations = patterns.get("correlations", {})
@@ -770,7 +842,9 @@ class AutonomousHypothesisGenerator:
             correlation = correlation_data["correlation"]
 
             if abs(correlation) > 0.7:  # Strong correlation suggests mechanism
-                mechanism_text = self._generate_mechanism_text(param_name, prop_name, correlation)
+                mechanism_text = self._generate_mechanism_text(
+                    param_name, prop_name, correlation
+                )
 
                 if mechanism_text:
                     hypothesis_text = (
@@ -782,18 +856,20 @@ class AutonomousHypothesisGenerator:
                         hypothesis_text=hypothesis_text,
                         hypothesis_type=HypothesisType.MECHANISTIC,
                         confidence=HypothesisConfidence.MEDIUM,
-                        supporting_evidence=[{
-                            "type": "mechanistic_reasoning",
-                            "correlation": correlation,
-                            "parameter": param_name,
-                            "property": prop_name
-                        }],
+                        supporting_evidence=[
+                            {
+                                "type": "mechanistic_reasoning",
+                                "correlation": correlation,
+                                "parameter": param_name,
+                                "property": prop_name,
+                            }
+                        ],
                         falsifiable_predictions=[
                             f"Mechanistic model should predict {prop_name} from {param_name}",
-                            "Physical constraints should limit the relationship"
+                            "Physical constraints should limit the relationship",
                         ],
                         parameters_of_interest=[param_name],
-                        validation_score=abs(correlation)
+                        validation_score=abs(correlation),
                     )
 
                     hypotheses.append(hypothesis)
@@ -813,40 +889,72 @@ class AutonomousHypothesisGenerator:
                 hypothesis_text=hypothesis_text,
                 hypothesis_type=HypothesisType.MECHANISTIC,
                 confidence=HypothesisConfidence.MEDIUM,
-                supporting_evidence=[{
-                    "type": "phase_analysis",
-                    "parameter": param,
-                    "num_phases": num_phases,
-                    "boundaries": boundaries
-                }],
+                supporting_evidence=[
+                    {
+                        "type": "phase_analysis",
+                        "parameter": param,
+                        "num_phases": num_phases,
+                        "boundaries": boundaries,
+                    }
+                ],
                 falsifiable_predictions=[
                     "Experiments near phase boundaries should show transitional behavior",
-                    "Each phase should have distinct parameter-property relationships"
+                    "Each phase should have distinct parameter-property relationships",
                 ],
                 parameters_of_interest=[param],
-                validation_score=min(1.0, num_phases / 5.0)  # More phases = higher complexity
+                validation_score=min(
+                    1.0, num_phases / 5.0
+                ),  # More phases = higher complexity
             )
 
             hypotheses.append(hypothesis)
 
         return hypotheses
 
-    def _generate_mechanism_text(self, param_name: str, prop_name: str, correlation: float) -> str:
+    def _generate_mechanism_text(
+        self, param_name: str, prop_name: str, correlation: float
+    ) -> str:
         """Generate mechanistic explanation text based on parameter-property relationships."""
         mechanisms = {
-            ("temperature", "band_gap"): "Higher temperatures increase lattice vibrations, affecting electronic band structure",
-            ("temperature", "efficiency"): "Temperature affects charge carrier mobility and recombination rates",
-            ("concentration", "band_gap"): "Concentration changes affect quantum confinement and electronic structure",
-            ("concentration", "efficiency"): "Optimal concentration balances charge injection and recombination",
-            ("pressure", "band_gap"): "Pressure modifies lattice parameters and orbital overlap",
-            ("time", "efficiency"): "Reaction time affects crystallinity and defect formation",
-            ("ph", "stability"): "pH affects surface chemistry and degradation pathways"
+            (
+                "temperature",
+                "band_gap",
+            ): "Higher temperatures increase lattice vibrations, affecting electronic band structure",
+            (
+                "temperature",
+                "efficiency",
+            ): "Temperature affects charge carrier mobility and recombination rates",
+            (
+                "concentration",
+                "band_gap",
+            ): "Concentration changes affect quantum confinement and electronic structure",
+            (
+                "concentration",
+                "efficiency",
+            ): "Optimal concentration balances charge injection and recombination",
+            (
+                "pressure",
+                "band_gap",
+            ): "Pressure modifies lattice parameters and orbital overlap",
+            (
+                "time",
+                "efficiency",
+            ): "Reaction time affects crystallinity and defect formation",
+            (
+                "ph",
+                "stability",
+            ): "pH affects surface chemistry and degradation pathways",
         }
 
         key = (param_name.lower(), prop_name.lower())
-        return mechanisms.get(key, f"changes in {param_name} directly affect {prop_name} through physical mechanisms")
+        return mechanisms.get(
+            key,
+            f"changes in {param_name} directly affect {prop_name} through physical mechanisms",
+        )
 
-    def _filter_and_rank_hypotheses(self, hypotheses: List[ScientificHypothesis]) -> List[ScientificHypothesis]:
+    def _filter_and_rank_hypotheses(
+        self, hypotheses: List[ScientificHypothesis]
+    ) -> List[ScientificHypothesis]:
         """Filter and rank hypotheses by quality and relevance."""
         # Remove low-confidence hypotheses
         filtered = [h for h in hypotheses if h.validation_score > 0.3]
@@ -857,28 +965,32 @@ class AutonomousHypothesisGenerator:
                 HypothesisConfidence.LOW: 0.25,
                 HypothesisConfidence.MEDIUM: 0.5,
                 HypothesisConfidence.HIGH: 0.75,
-                HypothesisConfidence.VERY_HIGH: 1.0
+                HypothesisConfidence.VERY_HIGH: 1.0,
             }[h.confidence]
 
             # Invert p-value for statistical significance (lower p-value = higher score)
-            stat_score = max(0, 1 - h.statistical_significance) if h.statistical_significance > 0 else 0.5
+            stat_score = (
+                max(0, 1 - h.statistical_significance)
+                if h.statistical_significance > 0
+                else 0.5
+            )
 
-            return (confidence_score * 0.4 + h.validation_score * 0.4 + stat_score * 0.2)
+            return confidence_score * 0.4 + h.validation_score * 0.4 + stat_score * 0.2
 
         filtered.sort(key=hypothesis_score, reverse=True)
 
         # Limit to max hypotheses per session
-        return filtered[:self.max_hypotheses_per_session]
+        return filtered[: self.max_hypotheses_per_session]
 
-    async def validate_hypothesis(self,
-                                hypothesis: ScientificHypothesis,
-                                new_experiments: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def validate_hypothesis(
+        self, hypothesis: ScientificHypothesis, new_experiments: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Validate a hypothesis against new experimental data.
-        
+
         Args:
             hypothesis: Hypothesis to validate
             new_experiments: New experimental data for validation
-            
+
         Returns:
             Validation results dictionary
         """
@@ -887,7 +999,7 @@ class AutonomousHypothesisGenerator:
             "validation_score": 0.0,
             "statistical_tests": [],
             "predictions_tested": [],
-            "overall_support": "insufficient_data"
+            "overall_support": "insufficient_data",
         }
 
         if len(new_experiments) < 3:
@@ -895,11 +1007,17 @@ class AutonomousHypothesisGenerator:
 
         # Test specific predictions based on hypothesis type
         if hypothesis.hypothesis_type == HypothesisType.CORRELATIONAL:
-            validation_results = await self._validate_correlation_hypothesis(hypothesis, new_experiments)
+            validation_results = await self._validate_correlation_hypothesis(
+                hypothesis, new_experiments
+            )
         elif hypothesis.hypothesis_type == HypothesisType.PREDICTIVE:
-            validation_results = await self._validate_predictive_hypothesis(hypothesis, new_experiments)
+            validation_results = await self._validate_predictive_hypothesis(
+                hypothesis, new_experiments
+            )
         elif hypothesis.hypothesis_type == HypothesisType.MECHANISTIC:
-            validation_results = await self._validate_mechanistic_hypothesis(hypothesis, new_experiments)
+            validation_results = await self._validate_mechanistic_hypothesis(
+                hypothesis, new_experiments
+            )
 
         # Update hypothesis with validation results
         hypothesis.validation_score = validation_results["validation_score"]
@@ -907,9 +1025,9 @@ class AutonomousHypothesisGenerator:
 
         return validation_results
 
-    async def _validate_correlation_hypothesis(self,
-                                             hypothesis: ScientificHypothesis,
-                                             experiments: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _validate_correlation_hypothesis(
+        self, hypothesis: ScientificHypothesis, experiments: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Validate a correlation-based hypothesis."""
         # Extract the parameter-property pair from supporting evidence
         evidence = hypothesis.supporting_evidence[0]
@@ -925,7 +1043,9 @@ class AutonomousHypothesisGenerator:
             param_val = exp.get("parameters", {}).get(param_name)
             prop_val = exp.get("results", {}).get(prop_name)
 
-            if isinstance(param_val, (int, float)) and isinstance(prop_val, (int, float)):
+            if isinstance(param_val, (int, float)) and isinstance(
+                prop_val, (int, float)
+            ):
                 param_values.append(param_val)
                 prop_values.append(prop_val)
 
@@ -935,27 +1055,35 @@ class AutonomousHypothesisGenerator:
         observed_correlation, p_value = stats.pearsonr(param_values, prop_values)
 
         # Compare with expected correlation
-        correlation_agreement = 1.0 - abs(expected_correlation - observed_correlation) / 2.0
+        correlation_agreement = (
+            1.0 - abs(expected_correlation - observed_correlation) / 2.0
+        )
         significance_support = 1.0 if p_value < 0.05 else 0.5
 
         validation_score = correlation_agreement * significance_support
 
-        support_level = "strong" if validation_score > 0.7 else "moderate" if validation_score > 0.4 else "weak"
+        support_level = (
+            "strong"
+            if validation_score > 0.7
+            else "moderate" if validation_score > 0.4 else "weak"
+        )
 
         return {
             "validation_score": validation_score,
-            "statistical_tests": [{
-                "test_type": "correlation",
-                "expected_correlation": expected_correlation,
-                "observed_correlation": observed_correlation,
-                "p_value": p_value
-            }],
-            "overall_support": support_level
+            "statistical_tests": [
+                {
+                    "test_type": "correlation",
+                    "expected_correlation": expected_correlation,
+                    "observed_correlation": observed_correlation,
+                    "p_value": p_value,
+                }
+            ],
+            "overall_support": support_level,
         }
 
-    async def _validate_predictive_hypothesis(self,
-                                            hypothesis: ScientificHypothesis,
-                                            experiments: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _validate_predictive_hypothesis(
+        self, hypothesis: ScientificHypothesis, experiments: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Validate a predictive hypothesis."""
         # For trend-based predictions
         if "temporal" in hypothesis.hypothesis_text.lower():
@@ -972,10 +1100,16 @@ class AutonomousHypothesisGenerator:
                         break  # Use first available property
 
             if len(prop_values) >= 3:
-                slope, _, r_value, p_value, _ = stats.linregress(timestamps, prop_values)
+                slope, _, r_value, p_value, _ = stats.linregress(
+                    timestamps, prop_values
+                )
 
                 # Check if trend direction matches prediction
-                expected_direction = "increasing" if "increasing" in hypothesis.hypothesis_text else "decreasing"
+                expected_direction = (
+                    "increasing"
+                    if "increasing" in hypothesis.hypothesis_text
+                    else "decreasing"
+                )
                 observed_direction = "increasing" if slope > 0 else "decreasing"
 
                 direction_match = expected_direction == observed_direction
@@ -983,26 +1117,32 @@ class AutonomousHypothesisGenerator:
                 significance = 1.0 if p_value < 0.05 else 0.5
 
                 validation_score = direction_match * trend_strength * significance
-                support_level = "strong" if validation_score > 0.6 else "moderate" if validation_score > 0.3 else "weak"
+                support_level = (
+                    "strong"
+                    if validation_score > 0.6
+                    else "moderate" if validation_score > 0.3 else "weak"
+                )
 
                 return {
                     "validation_score": validation_score,
-                    "statistical_tests": [{
-                        "test_type": "trend_analysis",
-                        "expected_direction": expected_direction,
-                        "observed_direction": observed_direction,
-                        "slope": slope,
-                        "r_value": r_value,
-                        "p_value": p_value
-                    }],
-                    "overall_support": support_level
+                    "statistical_tests": [
+                        {
+                            "test_type": "trend_analysis",
+                            "expected_direction": expected_direction,
+                            "observed_direction": observed_direction,
+                            "slope": slope,
+                            "r_value": r_value,
+                            "p_value": p_value,
+                        }
+                    ],
+                    "overall_support": support_level,
                 }
 
         return {"validation_score": 0.5, "overall_support": "partial"}
 
-    async def _validate_mechanistic_hypothesis(self,
-                                             hypothesis: ScientificHypothesis,
-                                             experiments: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _validate_mechanistic_hypothesis(
+        self, hypothesis: ScientificHypothesis, experiments: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Validate a mechanistic hypothesis."""
         # Mechanistic hypotheses are harder to validate directly
         # Use correlation strength and consistency as proxies
@@ -1023,7 +1163,9 @@ class AutonomousHypothesisGenerator:
                     param_val = exp.get("parameters", {}).get(param_name)
                     prop_val = exp.get("results", {}).get(prop_name)
 
-                    if isinstance(param_val, (int, float)) and isinstance(prop_val, (int, float)):
+                    if isinstance(param_val, (int, float)) and isinstance(
+                        prop_val, (int, float)
+                    ):
                         param_values.append(param_val)
                         prop_values.append(prop_val)
 
@@ -1039,7 +1181,7 @@ class AutonomousHypothesisGenerator:
         return {
             "validation_score": validation_score,
             "statistical_tests": [],
-            "overall_support": support_level
+            "overall_support": support_level,
         }
 
     def get_hypothesis_summary(self) -> Dict[str, Any]:
@@ -1059,13 +1201,13 @@ class AutonomousHypothesisGenerator:
             by_confidence[conf_key] = by_confidence.get(conf_key, 0) + 1
 
         # Calculate average validation score
-        avg_validation = np.mean([h.validation_score for h in self.generated_hypotheses])
+        avg_validation = np.mean(
+            [h.validation_score for h in self.generated_hypotheses]
+        )
 
         # Find highest confidence hypotheses
         top_hypotheses = sorted(
-            self.generated_hypotheses,
-            key=lambda x: x.validation_score,
-            reverse=True
+            self.generated_hypotheses, key=lambda x: x.validation_score, reverse=True
         )[:3]
 
         return {
@@ -1074,7 +1216,7 @@ class AutonomousHypothesisGenerator:
             "by_confidence": by_confidence,
             "average_validation_score": avg_validation,
             "top_hypotheses": [h.hypothesis_text for h in top_hypotheses],
-            "summary": f"Generated {len(self.generated_hypotheses)} hypotheses with average validation score {avg_validation:.2f}"
+            "summary": f"Generated {len(self.generated_hypotheses)} hypotheses with average validation score {avg_validation:.2f}",
         }
 
 
@@ -1090,14 +1232,15 @@ def get_global_hypothesis_generator() -> AutonomousHypothesisGenerator:
     return _global_hypothesis_generator
 
 
-async def generate_scientific_hypotheses(experiments: List[Dict[str, Any]],
-                                       target_properties: List[str] = None) -> List[ScientificHypothesis]:
+async def generate_scientific_hypotheses(
+    experiments: List[Dict[str, Any]], target_properties: List[str] = None
+) -> List[ScientificHypothesis]:
     """Convenience function to generate hypotheses from experimental data.
-    
+
     Args:
         experiments: List of experimental results
         target_properties: Properties to focus on (default: common materials properties)
-        
+
     Returns:
         List of generated scientific hypotheses
     """

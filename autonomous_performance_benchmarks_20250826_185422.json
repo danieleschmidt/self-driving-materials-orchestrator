@@ -1,0 +1,101 @@
+{
+  "timestamp": "2025-08-26T18:53:50.761368",
+  "benchmarks": {
+    "core_initialization": {
+      "avg_time": 0.6241817951202393,
+      "std_time": 1.3953390742354723,
+      "score": 80,
+      "details": [
+        3.1202402114868164,
+        0.0002334117889404297,
+        0.00014781951904296875,
+        0.0001366138458251953,
+        0.00015091896057128906
+      ]
+    },
+    "experiment_simulation": {
+      "avg_time": Infinity,
+      "throughput": 0.0,
+      "total_experiments": 50,
+      "score": 40
+    },
+    "optimization_performance": {
+      "optimization_time": 3.894069194793701,
+      "success_rate": 1.0,
+      "total_experiments": 25,
+      "score": 96.1059308052063
+    },
+    "concurrent_execution": {
+      "sequential_time": 2.0141050815582275,
+      "concurrent_time": 0.5072484016418457,
+      "speedup": 3.9706484535762665,
+      "concurrent_success_rate": 0.9,
+      "score": 95.0
+    },
+    "memory_efficiency": {
+      "baseline_memory_mb": 236.26953125,
+      "peak_memory_mb": 236.52734375,
+      "memory_usage_mb": 0.2578125,
+      "memory_leak_mb": 0.2578125,
+      "score": 100
+    },
+    "scalability": {
+      "problem_sizes": [
+        5,
+        10,
+        20,
+        50
+      ],
+      "execution_times": [
+        0.5058531761169434,
+        1.010115623474121,
+        0.008358001708984375,
+        1.07659912109375
+      ],
+      "scaling_factor": 2.1282838023435904,
+      "scaling_efficiency": 4.698621485061511,
+      "score": 100
+    },
+    "breakthrough_ai": {
+      "analysis_time": 0.0024995803833007812,
+      "discoveries_found": 0,
+      "score": 49.97500419616699
+    },
+    "resilient_engine": {
+      "execution_time": 13.057900190353394,
+      "success_rate": 0.0,
+      "score": 0.0
+    },
+    "quality_assurance": {
+      "analysis_time": 0.043386220932006836,
+      "assessments_completed": 8,
+      "score": 99.78306889533997
+    },
+    "quantum_acceleration": {
+      "optimization_time": 0.38896727561950684,
+      "optimal_distance": 0.3248640705779529,
+      "convergence_iterations": 20,
+      "quantum_speedup": 2.28,
+      "score": 66.7356583909657
+    }
+  },
+  "overall_score": 73.93889177637578,
+  "recommendations": [
+    "Improve simulation performance with vectorization or caching",
+    "Optimize AI analysis algorithms for speed",
+    "Improve error recovery mechanisms"
+  ],
+  "individual_scores": [
+    80,
+    40,
+    96.1059308052063,
+    95.0,
+    100,
+    100,
+    49.97500419616699,
+    0.0,
+    99.78306889533997,
+    66.7356583909657
+  ],
+  "benchmark_count": 10
+}

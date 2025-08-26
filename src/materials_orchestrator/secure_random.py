@@ -6,7 +6,7 @@ from typing import List, Union
 
 def secure_random() -> float:
     """Generate cryptographically secure random float [0.0, 1.0).
-    
+
     Returns:
         Secure random float
     """
@@ -15,11 +15,11 @@ def secure_random() -> float:
 
 def secure_randint(a: int, b: int) -> int:
     """Generate cryptographically secure random integer in [a, b].
-    
+
     Args:
         a: Lower bound (inclusive)
         b: Upper bound (inclusive)
-        
+
     Returns:
         Secure random integer
     """
@@ -28,10 +28,10 @@ def secure_randint(a: int, b: int) -> int:
 
 def secure_choice(sequence: List[Union[int, float, str]]) -> Union[int, float, str]:
     """Securely choose random element from sequence.
-    
+
     Args:
         sequence: Sequence to choose from
-        
+
     Returns:
         Random element from sequence
     """
@@ -44,10 +44,10 @@ def secure_choice(sequence: List[Union[int, float, str]]) -> Union[int, float, s
 
 def secure_shuffle(sequence: List) -> List:
     """Securely shuffle sequence in place.
-    
+
     Args:
         sequence: List to shuffle
-        
+
     Returns:
         Shuffled list (same object)
     """
@@ -63,9 +63,9 @@ import random as _stdlib_random
 
 def fast_random() -> float:
     """Generate fast (non-secure) random float for performance-critical code.
-    
+
     Note: Use only where cryptographic security is not required.
-    
+
     Returns:
         Random float
     """
@@ -74,13 +74,13 @@ def fast_random() -> float:
 
 def fast_randint(a: int, b: int) -> int:
     """Generate fast (non-secure) random integer for performance-critical code.
-    
+
     Note: Use only where cryptographic security is not required.
-    
+
     Args:
         a: Lower bound (inclusive)
         b: Upper bound (inclusive)
-        
+
     Returns:
         Random integer
     """
@@ -89,12 +89,12 @@ def fast_randint(a: int, b: int) -> int:
 
 def fast_choice(sequence: List[Union[int, float, str]]) -> Union[int, float, str]:
     """Fast (non-secure) choice for performance-critical code.
-    
+
     Note: Use only where cryptographic security is not required.
-    
+
     Args:
         sequence: Sequence to choose from
-        
+
     Returns:
         Random element from sequence
     """

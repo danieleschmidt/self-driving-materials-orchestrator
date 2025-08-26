@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class AdaptationTrigger(Enum):
     """Types of events that can trigger protocol adaptation."""
+
     PERFORMANCE_DEGRADATION = "performance_degradation"
     OUTLIER_DETECTION = "outlier_detection"
     CONVERGENCE_STAGNATION = "convergence_stagnation"
@@ -35,6 +36,7 @@ class AdaptationTrigger(Enum):
 
 class AdaptationStrategy(Enum):
     """Strategies for protocol adaptation."""
+
     CONSERVATIVE = "conservative"
     AGGRESSIVE = "aggressive"
     BALANCED = "balanced"
@@ -45,6 +47,7 @@ class AdaptationStrategy(Enum):
 
 class ProtocolStatus(Enum):
     """Status of adaptive protocols."""
+
     STABLE = "stable"
     ADAPTING = "adapting"
     OPTIMIZING = "optimizing"
@@ -75,10 +78,10 @@ class ExperimentalCondition:
             "reaction_time": self.reaction_time,
             "stirring_speed": self.stirring_speed,
             "ph": self.ph,
-            "atmosphere": self.atmosphere
+            "atmosphere": self.atmosphere,
         }
 
-    def distance_to(self, other: 'ExperimentalCondition') -> float:
+    def distance_to(self, other: "ExperimentalCondition") -> float:
         """Calculate Euclidean distance to another condition."""
         differences = [
             (self.temperature - other.temperature) / 100,  # Normalize by typical range
@@ -87,7 +90,7 @@ class ExperimentalCondition:
             (self.concentration_b - other.concentration_b) / 2,
             (self.reaction_time - other.reaction_time) / 10,
             (self.stirring_speed - other.stirring_speed) / 1000,
-            (self.ph - other.ph) / 7
+            (self.ph - other.ph) / 7,
         ]
         return math.sqrt(sum(d**2 for d in differences))
 
@@ -115,7 +118,7 @@ class RealTimeResult:
             "quality_indicators": self.quality_indicators,
             "experimental_errors": self.experimental_errors,
             "instrument_status": self.instrument_status,
-            "confidence_score": self.confidence_score
+            "confidence_score": self.confidence_score,
         }
 
 
@@ -163,7 +166,7 @@ class PerformanceMonitor:
         target_properties = {
             "band_gap": {"target": 1.4, "weight": 0.4},
             "efficiency": {"target": 0.25, "weight": 0.4},
-            "stability": {"target": 0.9, "weight": 0.2}
+            "stability": {"target": 0.9, "weight": 0.2},
         }
 
         performance_score = 0.0
@@ -202,8 +205,12 @@ class PerformanceMonitor:
             "current_performance": performance_score,
             "average_performance": statistics.mean(self.performance_history),
             "performance_trend": self._calculate_trend(),
-            "performance_volatility": statistics.stdev(self.performance_history) if len(self.performance_history) > 1 else 0,
-            "baseline_performance": self.baseline_performance or 0
+            "performance_volatility": (
+                statistics.stdev(self.performance_history)
+                if len(self.performance_history) > 1
+                else 0
+            ),
+            "baseline_performance": self.baseline_performance or 0,
         }
 
         return metrics
@@ -243,7 +250,9 @@ class PerformanceMonitor:
         trend = self._calculate_trend()
 
         # Check for performance degradation
-        if self.baseline_performance and current_perf < self.baseline_performance * (1 - self.performance_threshold):
+        if self.baseline_performance and current_perf < self.baseline_performance * (
+            1 - self.performance_threshold
+        ):
             issues.append("performance_below_baseline")
 
         # Check for declining trend
@@ -258,7 +267,9 @@ class PerformanceMonitor:
 
         # Check for stagnation
         if abs(trend) < 0.1 and len(self.performance_history) >= 5:
-            recent_range = max(self.performance_history[-5:]) - min(self.performance_history[-5:])
+            recent_range = max(self.performance_history[-5:]) - min(
+                self.performance_history[-5:]
+            )
             if recent_range < 0.05:
                 issues.append("performance_stagnation")
 
@@ -284,13 +295,19 @@ class OutlierDetector:
 
         for prop in ["band_gap", "efficiency", "stability"]:
             if prop in result.properties:
-                outlier_info = self._detect_property_outlier(prop, result.properties[prop])
+                outlier_info = self._detect_property_outlier(
+                    prop, result.properties[prop]
+                )
                 if outlier_info["is_outlier"]:
                     outlier_analysis[prop] = outlier_info
 
         # Overall outlier assessment
         is_outlier = len(outlier_analysis) > 0
-        outlier_score = max([info["outlier_score"] for info in outlier_analysis.values()]) if outlier_analysis else 0.0
+        outlier_score = (
+            max([info["outlier_score"] for info in outlier_analysis.values()])
+            if outlier_analysis
+            else 0.0
+        )
 
         # Determine outlier type
         outlier_type = None
@@ -306,10 +323,12 @@ class OutlierDetector:
             "is_outlier": is_outlier,
             "outlier_type": outlier_type,
             "outlier_score": outlier_score,
-            "property_analysis": outlier_analysis
+            "property_analysis": outlier_analysis,
         }
 
-    def _detect_property_outlier(self, property_name: str, value: float) -> Dict[str, Any]:
+    def _detect_property_outlier(
+        self, property_name: str, value: float
+    ) -> Dict[str, Any]:
         """Detect outlier for specific property."""
         # Extract historical values for this property
         historical_values = []
@@ -351,18 +370,26 @@ class OutlierDetector:
             "is_outlier": is_outlier,
             "outlier_score": outlier_score,
             "bounds": (lower_bound, upper_bound),
-            "outlier_direction": "low" if value < lower_bound else "high" if value > upper_bound else "normal"
+            "outlier_direction": (
+                "low"
+                if value < lower_bound
+                else "high" if value > upper_bound else "normal"
+            ),
         }
 
 
 class AdaptiveProtocolEngine:
     """Main engine for real-time protocol adaptation."""
 
-    def __init__(self,
-                 adaptation_strategy: AdaptationStrategy = AdaptationStrategy.BALANCED,
-                 max_adaptation_rate: float = 0.2):
+    def __init__(
+        self,
+        adaptation_strategy: AdaptationStrategy = AdaptationStrategy.BALANCED,
+        max_adaptation_rate: float = 0.2,
+    ):
         self.adaptation_strategy = adaptation_strategy
-        self.max_adaptation_rate = max_adaptation_rate  # Maximum relative change per adaptation
+        self.max_adaptation_rate = (
+            max_adaptation_rate  # Maximum relative change per adaptation
+        )
 
         # Components
         self.performance_monitor = PerformanceMonitor()
@@ -391,7 +418,7 @@ class AdaptiveProtocolEngine:
             condition_function=self._check_performance_degradation,
             adaptation_function=self._adapt_for_performance,
             priority=3,
-            cooldown_period=timedelta(minutes=15)
+            cooldown_period=timedelta(minutes=15),
         )
 
         # Outlier detection rule
@@ -401,7 +428,7 @@ class AdaptiveProtocolEngine:
             condition_function=self._check_outlier_conditions,
             adaptation_function=self._adapt_for_outliers,
             priority=2,
-            cooldown_period=timedelta(minutes=5)
+            cooldown_period=timedelta(minutes=5),
         )
 
         # Convergence stagnation rule
@@ -411,7 +438,7 @@ class AdaptiveProtocolEngine:
             condition_function=self._check_stagnation,
             adaptation_function=self._adapt_for_stagnation,
             priority=1,
-            cooldown_period=timedelta(minutes=30)
+            cooldown_period=timedelta(minutes=30),
         )
 
         # Safety rule (highest priority)
@@ -421,17 +448,22 @@ class AdaptiveProtocolEngine:
             condition_function=self._check_safety_conditions,
             adaptation_function=self._adapt_for_safety,
             priority=5,
-            cooldown_period=timedelta(minutes=1)
+            cooldown_period=timedelta(minutes=1),
         )
 
-        self.adaptation_rules = [performance_rule, outlier_rule, stagnation_rule, safety_rule]
+        self.adaptation_rules = [
+            performance_rule,
+            outlier_rule,
+            stagnation_rule,
+            safety_rule,
+        ]
 
     async def process_realtime_result(self, result: RealTimeResult) -> Dict[str, Any]:
         """Process real-time experimental result and trigger adaptations if needed.
-        
+
         Args:
             result: Real-time experimental result
-            
+
         Returns:
             Processing summary including any adaptations made
         """
@@ -444,12 +476,19 @@ class AdaptiveProtocolEngine:
         # Check for adaptation triggers
         triggered_rules = []
 
-        for rule in sorted(self.adaptation_rules, key=lambda r: r.priority, reverse=True):
+        for rule in sorted(
+            self.adaptation_rules, key=lambda r: r.priority, reverse=True
+        ):
             if not rule.can_trigger():
                 continue
 
             try:
-                if rule.condition_function and await self._evaluate_condition_async(rule.condition_function, result, performance_metrics, outlier_analysis):
+                if rule.condition_function and await self._evaluate_condition_async(
+                    rule.condition_function,
+                    result,
+                    performance_metrics,
+                    outlier_analysis,
+                ):
                     triggered_rules.append(rule)
                     rule.trigger_rule()
                     logger.info(f"Adaptation rule triggered: {rule.name}")
@@ -470,16 +509,18 @@ class AdaptiveProtocolEngine:
                             rule.adaptation_function,
                             result,
                             performance_metrics,
-                            outlier_analysis
+                            outlier_analysis,
                         )
 
                         if adaptation_result:
-                            adaptations_made.append({
-                                "rule_name": rule.name,
-                                "trigger": rule.trigger.value,
-                                "adaptation": adaptation_result,
-                                "timestamp": datetime.now().isoformat()
-                            })
+                            adaptations_made.append(
+                                {
+                                    "rule_name": rule.name,
+                                    "trigger": rule.trigger.value,
+                                    "adaptation": adaptation_result,
+                                    "timestamp": datetime.now().isoformat(),
+                                }
+                            )
 
                             # Update adaptation history
                             self.adaptation_history.append(adaptations_made[-1])
@@ -499,29 +540,35 @@ class AdaptiveProtocolEngine:
             "triggered_rules": [rule.name for rule in triggered_rules],
             "adaptations_made": adaptations_made,
             "protocol_status": self.protocol_status.value,
-            "current_conditions": self.current_conditions.to_dict()
+            "current_conditions": self.current_conditions.to_dict(),
         }
 
-        logger.info(f"Real-time processing complete. Adaptations: {len(adaptations_made)}")
+        logger.info(
+            f"Real-time processing complete. Adaptations: {len(adaptations_made)}"
+        )
 
         return response
 
-    async def _evaluate_condition_async(self,
-                                      condition_func: Callable,
-                                      result: RealTimeResult,
-                                      performance_metrics: Dict[str, float],
-                                      outlier_analysis: Dict[str, Any]) -> bool:
+    async def _evaluate_condition_async(
+        self,
+        condition_func: Callable,
+        result: RealTimeResult,
+        performance_metrics: Dict[str, float],
+        outlier_analysis: Dict[str, Any],
+    ) -> bool:
         """Evaluate condition function asynchronously."""
         if asyncio.iscoroutinefunction(condition_func):
             return await condition_func(result, performance_metrics, outlier_analysis)
         else:
             return condition_func(result, performance_metrics, outlier_analysis)
 
-    async def _execute_adaptation_async(self,
-                                      adaptation_func: Callable,
-                                      result: RealTimeResult,
-                                      performance_metrics: Dict[str, float],
-                                      outlier_analysis: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def _execute_adaptation_async(
+        self,
+        adaptation_func: Callable,
+        result: RealTimeResult,
+        performance_metrics: Dict[str, float],
+        outlier_analysis: Dict[str, Any],
+    ) -> Optional[Dict[str, Any]]:
         """Execute adaptation function asynchronously."""
         if asyncio.iscoroutinefunction(adaptation_func):
             return await adaptation_func(result, performance_metrics, outlier_analysis)
@@ -529,33 +576,47 @@ class AdaptiveProtocolEngine:
             return adaptation_func(result, performance_metrics, outlier_analysis)
 
     # Condition checking functions
-    def _check_performance_degradation(self,
-                                     result: RealTimeResult,
-                                     performance_metrics: Dict[str, float],
-                                     outlier_analysis: Dict[str, Any]) -> bool:
+    def _check_performance_degradation(
+        self,
+        result: RealTimeResult,
+        performance_metrics: Dict[str, float],
+        outlier_analysis: Dict[str, Any],
+    ) -> bool:
         """Check if performance degradation occurred."""
         issues = self.performance_monitor.detect_performance_issues()
-        return "performance_below_baseline" in issues or "declining_performance_trend" in issues
+        return (
+            "performance_below_baseline" in issues
+            or "declining_performance_trend" in issues
+        )
 
-    def _check_outlier_conditions(self,
-                                result: RealTimeResult,
-                                performance_metrics: Dict[str, float],
-                                outlier_analysis: Dict[str, Any]) -> bool:
+    def _check_outlier_conditions(
+        self,
+        result: RealTimeResult,
+        performance_metrics: Dict[str, float],
+        outlier_analysis: Dict[str, Any],
+    ) -> bool:
         """Check if outlier conditions are met."""
-        return outlier_analysis.get("is_outlier", False) and outlier_analysis.get("outlier_score", 0) > 0.6
+        return (
+            outlier_analysis.get("is_outlier", False)
+            and outlier_analysis.get("outlier_score", 0) > 0.6
+        )
 
-    def _check_stagnation(self,
-                         result: RealTimeResult,
-                         performance_metrics: Dict[str, float],
-                         outlier_analysis: Dict[str, Any]) -> bool:
+    def _check_stagnation(
+        self,
+        result: RealTimeResult,
+        performance_metrics: Dict[str, float],
+        outlier_analysis: Dict[str, Any],
+    ) -> bool:
         """Check for convergence stagnation."""
         issues = self.performance_monitor.detect_performance_issues()
         return "performance_stagnation" in issues
 
-    def _check_safety_conditions(self,
-                               result: RealTimeResult,
-                               performance_metrics: Dict[str, float],
-                               outlier_analysis: Dict[str, Any]) -> bool:
+    def _check_safety_conditions(
+        self,
+        result: RealTimeResult,
+        performance_metrics: Dict[str, float],
+        outlier_analysis: Dict[str, Any],
+    ) -> bool:
         """Check for safety concerns."""
         # Check for experimental errors
         if result.experimental_errors:
@@ -567,18 +628,25 @@ class AdaptiveProtocolEngine:
 
         # Check for extreme conditions
         conditions = result.conditions
-        if (conditions.temperature > 300 or conditions.temperature < 0 or
-            conditions.pressure > 50 or conditions.pressure < 0 or
-            conditions.ph < 1 or conditions.ph > 13):
+        if (
+            conditions.temperature > 300
+            or conditions.temperature < 0
+            or conditions.pressure > 50
+            or conditions.pressure < 0
+            or conditions.ph < 1
+            or conditions.ph > 13
+        ):
             return True
 
         return False
 
     # Adaptation functions
-    def _adapt_for_performance(self,
-                             result: RealTimeResult,
-                             performance_metrics: Dict[str, float],
-                             outlier_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def _adapt_for_performance(
+        self,
+        result: RealTimeResult,
+        performance_metrics: Dict[str, float],
+        outlier_analysis: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Adapt conditions to improve performance."""
         logger.info("Adapting for performance improvement")
 
@@ -593,20 +661,35 @@ class AdaptiveProtocolEngine:
 
         if trend < -0.3:  # Declining performance
             # Try opposite direction changes
-            if self.adaptation_strategy in [AdaptationStrategy.AGGRESSIVE, AdaptationStrategy.EXPLORATORY]:
+            if self.adaptation_strategy in [
+                AdaptationStrategy.AGGRESSIVE,
+                AdaptationStrategy.EXPLORATORY,
+            ]:
                 adaptation_factor = 0.15
             else:
                 adaptation_factor = 0.08
 
             # Adjust key parameters
             if np.random.random() < 0.5:
-                new_conditions.temperature += np.random.choice([-1, 1]) * adaptation_factor * old_conditions.temperature
+                new_conditions.temperature += (
+                    np.random.choice([-1, 1])
+                    * adaptation_factor
+                    * old_conditions.temperature
+                )
 
             if np.random.random() < 0.5:
-                new_conditions.concentration_a += np.random.choice([-1, 1]) * adaptation_factor * old_conditions.concentration_a
+                new_conditions.concentration_a += (
+                    np.random.choice([-1, 1])
+                    * adaptation_factor
+                    * old_conditions.concentration_a
+                )
 
             if np.random.random() < 0.3:
-                new_conditions.reaction_time += np.random.choice([-1, 1]) * adaptation_factor * old_conditions.reaction_time
+                new_conditions.reaction_time += (
+                    np.random.choice([-1, 1])
+                    * adaptation_factor
+                    * old_conditions.reaction_time
+                )
 
         else:  # Stable or improving - make smaller adjustments
             adaptation_factor = 0.05
@@ -614,8 +697,12 @@ class AdaptiveProtocolEngine:
             # Fine-tune based on recent performance
             current_perf = performance_metrics.get("current_performance", 0.5)
             if current_perf < 0.7:  # Room for improvement
-                new_conditions.temperature += np.random.normal(0, adaptation_factor * old_conditions.temperature)
-                new_conditions.concentration_a += np.random.normal(0, adaptation_factor * old_conditions.concentration_a)
+                new_conditions.temperature += np.random.normal(
+                    0, adaptation_factor * old_conditions.temperature
+                )
+                new_conditions.concentration_a += np.random.normal(
+                    0, adaptation_factor * old_conditions.concentration_a
+                )
 
         # Apply safety bounds
         new_conditions = self._apply_safety_bounds(new_conditions)
@@ -628,13 +715,15 @@ class AdaptiveProtocolEngine:
             "old_conditions": old_conditions.to_dict(),
             "new_conditions": new_conditions.to_dict(),
             "adaptation_factor": adaptation_factor,
-            "performance_trend": trend
+            "performance_trend": trend,
         }
 
-    def _adapt_for_outliers(self,
-                          result: RealTimeResult,
-                          performance_metrics: Dict[str, float],
-                          outlier_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def _adapt_for_outliers(
+        self,
+        result: RealTimeResult,
+        performance_metrics: Dict[str, float],
+        outlier_analysis: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Adapt conditions based on outlier analysis."""
         logger.info("Adapting for outlier investigation")
 
@@ -655,15 +744,23 @@ class AdaptiveProtocolEngine:
                     # Outlier had high value - might be interesting
                     if prop == "efficiency" or prop == "stability":
                         # Positive outliers - explore this direction
-                        new_conditions.temperature += adaptation_factor * old_conditions.temperature * 0.5
-                        new_conditions.concentration_a += adaptation_factor * old_conditions.concentration_a * 0.3
+                        new_conditions.temperature += (
+                            adaptation_factor * old_conditions.temperature * 0.5
+                        )
+                        new_conditions.concentration_a += (
+                            adaptation_factor * old_conditions.concentration_a * 0.3
+                        )
 
         else:  # Moderate outlier - make small adjustments
             adaptation_factor = 0.05
 
             # Small exploratory changes
-            new_conditions.concentration_b += np.random.normal(0, adaptation_factor * old_conditions.concentration_b)
-            new_conditions.stirring_speed += np.random.normal(0, adaptation_factor * old_conditions.stirring_speed)
+            new_conditions.concentration_b += np.random.normal(
+                0, adaptation_factor * old_conditions.concentration_b
+            )
+            new_conditions.stirring_speed += np.random.normal(
+                0, adaptation_factor * old_conditions.stirring_speed
+            )
 
         # Apply safety bounds
         new_conditions = self._apply_safety_bounds(new_conditions)
@@ -676,13 +773,15 @@ class AdaptiveProtocolEngine:
             "old_conditions": old_conditions.to_dict(),
             "new_conditions": new_conditions.to_dict(),
             "outlier_score": outlier_score,
-            "investigation_direction": "exploratory"
+            "investigation_direction": "exploratory",
         }
 
-    def _adapt_for_stagnation(self,
-                            result: RealTimeResult,
-                            performance_metrics: Dict[str, float],
-                            outlier_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def _adapt_for_stagnation(
+        self,
+        result: RealTimeResult,
+        performance_metrics: Dict[str, float],
+        outlier_analysis: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Adapt conditions to break out of stagnation."""
         logger.info("Adapting to break performance stagnation")
 
@@ -699,15 +798,25 @@ class AdaptiveProtocolEngine:
             adaptation_factor = 0.15
 
         # Make larger changes to multiple parameters
-        new_conditions.temperature += np.random.normal(0, adaptation_factor * old_conditions.temperature)
-        new_conditions.concentration_a += np.random.normal(0, adaptation_factor * old_conditions.concentration_a)
-        new_conditions.concentration_b += np.random.normal(0, adaptation_factor * old_conditions.concentration_b)
-        new_conditions.reaction_time += np.random.normal(0, adaptation_factor * old_conditions.reaction_time)
+        new_conditions.temperature += np.random.normal(
+            0, adaptation_factor * old_conditions.temperature
+        )
+        new_conditions.concentration_a += np.random.normal(
+            0, adaptation_factor * old_conditions.concentration_a
+        )
+        new_conditions.concentration_b += np.random.normal(
+            0, adaptation_factor * old_conditions.concentration_b
+        )
+        new_conditions.reaction_time += np.random.normal(
+            0, adaptation_factor * old_conditions.reaction_time
+        )
 
         # Occasionally try completely different regimes
         if np.random.random() < 0.3:
             # Jump to different parameter regime
-            new_conditions.temperature += np.random.choice([-1, 1]) * 0.3 * old_conditions.temperature
+            new_conditions.temperature += (
+                np.random.choice([-1, 1]) * 0.3 * old_conditions.temperature
+            )
             new_conditions.ph += np.random.choice([-1, 1]) * 1.0
 
         # Apply safety bounds
@@ -721,13 +830,15 @@ class AdaptiveProtocolEngine:
             "old_conditions": old_conditions.to_dict(),
             "new_conditions": new_conditions.to_dict(),
             "adaptation_factor": adaptation_factor,
-            "exploration_type": "aggressive"
+            "exploration_type": "aggressive",
         }
 
-    def _adapt_for_safety(self,
-                        result: RealTimeResult,
-                        performance_metrics: Dict[str, float],
-                        outlier_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def _adapt_for_safety(
+        self,
+        result: RealTimeResult,
+        performance_metrics: Dict[str, float],
+        outlier_analysis: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Adapt conditions to address safety concerns."""
         logger.warning("Adapting for safety concerns")
 
@@ -761,11 +872,15 @@ class AdaptiveProtocolEngine:
 
         # Concentration safety
         if old_conditions.concentration_a > 1.8:
-            new_conditions.concentration_a = min(1.5, old_conditions.concentration_a * 0.9)
+            new_conditions.concentration_a = min(
+                1.5, old_conditions.concentration_a * 0.9
+            )
             safety_adaptations.append("concentration_a_reduction")
 
         if old_conditions.concentration_b > 1.8:
-            new_conditions.concentration_b = min(1.5, old_conditions.concentration_b * 0.9)
+            new_conditions.concentration_b = min(
+                1.5, old_conditions.concentration_b * 0.9
+            )
             safety_adaptations.append("concentration_b_reduction")
 
         # Update current conditions
@@ -777,10 +892,12 @@ class AdaptiveProtocolEngine:
             "old_conditions": old_conditions.to_dict(),
             "new_conditions": new_conditions.to_dict(),
             "safety_adaptations": safety_adaptations,
-            "experimental_errors": result.experimental_errors
+            "experimental_errors": result.experimental_errors,
         }
 
-    def _apply_safety_bounds(self, conditions: ExperimentalCondition) -> ExperimentalCondition:
+    def _apply_safety_bounds(
+        self, conditions: ExperimentalCondition
+    ) -> ExperimentalCondition:
         """Apply safety bounds to experimental conditions."""
         # Temperature bounds
         conditions.temperature = np.clip(conditions.temperature, 50, 300)
@@ -803,10 +920,9 @@ class AdaptiveProtocolEngine:
 
         return conditions
 
-    def learn_from_adaptation_outcomes(self,
-                                     adaptation_id: str,
-                                     outcome_result: RealTimeResult,
-                                     success: bool) -> None:
+    def learn_from_adaptation_outcomes(
+        self, adaptation_id: str, outcome_result: RealTimeResult, success: bool
+    ) -> None:
         """Learn from adaptation outcomes to improve future adaptations."""
         # Find the adaptation in history
         adaptation_record = None
@@ -823,7 +939,7 @@ class AdaptiveProtocolEngine:
             "adaptation": adaptation_record,
             "outcome": outcome_result.to_dict(),
             "success": success,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         if success:
@@ -847,12 +963,24 @@ class AdaptiveProtocolEngine:
             adaptation_types.add(adaptation["adaptation"]["adaptation_type"])
 
         for adaptation_type in adaptation_types:
-            successes = len([a for a in self.successful_adaptations
-                           if a["adaptation"]["adaptation_type"] == adaptation_type])
-            failures = len([a for a in self.failed_adaptations
-                          if a["adaptation"]["adaptation_type"] == adaptation_type])
+            successes = len(
+                [
+                    a
+                    for a in self.successful_adaptations
+                    if a["adaptation"]["adaptation_type"] == adaptation_type
+                ]
+            )
+            failures = len(
+                [
+                    a
+                    for a in self.failed_adaptations
+                    if a["adaptation"]["adaptation_type"] == adaptation_type
+                ]
+            )
 
-            success_rate = successes / (successes + failures) if (successes + failures) > 0 else 0
+            success_rate = (
+                successes / (successes + failures) if (successes + failures) > 0 else 0
+            )
 
             # Adjust adaptation parameters based on success rate
             if success_rate > 0.7:
@@ -862,7 +990,9 @@ class AdaptiveProtocolEngine:
                 # Low success rate - be more conservative
                 self.max_adaptation_rate = max(0.05, self.max_adaptation_rate * 0.9)
 
-        logger.info(f"Updated adaptation strategies. Max rate: {self.max_adaptation_rate:.3f}")
+        logger.info(
+            f"Updated adaptation strategies. Max rate: {self.max_adaptation_rate:.3f}"
+        )
 
     def get_adaptation_summary(self) -> Dict[str, Any]:
         """Get summary of adaptation performance and current state."""
@@ -870,8 +1000,14 @@ class AdaptiveProtocolEngine:
 
         # Calculate success metrics
         if self.successful_adaptations or self.failed_adaptations:
-            total_learned = len(self.successful_adaptations) + len(self.failed_adaptations)
-            success_rate = len(self.successful_adaptations) / total_learned if total_learned > 0 else 0
+            total_learned = len(self.successful_adaptations) + len(
+                self.failed_adaptations
+            )
+            success_rate = (
+                len(self.successful_adaptations) / total_learned
+                if total_learned > 0
+                else 0
+            )
         else:
             success_rate = 0
 
@@ -887,7 +1023,9 @@ class AdaptiveProtocolEngine:
                 "trigger_count": rule.trigger_count,
                 "enabled": rule.enabled,
                 "priority": rule.priority,
-                "last_triggered": rule.last_triggered.isoformat() if rule.last_triggered else None
+                "last_triggered": (
+                    rule.last_triggered.isoformat() if rule.last_triggered else None
+                ),
             }
 
         return {
@@ -900,7 +1038,7 @@ class AdaptiveProtocolEngine:
             "recent_performance": recent_performance,
             "rule_statistics": rule_stats,
             "performance_issues_detected": self.performance_monitor.detect_performance_issues(),
-            "baseline_performance": self.performance_monitor.baseline_performance
+            "baseline_performance": self.performance_monitor.baseline_performance,
         }
 
 
@@ -916,12 +1054,14 @@ def get_global_adaptive_engine() -> AdaptiveProtocolEngine:
     return _global_adaptive_engine
 
 
-async def process_realtime_experiment_data(experimental_data: Dict[str, Any]) -> Dict[str, Any]:
+async def process_realtime_experiment_data(
+    experimental_data: Dict[str, Any],
+) -> Dict[str, Any]:
     """Convenience function to process real-time experimental data.
-    
+
     Args:
         experimental_data: Dictionary containing experimental conditions and results
-        
+
     Returns:
         Processing results including any adaptations made
     """
@@ -936,7 +1076,7 @@ async def process_realtime_experiment_data(experimental_data: Dict[str, Any]) ->
         quality_indicators=experimental_data.get("quality_indicators", {}),
         experimental_errors=experimental_data.get("experimental_errors", []),
         instrument_status=experimental_data.get("instrument_status", {}),
-        confidence_score=experimental_data.get("confidence_score", 1.0)
+        confidence_score=experimental_data.get("confidence_score", 1.0),
     )
 
     # Process with adaptive engine

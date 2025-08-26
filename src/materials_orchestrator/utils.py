@@ -77,13 +77,15 @@ except ImportError:
         @staticmethod
         def isnan(x):
             """Check if value is NaN."""
-            if hasattr(x, '__iter__') and not isinstance(x, (str, bytes)):
-                return [math.isnan(float(v)) if isinstance(v, (int, float)) else False for v in x]
+            if hasattr(x, "__iter__") and not isinstance(x, (str, bytes)):
+                return [
+                    math.isnan(float(v)) if isinstance(v, (int, float)) else False
+                    for v in x
+                ]
             try:
                 return math.isnan(float(x))
             except (ValueError, TypeError):
                 return False
-
 
     class MockArray:
         """Mock numpy array that supports 2D indexing."""

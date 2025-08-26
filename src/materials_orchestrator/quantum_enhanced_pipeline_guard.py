@@ -43,19 +43,26 @@ except ImportError:
         @staticmethod
         def random():
             import random
+
             return random.random()
 
         @staticmethod
         def exp(x):
-            return math.exp(x) if isinstance(x, (int, float)) else [math.exp(v) for v in x]
+            return (
+                math.exp(x) if isinstance(x, (int, float)) else [math.exp(v) for v in x]
+            )
 
         @staticmethod
         def cos(x):
-            return math.cos(x) if isinstance(x, (int, float)) else [math.cos(v) for v in x]
+            return (
+                math.cos(x) if isinstance(x, (int, float)) else [math.cos(v) for v in x]
+            )
 
         @staticmethod
         def sin(x):
-            return math.sin(x) if isinstance(x, (int, float)) else [math.sin(v) for v in x]
+            return (
+                math.sin(x) if isinstance(x, (int, float)) else [math.sin(v) for v in x]
+            )
 
         @staticmethod
         def mean(data):
@@ -67,7 +74,7 @@ except ImportError:
                 return 0.0
             mean_val = sum(data) / len(data)
             variance = sum((x - mean_val) ** 2 for x in data) / len(data)
-            return variance ** 0.5
+            return variance**0.5
 
         # Add ndarray attribute for compatibility
         ndarray = list

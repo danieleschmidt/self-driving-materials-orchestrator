@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 class ValidationLevel(Enum):
     """Validation strictness levels."""
+
     STRICT = "strict"
     NORMAL = "normal"
     PERMISSIVE = "permissive"
@@ -18,6 +19,7 @@ class ValidationLevel(Enum):
 
 class ValidationCategory(Enum):
     """Categories of validation checks."""
+
     SAFETY = "safety"
     CHEMISTRY = "chemistry"
     PHYSICS = "physics"
@@ -28,6 +30,7 @@ class ValidationCategory(Enum):
 @dataclass
 class ValidationResult:
     """Result of validation check."""
+
     is_valid: bool
     category: ValidationCategory
     severity: str  # "critical", "warning", "info"
@@ -49,9 +52,13 @@ class EnhancedValidator:
         self.safety_rules = self._load_safety_rules()
         self.chemistry_rules = self._load_chemistry_rules()
 
-        logger.info(f"Enhanced validator initialized with {validation_level.value} level")
+        logger.info(
+            f"Enhanced validator initialized with {validation_level.value} level"
+        )
 
-    def validate_experiment_parameters(self, parameters: Dict[str, Any]) -> List[ValidationResult]:
+    def validate_experiment_parameters(
+        self, parameters: Dict[str, Any]
+    ) -> List[ValidationResult]:
         """Comprehensive validation of experiment parameters."""
         results = []
 
@@ -71,14 +78,18 @@ class EnhancedValidator:
         results.extend(self._validate_environmental(parameters))
 
         # Store validation history
-        self.validation_history.append({
-            'timestamp': datetime.now(),
-            'parameters': parameters,
-            'results': results,
-            'total_checks': len(results),
-            'critical_issues': len([r for r in results if r.severity == 'critical']),
-            'warnings': len([r for r in results if r.severity == 'warning'])
-        })
+        self.validation_history.append(
+            {
+                "timestamp": datetime.now(),
+                "parameters": parameters,
+                "results": results,
+                "total_checks": len(results),
+                "critical_issues": len(
+                    [r for r in results if r.severity == "critical"]
+                ),
+                "warnings": len([r for r in results if r.severity == "warning"]),
+            }
+        )
 
         return results
 
@@ -87,54 +98,64 @@ class EnhancedValidator:
         results = []
 
         # Temperature safety
-        temp = parameters.get('temperature', 0)
+        temp = parameters.get("temperature", 0)
         if temp > 400:
-            results.append(ValidationResult(
-                is_valid=False,
-                category=ValidationCategory.SAFETY,
-                severity="critical",
-                message=f"Temperature {temp}°C exceeds safety limit (400°C)",
-                details={'parameter': 'temperature', 'value': temp, 'limit': 400}
-            ))
+            results.append(
+                ValidationResult(
+                    is_valid=False,
+                    category=ValidationCategory.SAFETY,
+                    severity="critical",
+                    message=f"Temperature {temp}°C exceeds safety limit (400°C)",
+                    details={"parameter": "temperature", "value": temp, "limit": 400},
+                )
+            )
         elif temp > 300:
-            results.append(ValidationResult(
-                is_valid=True,
-                category=ValidationCategory.SAFETY,
-                severity="warning",
-                message=f"Temperature {temp}°C is high, ensure proper safety measures",
-                details={'parameter': 'temperature', 'value': temp}
-            ))
+            results.append(
+                ValidationResult(
+                    is_valid=True,
+                    category=ValidationCategory.SAFETY,
+                    severity="warning",
+                    message=f"Temperature {temp}°C is high, ensure proper safety measures",
+                    details={"parameter": "temperature", "value": temp},
+                )
+            )
 
         # pH safety
-        pH = parameters.get('pH', 7)
+        pH = parameters.get("pH", 7)
         if pH < 1 or pH > 13:
-            results.append(ValidationResult(
-                is_valid=False,
-                category=ValidationCategory.SAFETY,
-                severity="critical",
-                message=f"pH {pH} is extremely dangerous",
-                details={'parameter': 'pH', 'value': pH, 'safe_range': [1, 13]}
-            ))
+            results.append(
+                ValidationResult(
+                    is_valid=False,
+                    category=ValidationCategory.SAFETY,
+                    severity="critical",
+                    message=f"pH {pH} is extremely dangerous",
+                    details={"parameter": "pH", "value": pH, "safe_range": [1, 13]},
+                )
+            )
         elif pH < 2 or pH > 12:
-            results.append(ValidationResult(
-                is_valid=True,
-                category=ValidationCategory.SAFETY,
-                severity="warning",
-                message=f"pH {pH} requires special handling precautions",
-                details={'parameter': 'pH', 'value': pH}
-            ))
+            results.append(
+                ValidationResult(
+                    is_valid=True,
+                    category=ValidationCategory.SAFETY,
+                    severity="warning",
+                    message=f"pH {pH} requires special handling precautions",
+                    details={"parameter": "pH", "value": pH},
+                )
+            )
 
         # Concentration safety
         for param, value in parameters.items():
-            if 'conc' in param.lower() and isinstance(value, (int, float)):
+            if "conc" in param.lower() and isinstance(value, (int, float)):
                 if value > 10:
-                    results.append(ValidationResult(
-                        is_valid=False,
-                        category=ValidationCategory.SAFETY,
-                        severity="warning",
-                        message=f"High concentration {value}M for {param} - verify safety protocols",
-                        details={'parameter': param, 'value': value}
-                    ))
+                    results.append(
+                        ValidationResult(
+                            is_valid=False,
+                            category=ValidationCategory.SAFETY,
+                            severity="warning",
+                            message=f"High concentration {value}M for {param} - verify safety protocols",
+                            details={"parameter": param, "value": value},
+                        )
+                    )
 
         return results
 
@@ -143,37 +164,43 @@ class EnhancedValidator:
         results = []
 
         # Reaction time validation
-        reaction_time = parameters.get('reaction_time', 0)
+        reaction_time = parameters.get("reaction_time", 0)
         if reaction_time > 48:
-            results.append(ValidationResult(
-                is_valid=True,
-                category=ValidationCategory.CHEMISTRY,
-                severity="warning",
-                message=f"Long reaction time {reaction_time}h may indicate inefficient process",
-                details={'parameter': 'reaction_time', 'value': reaction_time}
-            ))
+            results.append(
+                ValidationResult(
+                    is_valid=True,
+                    category=ValidationCategory.CHEMISTRY,
+                    severity="warning",
+                    message=f"Long reaction time {reaction_time}h may indicate inefficient process",
+                    details={"parameter": "reaction_time", "value": reaction_time},
+                )
+            )
 
         # Temperature vs reaction time correlation
-        temp = parameters.get('temperature', 0)
+        temp = parameters.get("temperature", 0)
         if temp > 200 and reaction_time > 12:
-            results.append(ValidationResult(
-                is_valid=True,
-                category=ValidationCategory.CHEMISTRY,
-                severity="warning",
-                message="High temperature with long reaction time may cause decomposition",
-                details={'temperature': temp, 'reaction_time': reaction_time}
-            ))
+            results.append(
+                ValidationResult(
+                    is_valid=True,
+                    category=ValidationCategory.CHEMISTRY,
+                    severity="warning",
+                    message="High temperature with long reaction time may cause decomposition",
+                    details={"temperature": temp, "reaction_time": reaction_time},
+                )
+            )
 
         # Solvent ratio validation
-        solvent_ratio = parameters.get('solvent_ratio', 0.5)
+        solvent_ratio = parameters.get("solvent_ratio", 0.5)
         if not 0 <= solvent_ratio <= 1:
-            results.append(ValidationResult(
-                is_valid=False,
-                category=ValidationCategory.CHEMISTRY,
-                severity="critical",
-                message=f"Solvent ratio {solvent_ratio} must be between 0 and 1",
-                details={'parameter': 'solvent_ratio', 'value': solvent_ratio}
-            ))
+            results.append(
+                ValidationResult(
+                    is_valid=False,
+                    category=ValidationCategory.CHEMISTRY,
+                    severity="critical",
+                    message=f"Solvent ratio {solvent_ratio} must be between 0 and 1",
+                    details={"parameter": "solvent_ratio", "value": solvent_ratio},
+                )
+            )
 
         return results
 
@@ -182,27 +209,34 @@ class EnhancedValidator:
         results = []
 
         # Thermodynamic feasibility
-        temp = parameters.get('temperature', 0)
+        temp = parameters.get("temperature", 0)
         if temp < -273.15:
-            results.append(ValidationResult(
-                is_valid=False,
-                category=ValidationCategory.PHYSICS,
-                severity="critical",
-                message=f"Temperature {temp}°C below absolute zero",
-                details={'parameter': 'temperature', 'value': temp}
-            ))
+            results.append(
+                ValidationResult(
+                    is_valid=False,
+                    category=ValidationCategory.PHYSICS,
+                    severity="critical",
+                    message=f"Temperature {temp}°C below absolute zero",
+                    details={"parameter": "temperature", "value": temp},
+                )
+            )
 
         # Energy balance considerations
         if temp > 250:
             energy_estimate = temp * 4.18  # Rough energy estimate
             if energy_estimate > 2000:
-                results.append(ValidationResult(
-                    is_valid=True,
-                    category=ValidationCategory.PHYSICS,
-                    severity="info",
-                    message=f"High energy requirement estimated: {energy_estimate:.0f} J",
-                    details={'temperature': temp, 'energy_estimate': energy_estimate}
-                ))
+                results.append(
+                    ValidationResult(
+                        is_valid=True,
+                        category=ValidationCategory.PHYSICS,
+                        severity="info",
+                        message=f"High energy requirement estimated: {energy_estimate:.0f} J",
+                        details={
+                            "temperature": temp,
+                            "energy_estimate": energy_estimate,
+                        },
+                    )
+                )
 
         return results
 
@@ -212,10 +246,10 @@ class EnhancedValidator:
 
         # Cost estimation based on parameters
         cost_factors = {
-            'temperature': 0.01,  # $/°C
-            'reaction_time': 0.5,  # $/hour
-            'precursor_A_conc': 10,  # $/M
-            'precursor_B_conc': 15   # $/M
+            "temperature": 0.01,  # $/°C
+            "reaction_time": 0.5,  # $/hour
+            "precursor_A_conc": 10,  # $/M
+            "precursor_B_conc": 15,  # $/M
         }
 
         total_cost = 0
@@ -224,77 +258,89 @@ class EnhancedValidator:
                 total_cost += cost_factors[param] * value
 
         if total_cost > 100:
-            results.append(ValidationResult(
-                is_valid=True,
-                category=ValidationCategory.ECONOMICS,
-                severity="warning",
-                message=f"High estimated cost ${total_cost:.2f} per experiment",
-                details={'total_cost': total_cost, 'cost_breakdown': cost_factors}
-            ))
+            results.append(
+                ValidationResult(
+                    is_valid=True,
+                    category=ValidationCategory.ECONOMICS,
+                    severity="warning",
+                    message=f"High estimated cost ${total_cost:.2f} per experiment",
+                    details={"total_cost": total_cost, "cost_breakdown": cost_factors},
+                )
+            )
 
         return results
 
-    def _validate_environmental(self, parameters: Dict[str, Any]) -> List[ValidationResult]:
+    def _validate_environmental(
+        self, parameters: Dict[str, Any]
+    ) -> List[ValidationResult]:
         """Environmental impact validation."""
         results = []
 
         # Waste generation assessment
-        reaction_time = parameters.get('reaction_time', 0)
-        concentrations = [v for k, v in parameters.items() if 'conc' in k.lower() and isinstance(v, (int, float))]
+        reaction_time = parameters.get("reaction_time", 0)
+        concentrations = [
+            v
+            for k, v in parameters.items()
+            if "conc" in k.lower() and isinstance(v, (int, float))
+        ]
 
         if concentrations:
             waste_estimate = sum(concentrations) * reaction_time
             if waste_estimate > 50:
-                results.append(ValidationResult(
-                    is_valid=True,
-                    category=ValidationCategory.ENVIRONMENTAL,
-                    severity="info",
-                    message=f"Consider waste reduction strategies (waste estimate: {waste_estimate:.1f})",
-                    details={'waste_estimate': waste_estimate}
-                ))
+                results.append(
+                    ValidationResult(
+                        is_valid=True,
+                        category=ValidationCategory.ENVIRONMENTAL,
+                        severity="info",
+                        message=f"Consider waste reduction strategies (waste estimate: {waste_estimate:.1f})",
+                        details={"waste_estimate": waste_estimate},
+                    )
+                )
 
         return results
 
     def get_validation_summary(self) -> Dict[str, Any]:
         """Get summary of validation activities."""
         if not self.validation_history:
-            return {'total_validations': 0}
+            return {"total_validations": 0}
 
         total_validations = len(self.validation_history)
-        total_checks = sum(h['total_checks'] for h in self.validation_history)
-        total_critical = sum(h['critical_issues'] for h in self.validation_history)
-        total_warnings = sum(h['warnings'] for h in self.validation_history)
+        total_checks = sum(h["total_checks"] for h in self.validation_history)
+        total_critical = sum(h["critical_issues"] for h in self.validation_history)
+        total_warnings = sum(h["warnings"] for h in self.validation_history)
 
         return {
-            'total_validations': total_validations,
-            'total_checks': total_checks,
-            'total_critical_issues': total_critical,
-            'total_warnings': total_warnings,
-            'validation_level': self.validation_level.value,
-            'categories_checked': [cat.value for cat in ValidationCategory],
-            'recent_activity': self.validation_history[-10:] if self.validation_history else []
+            "total_validations": total_validations,
+            "total_checks": total_checks,
+            "total_critical_issues": total_critical,
+            "total_warnings": total_warnings,
+            "validation_level": self.validation_level.value,
+            "categories_checked": [cat.value for cat in ValidationCategory],
+            "recent_activity": (
+                self.validation_history[-10:] if self.validation_history else []
+            ),
         }
 
     def _load_safety_rules(self) -> Dict[str, Any]:
         """Load safety rules configuration."""
         return {
-            'max_temperature': 400,
-            'min_temperature': -100,
-            'safe_ph_range': [1, 13],
-            'max_concentration': 10,
-            'max_reaction_time': 72
+            "max_temperature": 400,
+            "min_temperature": -100,
+            "safe_ph_range": [1, 13],
+            "max_concentration": 10,
+            "max_reaction_time": 72,
         }
 
     def _load_chemistry_rules(self) -> Dict[str, Any]:
         """Load chemistry rules configuration."""
         return {
-            'optimal_temp_range': [100, 300],
-            'optimal_time_range': [1, 24],
-            'solvent_ratio_range': [0, 1],
-            'concentration_limits': {
-                'precursor_A': [0.1, 5.0],
-                'precursor_B': [0.1, 5.0]
-            }
+            "optimal_temp_range": [100, 300],
+            "optimal_time_range": [1, 24],
+            "solvent_ratio_range": [0, 1],
+            "concentration_limits": {
+                "precursor_A": [0.1, 5.0],
+                "precursor_B": [0.1, 5.0],
+            },
         }
 
 
@@ -308,16 +354,18 @@ class RobustErrorHandler:
 
         logger.info("Robust error handler initialized")
 
-    def handle_experiment_error(self, error: Exception, context: Dict[str, Any]) -> Dict[str, Any]:
+    def handle_experiment_error(
+        self, error: Exception, context: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Handle experiment errors with recovery strategies."""
         self.error_count += 1
 
         error_info = {
-            'timestamp': datetime.now(),
-            'error_type': type(error).__name__,
-            'error_message': str(error),
-            'context': context,
-            'error_id': f"ERR_{self.error_count:04d}"
+            "timestamp": datetime.now(),
+            "error_type": type(error).__name__,
+            "error_message": str(error),
+            "context": context,
+            "error_id": f"ERR_{self.error_count:04d}",
         }
 
         self.error_history.append(error_info)
@@ -329,13 +377,15 @@ class RobustErrorHandler:
         logger.info(f"Applying recovery strategy: {recovery_action['strategy']}")
 
         return {
-            'error_info': error_info,
-            'recovery_action': recovery_action,
-            'should_retry': recovery_action.get('retry', False),
-            'modified_parameters': recovery_action.get('parameters', {})
+            "error_info": error_info,
+            "recovery_action": recovery_action,
+            "should_retry": recovery_action.get("retry", False),
+            "modified_parameters": recovery_action.get("parameters", {}),
         }
 
-    def _determine_recovery_strategy(self, error: Exception, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _determine_recovery_strategy(
+        self, error: Exception, context: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Determine appropriate recovery strategy based on error type."""
         error_type = type(error).__name__
 
@@ -343,56 +393,57 @@ class RobustErrorHandler:
             return self.recovery_strategies[error_type]
 
         # Default strategy
-        return {
-            'strategy': 'log_and_continue',
-            'retry': False,
-            'parameters': {}
-        }
+        return {"strategy": "log_and_continue", "retry": False, "parameters": {}}
 
     def _init_recovery_strategies(self) -> Dict[str, Any]:
         """Initialize recovery strategies for different error types."""
         return {
-            'TemperatureError': {
-                'strategy': 'reduce_temperature',
-                'retry': True,
-                'parameters': {'temperature_reduction': 50}
+            "TemperatureError": {
+                "strategy": "reduce_temperature",
+                "retry": True,
+                "parameters": {"temperature_reduction": 50},
             },
-            'ConcentrationError': {
-                'strategy': 'dilute_solution',
-                'retry': True,
-                'parameters': {'dilution_factor': 0.8}
+            "ConcentrationError": {
+                "strategy": "dilute_solution",
+                "retry": True,
+                "parameters": {"dilution_factor": 0.8},
             },
-            'TimeoutError': {
-                'strategy': 'extend_time',
-                'retry': True,
-                'parameters': {'time_extension': 2.0}
+            "TimeoutError": {
+                "strategy": "extend_time",
+                "retry": True,
+                "parameters": {"time_extension": 2.0},
             },
-            'ValidationError': {
-                'strategy': 'use_safe_defaults',
-                'retry': True,
-                'parameters': {}
-            }
+            "ValidationError": {
+                "strategy": "use_safe_defaults",
+                "retry": True,
+                "parameters": {},
+            },
         }
 
     def get_error_statistics(self) -> Dict[str, Any]:
         """Get error statistics and trends."""
         if not self.error_history:
-            return {'total_errors': 0}
+            return {"total_errors": 0}
 
         error_types = {}
         for error in self.error_history:
-            error_type = error['error_type']
+            error_type = error["error_type"]
             error_types[error_type] = error_types.get(error_type, 0) + 1
 
-        recent_errors = [e for e in self.error_history if
-                        (datetime.now() - e['timestamp']).total_seconds() < 3600]
+        recent_errors = [
+            e
+            for e in self.error_history
+            if (datetime.now() - e["timestamp"]).total_seconds() < 3600
+        ]
 
         return {
-            'total_errors': self.error_count,
-            'error_types': error_types,
-            'recent_errors_1h': len(recent_errors),
-            'error_rate': len(recent_errors) / 60,  # per minute
-            'most_common_error': max(error_types.items(), key=lambda x: x[1])[0] if error_types else None
+            "total_errors": self.error_count,
+            "error_types": error_types,
+            "recent_errors_1h": len(recent_errors),
+            "error_rate": len(recent_errors) / 60,  # per minute
+            "most_common_error": (
+                max(error_types.items(), key=lambda x: x[1])[0] if error_types else None
+            ),
         }
 
 

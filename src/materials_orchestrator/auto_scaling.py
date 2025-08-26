@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class ScalingDirection(Enum):
     """Scaling direction options."""
+
     UP = "up"
     DOWN = "down"
     NONE = "none"
@@ -69,16 +70,14 @@ class ScalingStrategy(Protocol):
     """Protocol for scaling strategies."""
 
     def should_scale(
-        self,
-        target: ScalingTarget,
-        metrics_data: Dict[str, List[float]]
+        self, target: ScalingTarget, metrics_data: Dict[str, List[float]]
     ) -> tuple[ScalingDirection, float, str]:
         """Determine if scaling is needed.
-        
+
         Args:
             target: Scaling target
             metrics_data: Recent metrics data
-            
+
         Returns:
             Tuple of (direction, confidence, reason)
         """
@@ -90,16 +89,14 @@ class ConservativeScalingStrategy:
 
     def __init__(self, confidence_threshold: float = 0.8):
         """Initialize strategy.
-        
+
         Args:
             confidence_threshold: Minimum confidence for scaling
         """
         self.confidence_threshold = confidence_threshold
 
     def should_scale(
-        self,
-        target: ScalingTarget,
-        metrics_data: Dict[str, List[float]]
+        self, target: ScalingTarget, metrics_data: Dict[str, List[float]]
     ) -> tuple[ScalingDirection, float, str]:
         """Conservative scaling decision."""
         if not metrics_data:
@@ -117,7 +114,11 @@ class ConservativeScalingStrategy:
                 continue
 
             avg_value = statistics.mean(values)
-            recent_trend = statistics.mean(values[-3:]) - statistics.mean(values[:-3]) if len(values) >= 6 else 0
+            recent_trend = (
+                statistics.mean(values[-3:]) - statistics.mean(values[:-3])
+                if len(values) >= 6
+                else 0
+            )
 
             # Example thresholds (would be configurable)
             if metric_name == "cpu_usage" and avg_value > 0.8:
@@ -126,7 +127,10 @@ class ConservativeScalingStrategy:
             elif metric_name == "memory_usage" and avg_value > 0.85:
                 scale_up_votes += 1
                 reasons.append(f"High memory: {avg_value:.2f}")
-            elif metric_name == "queue_length" and avg_value > target.current_capacity * 2:
+            elif (
+                metric_name == "queue_length"
+                and avg_value > target.current_capacity * 2
+            ):
                 scale_up_votes += 1
                 reasons.append(f"High queue: {avg_value}")
             elif metric_name == "response_time_ms" and avg_value > 2000:
@@ -161,16 +165,14 @@ class AggressiveScalingStrategy:
 
     def __init__(self, confidence_threshold: float = 0.5):
         """Initialize strategy.
-        
+
         Args:
             confidence_threshold: Minimum confidence for scaling
         """
         self.confidence_threshold = confidence_threshold
 
     def should_scale(
-        self,
-        target: ScalingTarget,
-        metrics_data: Dict[str, List[float]]
+        self, target: ScalingTarget, metrics_data: Dict[str, List[float]]
     ) -> tuple[ScalingDirection, float, str]:
         """Aggressive scaling decision."""
         if not metrics_data:
@@ -204,16 +206,14 @@ class PredictiveScalingStrategy:
 
     def __init__(self, prediction_window: int = 10):
         """Initialize strategy.
-        
+
         Args:
             prediction_window: Number of data points for trend analysis
         """
         self.prediction_window = prediction_window
 
     def should_scale(
-        self,
-        target: ScalingTarget,
-        metrics_data: Dict[str, List[float]]
+        self, target: ScalingTarget, metrics_data: Dict[str, List[float]]
     ) -> tuple[ScalingDirection, float, str]:
         """Predictive scaling decision."""
         if not metrics_data:
@@ -226,7 +226,7 @@ class PredictiveScalingStrategy:
                 continue
 
             # Simple linear trend prediction
-            recent_values = values[-self.prediction_window:]
+            recent_values = values[-self.prediction_window :]
             x = list(range(len(recent_values)))
 
             # Calculate linear regression slope
@@ -245,15 +245,35 @@ class PredictiveScalingStrategy:
 
                 # Scale up predictions
                 if metric_name == "cpu_usage" and predicted_value > 0.85:
-                    predictions.append((ScalingDirection.UP, 0.8, f"CPU trend: {predicted_value:.2f}"))
+                    predictions.append(
+                        (ScalingDirection.UP, 0.8, f"CPU trend: {predicted_value:.2f}")
+                    )
                 elif metric_name == "memory_usage" and predicted_value > 0.9:
-                    predictions.append((ScalingDirection.UP, 0.8, f"Memory trend: {predicted_value:.2f}"))
+                    predictions.append(
+                        (
+                            ScalingDirection.UP,
+                            0.8,
+                            f"Memory trend: {predicted_value:.2f}",
+                        )
+                    )
                 elif metric_name == "response_time_ms" and predicted_value > 3000:
-                    predictions.append((ScalingDirection.UP, 0.7, f"Response time trend: {predicted_value:.0f}ms"))
+                    predictions.append(
+                        (
+                            ScalingDirection.UP,
+                            0.7,
+                            f"Response time trend: {predicted_value:.0f}ms",
+                        )
+                    )
 
                 # Scale down predictions
                 elif metric_name == "cpu_usage" and predicted_value < 0.15:
-                    predictions.append((ScalingDirection.DOWN, 0.6, f"CPU decreasing: {predicted_value:.2f}"))
+                    predictions.append(
+                        (
+                            ScalingDirection.DOWN,
+                            0.6,
+                            f"CPU decreasing: {predicted_value:.2f}",
+                        )
+                    )
 
         if predictions:
             # Choose highest confidence prediction
@@ -269,10 +289,10 @@ class AutoScalingEngine:
     def __init__(
         self,
         performance_tracker: Optional[PerformanceTracker] = None,
-        strategy: Optional[ScalingStrategy] = None
+        strategy: Optional[ScalingStrategy] = None,
     ):
         """Initialize auto-scaling engine.
-        
+
         Args:
             performance_tracker: Performance tracker to use
             strategy: Scaling strategy to use
@@ -293,7 +313,7 @@ class AutoScalingEngine:
 
     def add_scaling_rule(self, rule: ScalingRule) -> None:
         """Add a scaling rule.
-        
+
         Args:
             rule: Scaling rule to add
         """
@@ -303,7 +323,7 @@ class AutoScalingEngine:
 
     def add_scaling_target(self, target: ScalingTarget) -> None:
         """Add a scaling target.
-        
+
         Args:
             target: Scaling target to add
         """
@@ -311,17 +331,21 @@ class AutoScalingEngine:
             self._targets[target.name] = target
             logger.info(f"Added scaling target: {target.name}")
 
-    def register_scale_up_callback(self, callback: Callable[[ScalingAction], None]) -> None:
+    def register_scale_up_callback(
+        self, callback: Callable[[ScalingAction], None]
+    ) -> None:
         """Register callback for scale-up events.
-        
+
         Args:
             callback: Callback function
         """
         self._scale_up_callbacks.append(callback)
 
-    def register_scale_down_callback(self, callback: Callable[[ScalingAction], None]) -> None:
+    def register_scale_down_callback(
+        self, callback: Callable[[ScalingAction], None]
+    ) -> None:
         """Register callback for scale-down events.
-        
+
         Args:
             callback: Callback function
         """
@@ -371,33 +395,39 @@ class AutoScalingEngine:
                 metrics_data = self._gather_metrics_for_target(target)
 
                 # Use strategy to determine scaling decision
-                direction, confidence, reason = self.strategy.should_scale(target, metrics_data)
+                direction, confidence, reason = self.strategy.should_scale(
+                    target, metrics_data
+                )
 
                 if direction != ScalingDirection.NONE and confidence > 0.5:
                     # Calculate new capacity
                     if direction == ScalingDirection.UP:
                         new_capacity = min(
                             target.current_capacity + target.scale_up_step,
-                            target.max_capacity
+                            target.max_capacity,
                         )
                     else:  # ScalingDirection.DOWN
                         new_capacity = max(
                             target.current_capacity - target.scale_down_step,
-                            target.min_capacity
+                            target.min_capacity,
                         )
 
                     if new_capacity != target.current_capacity:
-                        self._execute_scaling_action(target, direction, new_capacity, reason, confidence)
+                        self._execute_scaling_action(
+                            target, direction, new_capacity, reason, confidence
+                        )
 
             except Exception as e:
                 logger.error(f"Error evaluating scaling for {target.name}: {e}")
 
-    def _gather_metrics_for_target(self, target: ScalingTarget) -> Dict[str, List[float]]:
+    def _gather_metrics_for_target(
+        self, target: ScalingTarget
+    ) -> Dict[str, List[float]]:
         """Gather recent metrics for a target.
-        
+
         Args:
             target: Scaling target
-            
+
         Returns:
             Dictionary of metric_name -> list of recent values
         """
@@ -413,7 +443,7 @@ class AutoScalingEngine:
             f"{target.name}_queue_length",
             f"{target.name}_response_time_ms",
             f"{target.name}_throughput",
-            f"{target.name}_error_rate"
+            f"{target.name}_error_rate",
         ]
 
         for metric_name in metric_names:
@@ -430,10 +460,10 @@ class AutoScalingEngine:
         direction: ScalingDirection,
         new_capacity: int,
         reason: str,
-        confidence: float
+        confidence: float,
     ) -> None:
         """Execute a scaling action.
-        
+
         Args:
             target: Target to scale
             direction: Scaling direction
@@ -449,7 +479,7 @@ class AutoScalingEngine:
             timestamp=datetime.now(),
             reason=reason,
             triggered_by_rules=[],
-            confidence=confidence
+            confidence=confidence,
         )
 
         logger.info(
@@ -480,12 +510,14 @@ class AutoScalingEngine:
                 except Exception as e:
                     logger.error(f"Error in scale-down callback: {e}")
 
-    def get_scaling_history(self, target_name: Optional[str] = None) -> List[ScalingAction]:
+    def get_scaling_history(
+        self, target_name: Optional[str] = None
+    ) -> List[ScalingAction]:
         """Get scaling history.
-        
+
         Args:
             target_name: Filter by target name
-            
+
         Returns:
             List of scaling actions
         """
@@ -493,13 +525,15 @@ class AutoScalingEngine:
             history = self._scaling_history.copy()
 
         if target_name:
-            history = [action for action in history if action.target_name == target_name]
+            history = [
+                action for action in history if action.target_name == target_name
+            ]
 
         return history
 
     def get_current_targets(self) -> Dict[str, ScalingTarget]:
         """Get current scaling targets.
-        
+
         Returns:
             Dictionary of current targets
         """
@@ -510,15 +544,15 @@ class AutoScalingEngine:
         self,
         target_name: str,
         direction: ScalingDirection,
-        reason: str = "Manual trigger"
+        reason: str = "Manual trigger",
     ) -> bool:
         """Force a scaling action.
-        
+
         Args:
             target_name: Target to scale
             direction: Scaling direction
             reason: Reason for manual scaling
-            
+
         Returns:
             True if scaling was executed
         """
@@ -531,13 +565,11 @@ class AutoScalingEngine:
 
         if direction == ScalingDirection.UP:
             new_capacity = min(
-                target.current_capacity + target.scale_up_step,
-                target.max_capacity
+                target.current_capacity + target.scale_up_step, target.max_capacity
             )
         elif direction == ScalingDirection.DOWN:
             new_capacity = max(
-                target.current_capacity - target.scale_down_step,
-                target.min_capacity
+                target.current_capacity - target.scale_down_step, target.min_capacity
             )
         else:
             return False
@@ -555,7 +587,7 @@ _global_scaling_engine: Optional[AutoScalingEngine] = None
 
 def get_auto_scaling_engine() -> AutoScalingEngine:
     """Get global auto-scaling engine.
-    
+
     Returns:
         Auto-scaling engine instance
     """
@@ -578,7 +610,7 @@ def setup_default_scaling_targets() -> None:
             max_capacity=20,
             scale_up_step=2,
             scale_down_step=1,
-            target_type="worker"
+            target_type="worker",
         ),
         ScalingTarget(
             name="api_servers",
@@ -587,7 +619,7 @@ def setup_default_scaling_targets() -> None:
             max_capacity=10,
             scale_up_step=1,
             scale_down_step=1,
-            target_type="service"
+            target_type="service",
         ),
         ScalingTarget(
             name="optimization_queue",
@@ -596,8 +628,8 @@ def setup_default_scaling_targets() -> None:
             max_capacity=1000,
             scale_up_step=50,
             scale_down_step=25,
-            target_type="queue"
-        )
+            target_type="queue",
+        ),
     ]
 
     for target in targets:
