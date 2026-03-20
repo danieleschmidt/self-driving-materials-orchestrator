@@ -1,0 +1,26 @@
+# Gitleaks configuration for self-driving-materials-orchestrator
+title = "Self-Driving Materials Orchestrator — Gitleaks Config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Suppress false positives from devcontainer setup scripts and example configs"
+paths = [
+  '''.devcontainer/post-create.sh''',
+  '''.env.example''',
+  '''\.env\.production\.example''',
+  '''docs/.*''',
+  '''README.*''',
+]
+regexes = [
+  # Example/placeholder credentials in docs and setup scripts
+  '''your[-_]?(key|password|secret|token|credential)''',
+  '''example[-_]?(key|password|secret|token)''',
+  '''<(your|my|insert)[-_]?(api[-_]?key|password|secret|token)>''',
+  # curl -u pattern in devcontainer apt/setup scripts (apt-get, not credential curl)
+  '''apt[-_]?(get|cache|install)''',
+  # Common CI/CD placeholder patterns
+  '''\$\{[A-Z_]+\}''',
+  '''\$[A-Z_]+''',
+]
