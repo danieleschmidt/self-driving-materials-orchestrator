@@ -1,1 +1,0 @@
-"""Robot hardware integration tests."""
